@@ -39,10 +39,10 @@ input[type="range"] { width: 180px; }
 #xpFill { background: linear-gradient(90deg, #ffd166, #ff7b7b); }
 #healthFill { background: linear-gradient(90deg, #59ffa0, #00b36b); width: 100%; }
 .barLabel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; text-shadow: 0 1px 2px #000; }
-#crosshair { position: fixed; inset: 50% auto auto 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); z-index: 4; pointer-events: none; }
-#crosshair::before, #crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,0.9); }
-#crosshair::before { width: 2px; height: 18px; left: 8px; }
-#crosshair::after { height: 2px; width: 18px; top: 8px; }
+#crosshair { position: fixed; inset: 50% auto auto 50%; width: 12px; height: 12px; transform: translate(-50%, -50%); z-index: 4; pointer-events: none; opacity: 0.45; }
+#crosshair::before, #crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,0.7); }
+#crosshair::before { width: 2px; height: 12px; left: 5px; }
+#crosshair::after { height: 2px; width: 12px; top: 5px; }
 #notice { position: fixed; left: 50%; top: 84px; transform: translateX(-50%); z-index: 6; background: rgba(5,15,30,0.8); border-radius: 999px; padding: 10px 16px; color: #d7f1ff; opacity: 0; transition: opacity 0.2s; }
 #notice.show { opacity: 1; }
 .upgrade { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; background: rgba(255,255,255,0.04); padding: 12px; border-radius: 12px; margin-bottom: 10px; }

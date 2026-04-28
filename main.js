@@ -214,6 +214,32 @@ const player = {
   radius: 1.2
 };
 
+const axolotl = new THREE.Group();
+const axBody = new THREE.Mesh(new THREE.CapsuleGeometry(0.7, 1.8, 6, 12), new THREE.MeshStandardMaterial({ color: 0xff9ecf, roughness: 0.7 }));
+const axHead = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffadd7, roughness: 0.7 }));
+const axTail = new THREE.Mesh(new THREE.ConeGeometry(0.38, 1.5, 10), new THREE.MeshStandardMaterial({ color: 0xf58cbc, roughness: 0.7 }));
+const axFinL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.9, 0.7), new THREE.MeshStandardMaterial({ color: 0xff74b6, transparent: true, opacity: 0.8 }));
+const axFinR = axFinL.clone();
+const axGillL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.7), new THREE.MeshStandardMaterial({ color: 0xff5ca8, transparent: true, opacity: 0.85 }));
+const axGillR = axGillL.clone();
+const axEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+const axEyeR = axEyeL.clone();
+axBody.rotation.z = Math.PI / 2;
+axHead.position.set(1.15, 0.1, 0);
+axTail.position.set(-1.45, 0.02, 0);
+axTail.rotation.z = -Math.PI / 2;
+axFinL.position.set(0, -0.25, 0.72);
+axFinR.position.set(0, -0.25, -0.72);
+axGillL.position.set(0.95, 0.45, 0.78);
+axGillR.position.set(0.95, 0.45, -0.78);
+axEyeL.position.set(1.52, 0.26, 0.23);
+axEyeR.position.set(1.52, 0.26, -0.23);
+axolotl.add(axBody, axHead, axTail, axFinL, axFinR, axGillL, axGillR, axEyeL, axEyeR);
+scene.add(axolotl);
+
+const cameraTarget = new THREE.Vector3();
+const cameraOffset = new THREE.Vector3();
+
 const aliens = [];
 const pickups = [];
 const ripples = [];
@@ -467,7 +493,7 @@ window.addEventListener('resize', () => {
 
 function updatePlayer(dt) {
   const dir = new THREE.Vector3();
-  const forward = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
+  const forward = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
   const right = new THREE.Vector3(forward.z, 0, -forward.x);
   if (keys.has(data.options.keybinds.forward)) dir.add(forward);
   if (keys.has(data.options.keybinds.backward)) dir.sub(forward);
@@ -476,16 +502,30 @@ function updatePlayer(dt) {
   if (keys.has(data.options.keybinds.up)) dir.y += 1;
   if (keys.has(data.options.keybinds.down)) dir.y -= 1;
   if (dir.lengthSq()) dir.normalize();
+
   const speed = config.moveSpeed() * (keys.has('Mouse0') ? 1.5 : 1);
   player.velocity.lerp(dir.multiplyScalar(speed), 0.08);
   player.pos.addScaledVector(player.velocity, dt);
+
   const radius = 34;
   if (player.pos.length() > radius) player.pos.setLength(radius);
   player.pos.y = Math.max(-8.5, Math.min(4.5, player.pos.y));
-  camera.position.copy(player.pos);
-  camera.rotation.order = 'YXZ';
-  camera.rotation.y = player.yaw;
-  camera.rotation.x = player.pitch;
+
+  axolotl.position.copy(player.pos);
+  if (player.velocity.lengthSq() > 0.001) {
+    axolotl.rotation.y = Math.atan2(-player.velocity.x, -player.velocity.z);
+  } else {
+    axolotl.rotation.y = player.yaw;
+  }
+  axolotl.rotation.z = Math.sin(performance.now() * 0.006) * 0.08;
+  axTail.rotation.y = Math.sin(performance.now() * 0.01) * 0.45;
+  axFinL.rotation.x = Math.sin(performance.now() * 0.012) * 0.35;
+  axFinR.rotation.x = -Math.sin(performance.now() * 0.012) * 0.35;
+
+  cameraOffset.set(Math.sin(player.yaw) * 6, 3.2 + Math.sin(player.pitch) * 1.5, Math.cos(player.yaw) * 6);
+  cameraTarget.copy(player.pos).add(new THREE.Vector3(0, 1.2, 0));
+  camera.position.lerp(cameraTarget.clone().add(cameraOffset), 0.12);
+  camera.lookAt(cameraTarget);
 }
 
 document.addEventListener('mousedown', e => { if (e.button === 0) keys.add('Mouse0'); });
