@@ -13,8 +13,6 @@ const defaults = {
       backward: 'KeyS',
       left: 'KeyA',
       right: 'KeyD',
-      up: 'Space',
-      down: 'ShiftLeft',
       upgrades: 'KeyU',
       pause: 'Escape'
     }
@@ -46,10 +44,11 @@ const state = {
 };
 
 const config = {
-  moveSpeed: () => 6 + state.upgrades.fins * 1.2,
+  moveSpeed: () => 7 + state.upgrades.fins * 1.4,
   ramPower: () => 18 + state.upgrades.head * 6,
   maxHealth: () => 100 + state.upgrades.lungs * 20,
   pickupRadius: () => 1.4 + state.upgrades.bite * 0.25,
+  accel: () => 3.8 + state.upgrades.fins * 0.45,
   xpToNext: () => 50 + (state.level - 1) * 35
 };
 
@@ -224,6 +223,7 @@ const axGillL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.7), new THREE
 const axGillR = axGillL.clone();
 const axEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), new THREE.MeshBasicMaterial({ color: 0x111111 }));
 const axEyeR = axEyeL.clone();
+const axSmile = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 6, 18, Math.PI), new THREE.MeshBasicMaterial({ color: 0x7a3050 }));
 axBody.rotation.z = Math.PI / 2;
 axHead.position.set(1.15, 0.1, 0);
 axTail.position.set(-1.45, 0.02, 0);
@@ -234,7 +234,10 @@ axGillL.position.set(0.95, 0.45, 0.78);
 axGillR.position.set(0.95, 0.45, -0.78);
 axEyeL.position.set(1.52, 0.26, 0.23);
 axEyeR.position.set(1.52, 0.26, -0.23);
-axolotl.add(axBody, axHead, axTail, axFinL, axFinR, axGillL, axGillR, axEyeL, axEyeR);
+axSmile.position.set(1.74, -0.02, 0);
+axSmile.rotation.y = Math.PI / 2;
+axolotl.add(axBody, axHead, axTail, axFinL, axFinR, axGillL, axGillR, axEyeL, axEyeR, axSmile);
+axolotl.rotation.y = Math.PI;
 scene.add(axolotl);
 
 const cameraTarget = new THREE.Vector3();
@@ -251,30 +254,63 @@ let continueAllowed = !!data.save.hasSave;
 
 function makeAlien() {
   const group = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.9, 14, 14), new THREE.MeshStandardMaterial({ color: 0x8cf07d, emissive: 0x245d1b }));
-  const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.9, 18, 18), new THREE.MeshStandardMaterial({ color: 0x8cf07d, emissive: 0x245d1b, roughness: 0.35, metalness: 0.15 }));
+  const shell = new THREE.Mesh(new THREE.TorusGeometry(0.88, 0.12, 10, 24), new THREE.MeshStandardMaterial({ color: 0xc9ff9f, emissive: 0x355d10, transparent: true, opacity: 0.65 }));
+  shell.rotation.x = Math.PI / 2;
+  const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10), new THREE.MeshBasicMaterial({ color: 0x111111 }));
   const eye2 = eye1.clone();
+  const pupil1 = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff4d4d }));
+  const pupil2 = pupil1.clone();
   eye1.position.set(-0.25, 0.18, 0.7); eye2.position.set(0.25, 0.18, 0.7);
-  const horn = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xb8ffb0 }));
-  horn.position.y = 0.95;
-  group.add(body, eye1, eye2, horn);
-  const r = 12 + Math.random() * 28;
+  pupil1.position.set(-0.25, 0.18, 0.83); pupil2.position.set(0.25, 0.18, 0.83);
+  const horn = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xb8ffb0, emissive: 0x274611 }));
+  const horn2 = horn.clone();
+  horn.position.set(-0.28, 0.85, 0.12);
+  horn2.position.set(0.28, 0.85, 0.12);
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 6, 18, Math.PI), new THREE.MeshBasicMaterial({ color: 0x365421 }));
+  mouth.position.set(0, -0.18, 0.82);
+  group.add(body, shell, eye1, eye2, pupil1, pupil2, horn, horn2, mouth);
+  const r = 18 + Math.random() * 24;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -1.5 + Math.random() * 3, Math.sin(a) * r);
   scene.add(group);
-  aliens.push({ mesh: group, hp: 18 + state.level * 5, speed: 1.2 + Math.random() * 1.1, bob: Math.random() * Math.PI * 2 });
+  aliens.push({ mesh: group, hp: 18 + state.level * 5, speed: 0.9 + Math.random() * 0.8, bob: Math.random() * Math.PI * 2 });
 }
 
 function makePickup(kind = Math.random() < 0.12 ? 'steak' : 'worm') {
-  const color = kind === 'steak' ? 0xa22f2f : 0xc7944d;
-  const geo = kind === 'steak' ? new THREE.BoxGeometry(0.8, 0.45, 0.55) : new THREE.TorusKnotGeometry(0.22, 0.07, 30, 5);
-  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, emissive: kind === 'steak' ? 0x330000 : 0x2d220c }));
-  const r = Math.random() * 30;
+  const group = new THREE.Group();
+  if (kind === 'steak') {
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.55, 0.7), new THREE.MeshStandardMaterial({ color: 0x8f2b2b, roughness: 0.8 }));
+    const fat = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.16), new THREE.MeshStandardMaterial({ color: 0xf4d5c2, roughness: 0.9 }));
+    const marbling1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 6), new THREE.MeshStandardMaterial({ color: 0xf7e4d8 }));
+    const marbling2 = marbling1.clone();
+    fat.position.set(0.02, 0.18, 0.28);
+    marbling1.rotation.z = 1.1;
+    marbling2.rotation.z = -0.8;
+    marbling1.position.set(-0.15, 0.02, 0.2);
+    marbling2.position.set(0.18, -0.05, -0.12);
+    group.add(base, fat, marbling1, marbling2);
+  } else {
+    const body = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.32, 0, 0),
+      new THREE.Vector3(-0.1, 0.12, 0.1),
+      new THREE.Vector3(0.08, -0.1, -0.08),
+      new THREE.Vector3(0.3, 0.04, 0)
+    ]), 24, 0.08, 8, false), new THREE.MeshStandardMaterial({ color: 0xc98a52, roughness: 0.95 }));
+    const band1 = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.012, 6, 12), new THREE.MeshStandardMaterial({ color: 0x9c6436 }));
+    const band2 = band1.clone();
+    band1.position.set(-0.08, 0.03, 0.05);
+    band2.position.set(0.14, -0.03, -0.04);
+    band1.rotation.x = 1.2;
+    band2.rotation.x = 1.05;
+    group.add(body, band1, band2);
+  }
+  const r = 6 + Math.random() * 34;
   const a = Math.random() * Math.PI * 2;
-  mesh.position.set(Math.cos(a) * r, -2 + Math.random() * 3.5, Math.sin(a) * r);
-  mesh.rotation.set(Math.random(), Math.random(), Math.random());
-  scene.add(mesh);
-  pickups.push({ mesh, kind, spin: (Math.random() - 0.5) * 2 });
+  group.position.set(Math.cos(a) * r, -2 + Math.random() * 3.5, Math.sin(a) * r);
+  group.rotation.set(Math.random(), Math.random(), Math.random());
+  scene.add(group);
+  pickups.push({ mesh: group, kind, spin: (Math.random() - 0.5) * 1.4 });
 }
 
 function spawnRipple(position, color = 0xffffff) {
@@ -285,8 +321,8 @@ function spawnRipple(position, color = 0xffffff) {
   ripples.push({ mesh, life: 0.7 });
 }
 
-for (let i = 0; i < 8; i++) makeAlien();
-for (let i = 0; i < 22; i++) makePickup();
+for (let i = 0; i < 5; i++) makeAlien();
+for (let i = 0; i < 10; i++) makePickup();
 
 function addXp(amount) {
   state.xp += amount;
@@ -371,7 +407,7 @@ function renderOptions() {
   el.soundSlider.value = data.options.sound;
   el.musicSlider.value = data.options.music;
   el.keybindList.innerHTML = '';
-  const labels = { forward: 'Forward', backward: 'Backward', left: 'Left', right: 'Right', up: 'Swim Up', down: 'Swim Down', upgrades: 'Upgrades', pause: 'Pause' };
+  const labels = { forward: 'Forward', backward: 'Backward', left: 'Left', right: 'Right', upgrades: 'Upgrades', pause: 'Pause' };
   for (const [key, code] of Object.entries(data.options.keybinds)) {
     const row = document.createElement('div');
     row.className = 'keybind';
@@ -493,18 +529,19 @@ window.addEventListener('resize', () => {
 
 function updatePlayer(dt) {
   const dir = new THREE.Vector3();
-  const forward = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
-  const right = new THREE.Vector3(forward.z, 0, -forward.x);
+  const forward = new THREE.Vector3(-Math.sin(player.yaw), Math.sin(player.pitch) * 0.9, -Math.cos(player.yaw));
+  const flatForward = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+  const right = new THREE.Vector3(flatForward.z, 0, -flatForward.x);
   if (keys.has(data.options.keybinds.forward)) dir.add(forward);
   if (keys.has(data.options.keybinds.backward)) dir.sub(forward);
   if (keys.has(data.options.keybinds.right)) dir.add(right);
   if (keys.has(data.options.keybinds.left)) dir.sub(right);
-  if (keys.has(data.options.keybinds.up)) dir.y += 1;
-  if (keys.has(data.options.keybinds.down)) dir.y -= 1;
   if (dir.lengthSq()) dir.normalize();
 
-  const speed = config.moveSpeed() * (keys.has('Mouse0') ? 1.5 : 1);
-  player.velocity.lerp(dir.multiplyScalar(speed), 0.08);
+  const speed = config.moveSpeed() * (keys.has('Mouse0') ? 1.55 : 1);
+  const desiredVelocity = dir.multiplyScalar(speed);
+  player.velocity.lerp(desiredVelocity, Math.min(0.2, dt * config.accel()));
+  if (!dir.lengthSq()) player.velocity.multiplyScalar(Math.max(0.92, 1 - dt * 2.2));
   player.pos.addScaledVector(player.velocity, dt);
 
   const radius = 34;
@@ -513,9 +550,9 @@ function updatePlayer(dt) {
 
   axolotl.position.copy(player.pos);
   if (player.velocity.lengthSq() > 0.001) {
-    axolotl.rotation.y = Math.atan2(-player.velocity.x, -player.velocity.z);
+    axolotl.rotation.y = Math.atan2(player.velocity.x, player.velocity.z);
   } else {
-    axolotl.rotation.y = player.yaw;
+    axolotl.rotation.y = player.yaw + Math.PI;
   }
   axolotl.rotation.z = Math.sin(performance.now() * 0.006) * 0.08;
   axTail.rotation.y = Math.sin(performance.now() * 0.01) * 0.45;
@@ -533,7 +570,7 @@ document.addEventListener('mouseup', e => { if (e.button === 0) keys.delete('Mou
 
 function updateAliens(dt) {
   alienSpawnTimer += dt;
-  if (alienSpawnTimer > 4 && aliens.length < 18) { alienSpawnTimer = 0; makeAlien(); }
+  if (alienSpawnTimer > 6 && aliens.length < 10) { alienSpawnTimer = 0; makeAlien(); }
   for (let i = aliens.length - 1; i >= 0; i--) {
     const alien = aliens[i];
     const toPlayer = player.pos.clone().sub(alien.mesh.position);
@@ -562,7 +599,7 @@ function updateAliens(dt) {
 
 function updatePickups(dt) {
   pickupSpawnTimer += dt;
-  if (pickupSpawnTimer > 1.8 && pickups.length < 28) { pickupSpawnTimer = 0; makePickup(); }
+  if (pickupSpawnTimer > 3.2 && pickups.length < 14) { pickupSpawnTimer = 0; makePickup(); }
   for (let i = pickups.length - 1; i >= 0; i--) {
     const p = pickups[i];
     p.mesh.rotation.y += dt * p.spin;

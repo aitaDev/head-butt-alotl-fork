@@ -14,8 +14,7 @@ Then open <http://localhost:3002>.
 
 Default controls are configurable in the Options menu.
 - Move: WASD
-- Swim up: Space
-- Swim down: Shift
+- Aim up/down with mouse to change swim height while moving
 - Sprint: Left mouse
 - Upgrade menu: U
 - Pause/menu: Escape
