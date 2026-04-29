@@ -314,6 +314,15 @@ for (let i = 0; i < 60; i++) {
   scene.add(shell);
 }
 
+function resolveSolidCollision(pos, solidPos, radius) {
+  const offset = pos.clone().sub(solidPos);
+  const dist = offset.length();
+  if (dist === 0 || dist >= radius) return false;
+  offset.normalize().multiplyScalar(radius - dist + 0.001);
+  pos.add(offset);
+  return true;
+}
+
 const whale = new THREE.Group();
 const whaleBody = new THREE.Mesh(new THREE.BoxGeometry(135, 48, 48), new THREE.MeshStandardMaterial({ color: 0x4a6f96, roughness: 0.8 }));
 const whaleHead = new THREE.Mesh(new THREE.BoxGeometry(58, 38, 38), new THREE.MeshStandardMaterial({ color: 0x5d84aa, roughness: 0.75 }));
@@ -1246,6 +1255,19 @@ function updatePlayer(dt) {
   player.pos.z += player.velocity.z * dt;
   player.pos.y += player.verticalVelocity * dt;
 
+  for (const coralPiece of coral) {
+    resolveSolidCollision(player.pos, coralPiece.position, Math.max(2.2, coralPiece.scale.x * 2.2));
+  }
+  for (const shell of shells) {
+    resolveSolidCollision(player.pos, shell.position, 0.8);
+  }
+  for (const octo of octopi) {
+    resolveSolidCollision(player.pos, octo.mesh.position, 1.8);
+  }
+  for (const narwhal of narwhals) {
+    resolveSolidCollision(player.pos, narwhal.mesh.position, narwhal.collisionRadius + player.radius * 0.3);
+  }
+
   // Endless forward travel: keep player in continuous world space while scenery recycles around them.
   if (player.pos.y < -82) {
     player.pos.y = -82;
@@ -1349,17 +1371,22 @@ function updateAliens(dt, now) {
     alien.mesh.lookAt(player.pos);
 
     if (dist < (alien.collisionRadius + player.radius)) {
+      let killed = false;
       if (!alien.hitCooldown || now - alien.hitCooldown > 120) {
         const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
         const ram = player.velocity.length() * config.ramPower() * 0.18 * damageMultiplier;
         const crit = player.velocity.length() > config.moveSpeed() * 1.8;
         const dealt = crit ? ram * 1.5 : ram;
         alien.hp -= dealt;
+        killed = alien.hp <= 0;
         audio.eat.currentTime = 0;
         audio.eat.play().catch(() => {});
         spawnDamageText(alien.mesh.position, dealt, crit);
         alien.hitCooldown = now;
         if (ram > 1.5) spawnRipple(alien.mesh.position, crit ? 0xff4444 : 0xffe08a);
+      }
+      if (!killed) {
+        resolveSolidCollision(player.pos, alien.mesh.position, alien.collisionRadius + player.radius);
       }
       takeDamage(alien.damage * dt + 5 * (1 - Math.min(1, player.velocity.length() / (4 + state.upgrades.head))) * dt);
       if (alien.hp <= 0) {
@@ -1475,17 +1502,22 @@ function updateSharks(dt, now) {
     shark.mesh.lookAt(player.pos);
     shark.mesh.rotation.y += Math.PI / 2;
     if (dist < (shark.collisionRadius + player.radius)) {
+      let killed = false;
       if (!shark.hitCooldown || now - shark.hitCooldown > 120) {
         const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
         const ram = player.velocity.length() * config.ramPower() * 0.16 * damageMultiplier;
         const crit = player.velocity.length() > config.moveSpeed() * 1.9;
         const dealt = crit ? ram * 1.5 : ram;
         shark.hp -= dealt;
+        killed = shark.hp <= 0;
         audio.eat.currentTime = 0;
         audio.eat.play().catch(() => {});
         spawnDamageText(shark.mesh.position, dealt, crit);
         shark.hitCooldown = now;
         spawnRipple(shark.mesh.position, crit ? 0xff4444 : 0xff8888);
+      }
+      if (!killed) {
+        resolveSolidCollision(player.pos, shark.mesh.position, shark.collisionRadius + player.radius);
       }
       takeDamage(shark.damage * dt);
       if (shark.hp <= 0) {
