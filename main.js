@@ -420,13 +420,27 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45
     shine.position.set(-0.06, 0.1, -0.18);
     group.add(base, fat, marbling1, marbling2, shine);
   } else if (kind === 'fish') {
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.38, 0.32), new THREE.MeshStandardMaterial({ color: 0x5cc8ff, roughness: 0.55 }));
-    body.scale.set(1.6, 1, 0.8);
-    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.18, 0.45), new THREE.MeshStandardMaterial({ color: 0x88e0ff }));
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.22, 0.08), new THREE.MeshStandardMaterial({ color: 0xb8f2ff }));
-    tail.position.set(-0.45, 0, 0);
-    fin.position.set(0, 0.24, 0);
-    group.add(body, tail, fin);
+    const colors = [0x5cc8ff, 0x66f0d1, 0xffc857, 0xff7f50, 0xb784ff];
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.55, 0.45), new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random() * colors.length)], roughness: 0.55 }));
+    const belly = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.16, 0.32), new THREE.MeshStandardMaterial({ color: 0xe8fbff, roughness: 0.7 }));
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.42, 0.7), new THREE.MeshStandardMaterial({ color: 0x88e0ff }));
+    const topFin = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.32, 0.12), new THREE.MeshStandardMaterial({ color: 0xb8f2ff }));
+    const sideFinL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.1, 0.18), new THREE.MeshStandardMaterial({ color: 0xa8f0ff }));
+    const sideFinR = sideFinL.clone();
+    const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+    const eyeR = eyeL.clone();
+    const stripe1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.46), new THREE.MeshStandardMaterial({ color: 0x1b6ca8 }));
+    const stripe2 = stripe1.clone();
+    belly.position.set(0.05, -0.18, 0);
+    tail.position.set(-0.72, 0, 0);
+    topFin.position.set(0.05, 0.34, 0);
+    sideFinL.position.set(0.1, -0.03, 0.3);
+    sideFinR.position.set(0.1, -0.03, -0.3);
+    eyeL.position.set(0.42, 0.08, 0.16);
+    eyeR.position.set(0.42, 0.08, -0.16);
+    stripe1.position.set(-0.1, 0, 0);
+    stripe2.position.set(0.18, 0, 0);
+    group.add(body, belly, tail, topFin, sideFinL, sideFinR, eyeL, eyeR, stripe1, stripe2);
   } else {
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.16, 0.16), new THREE.MeshStandardMaterial({ color: 0xc98a52, roughness: 0.95 }));
     const band1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.18, 0.18), new THREE.MeshStandardMaterial({ color: 0x9c6436 }));
@@ -691,7 +705,7 @@ document.addEventListener('pointerlockchange', () => {
 document.addEventListener('mousemove', e => {
   if (!pointerLocked || paused) return;
   player.yaw -= e.movementX * 0.0028;
-  player.pitch -= e.movementY * 0.0028;
+  player.pitch -= e.movementY * 0.0036;
   player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch));
 });
 
@@ -775,7 +789,7 @@ function updatePlayer(dt) {
   }
 
   const lookVertical = Math.sin(player.pitch);
-  const verticalIntent = moveInput.y !== 0 ? lookVertical * Math.sign(moveInput.y) : 0;
+  const verticalIntent = moveInput.y !== 0 ? Math.sign(moveInput.y) * Math.sign(lookVertical) * Math.pow(Math.abs(lookVertical), 0.7) : 0;
   const desiredVelocity = new THREE.Vector3(flatDir.x, 0, flatDir.z);
 
   const holdingForward = moveInput.y > 0.05;
@@ -791,7 +805,7 @@ function updatePlayer(dt) {
     player.velocity.z *= Math.max(0.9, 1 - dt * 2.6);
   }
 
-  player.verticalVelocity = verticalIntent * config.moveSpeed() * Math.min(2.2, player.forwardBoost);
+  player.verticalVelocity = verticalIntent * config.moveSpeed() * Math.min(3.1, player.forwardBoost * 1.25);
 
   player.pos.x += player.velocity.x * dt;
   player.pos.z += player.velocity.z * dt;
