@@ -2,10 +2,10 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.3.2';
+const gameVersion = 'v0.3.3';
 const patchNotes = [
+  'v0.3.3  HP bar flashes red while sprinting, screen shake on critical headbutts.',
   'v0.3.2  Halved whale size, added whale swimming movement, and restored menu button sound triggers.',
-  'v0.3.1  Fixed tutorial dismissal, restored whale interaction radius, added solid collisions, and corrected shark facing.',
   'v0.3.0  Upgrades visibly change axolotl, new creatures: jellyfish/seahorses/orbs/anemones, bubble particles, animated kelp, bioluminescent glow, lore tablets, light rays, treasure chests.',
   'v0.2.0  Added menu patch notes, version tag, flashier XP UI, and bigger coral pass.',
   'v0.1.9  Added user audio loops and ambient sound hooks.',
@@ -359,7 +359,8 @@ const player = {
   velocity: new THREE.Vector3(),
   radius: 1.2,
   verticalVelocity: 0,
-  forwardBoost: 1
+  forwardBoost: 1,
+  sprinting: false
 };
 
 const axolotl = new THREE.Group();
@@ -513,6 +514,7 @@ const tentacles = [];
 const depthZones = [];
 const pearls = [];
 const planktonPatches = [];
+let screenShake = { intensity: 0, duration: 0, offsetX: 0, offsetY: 0 };
 const moteGroup = new THREE.Group();
 scene.add(moteGroup);
 let trailParticles = [];
@@ -1430,7 +1432,11 @@ function updatePlayer(dt) {
   const lookVertical = Math.sin(player.pitch);
   const verticalIntent = moveInput.y !== 0 ? Math.sign(moveInput.y) * Math.sign(lookVertical) * Math.pow(Math.abs(lookVertical), 0.7) : 0;
   const desiredVelocity = new THREE.Vector3(flatDir.x, 0, flatDir.z);
-
+  const isMoving = moveInput.lengthSq() > 0;
+  player.sprinting = sprintPressed && isMoving;
+  if (!paused && gameStarted) {
+    updateHUD();
+  }
   const holdingForward = moveInput.y > 0.05;
   if (holdingForward) player.forwardBoost = Math.min(config.maxBoostMultiplier(), player.forwardBoost + dt * 0.75);
   else player.forwardBoost = Math.max(1, player.forwardBoost - dt * 1.6);
@@ -1509,10 +1515,20 @@ function updatePlayer(dt) {
   axLegBL.rotation.z = 0.1 - Math.sin(swimPhase * 1.4) * 0.14;
   axLegBR.rotation.z = -0.1 + Math.sin(swimPhase * 1.4) * 0.14;
 
+  if (screenShake.duration > 0) {
+    screenShake.duration -= dt;
+    const amt = screenShake.intensity * Math.max(0, screenShake.duration / 0.22);
+    screenShake.offsetX = (Math.random() - 0.5) * amt;
+    screenShake.offsetY = (Math.random() - 0.5) * amt;
+  } else {
+    screenShake.offsetX = 0;
+    screenShake.offsetY = 0;
+  }
+
   cameraOffset.set(Math.sin(player.yaw) * 7.4, 2.8 - Math.sin(player.pitch) * 1.2, Math.cos(player.yaw) * 7.4);
   cameraTarget.copy(player.pos).add(new THREE.Vector3(0, 0.7, 0));
   scene.fog.color.set(player.pos.y > -10 ? 0x5cbcff : 0x0b5ea8);
-  const desiredCameraPos = cameraTarget.clone().add(cameraOffset);
+  const desiredCameraPos = cameraTarget.clone().add(cameraOffset).add(new THREE.Vector3(screenShake.offsetX, screenShake.offsetY, 0));
   camera.position.lerp(desiredCameraPos, 0.22);
   const lookTarget = cameraTarget.clone().add(new THREE.Vector3(-Math.sin(player.yaw) * 8, Math.sin(player.pitch) * 8, -Math.cos(player.yaw) * 8));
   camera.lookAt(lookTarget);
@@ -1578,7 +1594,11 @@ function updateAliens(dt, now) {
         audio.eat.play().catch(() => {});
         spawnDamageText(alien.mesh.position, dealt, crit);
         alien.hitCooldown = now;
-        if (ram > 1.5) spawnRipple(alien.mesh.position, crit ? 0xff4444 : 0xffe08a);
+        if (ram > 1.5) {
+          spawnRipple(alien.mesh.position, crit ? 0xff4444 : 0xffe08a);
+          if (crit) { screenShake.intensity = 0.45; screenShake.duration = 0.22; }
+          else if (ram > 4) { screenShake.intensity = 0.22; screenShake.duration = 0.18; }
+        }
       }
       if (!killed) {
         resolveSolidCollision(player.pos, alien.mesh.position, alien.collisionRadius + player.radius);
@@ -1710,6 +1730,8 @@ function updateSharks(dt, now) {
         spawnDamageText(shark.mesh.position, dealt, crit);
         shark.hitCooldown = now;
         spawnRipple(shark.mesh.position, crit ? 0xff4444 : 0xff8888);
+        if (crit) { screenShake.intensity = 0.5; screenShake.duration = 0.25; }
+        else if (ram > 4) { screenShake.intensity = 0.28; screenShake.duration = 0.2; }
       }
       if (!killed) {
         resolveSolidCollision(player.pos, shark.mesh.position, shark.collisionRadius + player.radius);
