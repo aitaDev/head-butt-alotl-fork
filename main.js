@@ -330,7 +330,6 @@ scene.add(axolotl);
 
 const cameraTarget = new THREE.Vector3();
 const cameraOffset = new THREE.Vector3();
-let cameraSnapNextFrame = false;
 
 const aliens = [];
 const pickups = [];
@@ -346,7 +345,6 @@ let alienSpawnTimer = 0;
 let pickupSpawnTimer = 0;
 let continueAllowed = !!data.save.hasSave;
 const worldRadius = 100;
-const worldWrapRadius = 120;
 let isGameOver = false;
 let narwhalBuffUntil = 0;
 let whaleChatCooldownUntil = 0;
@@ -813,10 +811,7 @@ function updatePlayer(dt) {
   player.pos.z += player.velocity.z * dt;
   player.pos.y += player.verticalVelocity * dt;
 
-  if (player.pos.x > worldWrapRadius) { player.pos.x = -worldWrapRadius; cameraSnapNextFrame = true; }
-  if (player.pos.x < -worldWrapRadius) { player.pos.x = worldWrapRadius; cameraSnapNextFrame = true; }
-  if (player.pos.z > worldWrapRadius) { player.pos.z = -worldWrapRadius; cameraSnapNextFrame = true; }
-  if (player.pos.z < -worldWrapRadius) { player.pos.z = worldWrapRadius; cameraSnapNextFrame = true; }
+  // Endless forward travel: keep player in continuous world space while scenery recycles around them.
   if (player.pos.y < -82) {
     player.pos.y = -82;
     player.verticalVelocity = Math.max(0, player.verticalVelocity);
@@ -852,12 +847,7 @@ function updatePlayer(dt) {
   cameraTarget.copy(player.pos).add(new THREE.Vector3(0, 0.7, 0));
   scene.fog.color.set(player.pos.y > -10 ? 0x5cbcff : 0x0b5ea8);
   const desiredCameraPos = cameraTarget.clone().add(cameraOffset);
-  if (cameraSnapNextFrame) {
-    camera.position.copy(desiredCameraPos);
-    cameraSnapNextFrame = false;
-  } else {
-    camera.position.lerp(desiredCameraPos, 0.22);
-  }
+  camera.position.lerp(desiredCameraPos, 0.22);
   const lookTarget = cameraTarget.clone().add(new THREE.Vector3(-Math.sin(player.yaw) * 8, Math.sin(player.pitch) * 8, -Math.cos(player.yaw) * 8));
   camera.lookAt(lookTarget);
   renderer.setClearColor(player.pos.y > -10 ? 0x7ed0ff : 0x1676d2);
@@ -885,6 +875,8 @@ function updateAliens(dt, now) {
     if (alien.mesh.position.x - player.pos.x < -worldRadius) alien.mesh.position.x += worldRadius * 2;
     if (alien.mesh.position.z - player.pos.z > worldRadius) alien.mesh.position.z -= worldRadius * 2;
     if (alien.mesh.position.z - player.pos.z < -worldRadius) alien.mesh.position.z += worldRadius * 2;
+    if (alien.mesh.position.y - player.pos.y > 45) alien.mesh.position.y -= 90;
+    if (alien.mesh.position.y - player.pos.y < -45) alien.mesh.position.y += 90;
   }
   for (let i = aliens.length - 1; i >= 0; i--) {
     const alien = aliens[i];
@@ -928,6 +920,8 @@ function updatePickups(dt) {
     if (p.mesh.position.x - player.pos.x < -worldRadius) p.mesh.position.x += worldRadius * 2;
     if (p.mesh.position.z - player.pos.z > worldRadius) p.mesh.position.z -= worldRadius * 2;
     if (p.mesh.position.z - player.pos.z < -worldRadius) p.mesh.position.z += worldRadius * 2;
+    if (p.mesh.position.y - player.pos.y > 45) p.mesh.position.y -= 90;
+    if (p.mesh.position.y - player.pos.y < -45) p.mesh.position.y += 90;
     p.mesh.rotation.y += dt * p.spin;
     p.mesh.position.y += Math.sin(performance.now() * 0.002 + i) * 0.01;
     const dist = p.mesh.position.distanceTo(player.pos);
@@ -982,6 +976,12 @@ function updateNarwhals(dt) {
 function updateSharks(dt, now) {
   for (let i = sharks.length - 1; i >= 0; i--) {
     const shark = sharks[i];
+    if (shark.mesh.position.x - player.pos.x > worldRadius) shark.mesh.position.x -= worldRadius * 2;
+    if (shark.mesh.position.x - player.pos.x < -worldRadius) shark.mesh.position.x += worldRadius * 2;
+    if (shark.mesh.position.z - player.pos.z > worldRadius) shark.mesh.position.z -= worldRadius * 2;
+    if (shark.mesh.position.z - player.pos.z < -worldRadius) shark.mesh.position.z += worldRadius * 2;
+    if (shark.mesh.position.y - player.pos.y > 45) shark.mesh.position.y -= 90;
+    if (shark.mesh.position.y - player.pos.y < -45) shark.mesh.position.y += 90;
     const toPlayer = player.pos.clone().sub(shark.mesh.position);
     const dist = toPlayer.length();
     if (dist > 0.001) shark.mesh.position.addScaledVector(toPlayer.normalize(), shark.speed * dt);
