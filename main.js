@@ -230,14 +230,35 @@ const coral = [];
 for (let i = 0; i < 90; i++) {
   const group = new THREE.Group();
   const colors = [0xff7aa2, 0xff9966, 0xa66cff, 0xffcc66, 0x66e0ff, 0xff6680];
-  for (let j = 0; j < 5; j++) {
-    const branch = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 1 + Math.random() * 1.8, 0.28),
-      new THREE.MeshStandardMaterial({ color: colors[(i + j) % colors.length], roughness: 0.85 })
+  const color = colors[i % colors.length];
+  const stem = new THREE.Mesh(
+    new THREE.BoxGeometry(0.55, 2.8 + Math.random() * 2.4, 0.55),
+    new THREE.MeshStandardMaterial({ color, roughness: 0.88 })
+  );
+  stem.position.y = stem.geometry.parameters.height / 2;
+  group.add(stem);
+  for (let j = 0; j < 8; j++) {
+    const petal = new THREE.Mesh(
+      new THREE.BoxGeometry(0.9 + Math.random() * 0.8, 0.45, 0.9 + Math.random() * 0.8),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.82 })
     );
-    branch.position.set((j - 2) * 0.22, branch.geometry.parameters.height / 2, (Math.random() - 0.5) * 0.45);
-    branch.rotation.z = (Math.random() - 0.5) * 0.35;
-    group.add(branch);
+    const angle = (j / 8) * Math.PI * 2;
+    const radius = 0.85 + Math.random() * 0.5;
+    petal.position.set(Math.cos(angle) * radius, stem.geometry.parameters.height + 0.15 + Math.random() * 0.8, Math.sin(angle) * radius);
+    petal.rotation.y = angle;
+    petal.rotation.z = (Math.random() - 0.5) * 0.25;
+    group.add(petal);
+  }
+  for (let j = 0; j < 4; j++) {
+    const arm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.38, 1.6 + Math.random() * 1.2, 0.38),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.86 })
+    );
+    const angle = (j / 4) * Math.PI * 2 + Math.PI / 4;
+    arm.position.set(Math.cos(angle) * 0.8, 1.4 + Math.random() * 1.2, Math.sin(angle) * 0.8);
+    arm.rotation.z = 0.55;
+    arm.rotation.x = (Math.random() - 0.5) * 0.4;
+    group.add(arm);
   }
   const r = 12 + Math.random() * 90;
   const a = Math.random() * Math.PI * 2;
