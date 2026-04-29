@@ -2,8 +2,9 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.4.0';
+const gameVersion = 'v0.5.0';
 const patchNotes = [
+  'v0.5.0  Charged attacks — hold Shift+forward to build charge, release to unleash 2x damage with magenta ripple and big screen shake. Bonus rewards on charged kills.',
   'v0.4.0  Depth gauge — real-time dive indicator with zone name and visual fill. Deep waters darken the world.',
   'v0.3.5  Anglerfish lurking in the deep — glowing lures, aggressive hunting in dark waters, pulsing bioluminescence.',
   'v0.3.4  Seabed creatures now live: urchins spike on contact, crabs scuttle and deal damage, starfish are collectible with respawn.',
@@ -187,6 +188,14 @@ app.innerHTML = `
     <div class="card" id="statCard">Aliens bonked: <span id="aliensBonked">0</span></div>
   </div>
 
+  <div id="chargeBar" class="charge-bar-shell">
+    <div class="charge-label">⚡ CHARGE</div>
+    <div class="charge-track">
+      <div id="chargeFill" class="charge-fill"></div>
+      <div id="chargeReadyDot" class="charge-ready-dot hidden">✦</div>
+    </div>
+  </div>
+  <div id="chargeVignette" class="charge-vignette hidden"></div>
   <div id="notice"></div>
   <div id="crosshair"><div class="dot"></div></div>
   <div id="healthHud" class="card hp-card">
@@ -368,7 +377,8 @@ const player = {
   radius: 1.2,
   verticalVelocity: 0,
   forwardBoost: 1,
-  sprinting: false
+  sprinting: false,
+  chargeTimer: 0
 };
 
 const axolotl = new THREE.Group();
@@ -1153,8 +1163,15 @@ function updateAnglerfish(dt, now) {
       const dmgMult = narwhalBuffUntil > performance.now() ? 2 : 1;
       const ram = player.velocity.length() * config.ramPower() * 0.16 * dmgMult;
       const crit = player.velocity.length() > config.moveSpeed() * 1.8;
-      af.hp -= crit ? ram * 1.5 : ram;
-      spawnDamageText(af.mesh.position, crit ? ram * 1.5 : ram, crit);
+      const isCharged = player.chargeTimer >= 0.65 && (keys.has(data.options.keybinds.sprint) && moveInput.y > 0);
+      af.hp -= isCharged ? ram * 2.5 : crit ? ram * 1.5 : ram;
+      if (isCharged) {
+        spawnDamageText(af.mesh.position, ram * 2.5, true);
+        spawnRipple(af.mesh.position, 0xff44ff);
+        screenShake.intensity = 0.55; screenShake.duration = 0.28;
+      } else {
+        spawnDamageText(af.mesh.position, crit ? ram * 1.5 : ram, crit);
+      }
       if (crit) { screenShake.intensity = 0.4; screenShake.duration = 0.2; }
       spawnRipple(af.mesh.position, af.lureColor || 0x00ffcc);
       audio.eat.currentTime = 0;
@@ -1597,6 +1614,24 @@ function updatePlayer(dt) {
   player.sprinting = sprintPressed && isMoving;
   if (!paused && gameStarted) {
     updateHUD();
+    // Charge bar UI
+    const chargePct = player.chargeTimer * 100;
+    el.chargeFill.style.width = chargePct + '%';
+    if (player.chargeTimer >= 0.65) {
+      el.chargeReadyDot.classList.remove('hidden');
+      el.chargeBar.style.borderColor = 'rgba(200,80,255,0.6)';
+      el.chargeBar.style.boxShadow = '0 0 12px rgba(200,80,255,0.4)';
+    } else {
+      el.chargeReadyDot.classList.add('hidden');
+      el.chargeBar.style.borderColor = 'rgba(160,210,255,0.2)';
+      el.chargeBar.style.boxShadow = 'none';
+    }
+    if (chargeVfxTimer > 0) {
+      el.chargeVignette.classList.remove('hidden');
+      el.chargeVignette.style.animationDuration = '0.18s';
+    } else {
+      el.chargeVignette.classList.add('hidden');
+    }
   }
   const holdingForward = moveInput.y > 0.05;
   if (holdingForward) player.forwardBoost = Math.min(config.maxBoostMultiplier(), player.forwardBoost + dt * 0.75);
@@ -1604,6 +1639,16 @@ function updatePlayer(dt) {
 
   const sprintMultiplier = (sprintPressed ? 1.9 : (keys.has('Mouse0') ? 1.45 : 1)) * player.forwardBoost;
   if (desiredVelocity.lengthSq() > 0) desiredVelocity.normalize().multiplyScalar(config.moveSpeed() * sprintMultiplier);
+
+  // ── Charged attack system ──
+  // Charge builds while sprinting forward (Shift+forward held), resets when you release
+  const isCharging = sprintPressed && holdingForward;
+  if (isCharging) {
+    player.chargeTimer = Math.min(1.0, player.chargeTimer + dt * 0.48);
+  } else {
+    player.chargeTimer = Math.max(0, player.chargeTimer - dt * 1.2);
+  }
+  if (chargeVfxTimer > 0) chargeVfxTimer -= dt;
   player.velocity.x = THREE.MathUtils.lerp(player.velocity.x, desiredVelocity.x, Math.min(0.22, dt * config.accel()));
   player.velocity.z = THREE.MathUtils.lerp(player.velocity.z, desiredVelocity.z, Math.min(0.22, dt * config.accel()));
   if (!desiredVelocity.lengthSq()) {
@@ -1757,14 +1802,21 @@ function updateAliens(dt, now) {
         const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
         const ram = player.velocity.length() * config.ramPower() * 0.18 * damageMultiplier;
         const crit = player.velocity.length() > config.moveSpeed() * 1.8;
+        const isCharged = player.chargeTimer >= 0.65 && (keys.has(data.options.keybinds.sprint) && moveInput.y > 0);
         const dealt = crit ? ram * 1.5 : ram;
-        alien.hp -= dealt;
+        alien.hp -= isCharged ? dealt * 2 : dealt;
         killed = alien.hp <= 0;
         audio.eat.currentTime = 0;
         audio.eat.play().catch(() => {});
-        spawnDamageText(alien.mesh.position, dealt, crit);
+        if (isCharged) {
+          spawnDamageText(alien.mesh.position, dealt * 2, true);
+          spawnRipple(alien.mesh.position, 0xff44ff);
+          screenShake.intensity = 0.55; screenShake.duration = 0.28;
+        } else {
+          spawnDamageText(alien.mesh.position, dealt, crit);
+        }
         alien.hitCooldown = now;
-        if (ram > 1.5) {
+        if (ram > 1.5 && !isCharged) {
           spawnRipple(alien.mesh.position, crit ? 0xff4444 : 0xffe08a);
           if (crit) { screenShake.intensity = 0.45; screenShake.duration = 0.22; }
           else if (ram > 4) { screenShake.intensity = 0.22; screenShake.duration = 0.18; }
@@ -1781,6 +1833,13 @@ function updateAliens(dt, now) {
         state.stats.aliensBonked += 1;
         addXp(12);
         spawnRipple(alien.mesh.position, 0x9aff9a);
+        if (player.chargeTimer >= 0.65 && (keys.has(data.options.keybinds.sprint) && moveInput.y > 0)) {
+          state.currency += 6;
+          addXp(5);
+          showNotice('⚡ Charged BONK! Extra rewards!');
+          player.chargeTimer = 0;
+          chargeVfxTimer = 0.4;
+        }
       }
     }
   }
@@ -1892,16 +1951,23 @@ function updateSharks(dt, now) {
         const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
         const ram = player.velocity.length() * config.ramPower() * 0.16 * damageMultiplier;
         const crit = player.velocity.length() > config.moveSpeed() * 1.9;
+        const isCharged = player.chargeTimer >= 0.65 && (keys.has(data.options.keybinds.sprint) && moveInput.y > 0);
         const dealt = crit ? ram * 1.5 : ram;
-        shark.hp -= dealt;
+        shark.hp -= isCharged ? dealt * 2 : dealt;
         killed = shark.hp <= 0;
         audio.eat.currentTime = 0;
         audio.eat.play().catch(() => {});
-        spawnDamageText(shark.mesh.position, dealt, crit);
+        if (isCharged) {
+          spawnDamageText(shark.mesh.position, dealt * 2, true);
+          spawnRipple(shark.mesh.position, 0xff44ff);
+          screenShake.intensity = 0.6; screenShake.duration = 0.3;
+        } else {
+          spawnDamageText(shark.mesh.position, dealt, crit);
+          spawnRipple(shark.mesh.position, crit ? 0xff4444 : 0xff8888);
+          if (crit) { screenShake.intensity = 0.5; screenShake.duration = 0.25; }
+          else if (ram > 4) { screenShake.intensity = 0.28; screenShake.duration = 0.2; }
+        }
         shark.hitCooldown = now;
-        spawnRipple(shark.mesh.position, crit ? 0xff4444 : 0xff8888);
-        if (crit) { screenShake.intensity = 0.5; screenShake.duration = 0.25; }
-        else if (ram > 4) { screenShake.intensity = 0.28; screenShake.duration = 0.2; }
       }
       if (!killed) {
         resolveSolidCollision(player.pos, shark.mesh.position, shark.collisionRadius + player.radius);

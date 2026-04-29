@@ -87,6 +87,38 @@ input[type="range"] { width: 180px; }
 #crosshair::before, #crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,0.7); }
 #crosshair::before { width: 2px; height: 12px; left: 5px; }
 #crosshair::after { height: 2px; width: 12px; top: 5px; }
+.charge-bar-shell {
+  position: fixed; right: 110px; top: 16px; z-index: 6; pointer-events: none;
+  width: 88px; text-align: center; padding: 10px 8px;
+  background: rgba(5,15,30,0.7); border: 1px solid rgba(160,210,255,0.2);
+  border-radius: 12px; backdrop-filter: blur(8px);
+}
+.charge-label { font-size: 9px; color: #a7d8ff; text-shadow: 1px 1px 0 #000; margin-bottom: 6px; letter-spacing: 1px; }
+.charge-track { position: relative; width: 60px; height: 14px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: visible; margin: 0 auto; }
+.charge-fill {
+  height: 100%; width: 0%; border-radius: 999px;
+  background: linear-gradient(90deg, #ff7b7b 0%, #ff4da6 40%, #c44dff 70%, #ffffff 100%);
+  box-shadow: 0 0 10px rgba(255,100,200,0.6);
+  transition: width 0.06s linear;
+}
+.charge-ready-dot {
+  position: absolute; right: -8px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; color: #fff;
+  animation: chargePulse 0.45s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 4px #ff88ff);
+}
+@keyframes chargePulse {
+  from { transform: translateY(-50%) scale(1); opacity: 0.8; }
+  to { transform: translateY(-50%) scale(1.35); opacity: 1; }
+}
+.charge-vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: 3;
+  animation: vignettePulse 0.35s ease-in-out infinite alternate;
+}
+@keyframes vignettePulse {
+  from { box-shadow: inset 0 0 90px rgba(255,80,200,0.2); }
+  to { box-shadow: inset 0 0 160px rgba(255,80,200,0.42); }
+}
 #notice { position: fixed; left: 50%; top: 84px; transform: translateX(-50%); z-index: 6; background: rgba(5,15,30,0.92); border: 3px solid #8bd8ff; border-radius: 4px; padding: 10px 16px; color: #d7f1ff; opacity: 0; transition: opacity 0.2s; font-size: 10px; line-height: 1.5; text-align: center; }
 #notice.show { opacity: 1; }
 #xpBurst, #levelUpFlash {
