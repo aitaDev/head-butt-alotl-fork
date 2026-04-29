@@ -173,27 +173,29 @@ sun.position.set(20, 30, 10);
 scene.add(sun);
 
 const water = new THREE.Mesh(
-  new THREE.CylinderGeometry(50, 50, 12, data.options.graphics === 'low' ? 24 : 64),
+  new THREE.CylinderGeometry(80, 80, 12, data.options.graphics === 'low' ? 24 : 64),
   new THREE.MeshPhongMaterial({ color: 0x1a6d8a, transparent: true, opacity: 0.92 })
 );
 water.position.y = -6;
 scene.add(water);
 
 const floor = new THREE.Mesh(
-  new THREE.CylinderGeometry(52, 52, 2, 64),
+  new THREE.CylinderGeometry(82, 82, 2, 64),
   new THREE.MeshStandardMaterial({ color: 0x4f6f36 })
 );
 floor.position.y = -13;
 scene.add(floor);
 
-for (let i = 0; i < 80; i++) {
+const reeds = [];
+for (let i = 0; i < 120; i++) {
   const reed = new THREE.Mesh(
     new THREE.CylinderGeometry(0.06, 0.09, 2 + Math.random() * 3, 6),
     new THREE.MeshStandardMaterial({ color: 0x77a85d })
   );
-  const r = 20 + Math.random() * 26;
+  const r = 20 + Math.random() * 50;
   const a = Math.random() * Math.PI * 2;
   reed.position.set(Math.cos(a) * r, -10.5 + reed.geometry.parameters.height / 2, Math.sin(a) * r);
+  reeds.push(reed);
   scene.add(reed);
 }
 
@@ -237,7 +239,6 @@ axEyeR.position.set(1.52, 0.26, -0.23);
 axSmile.position.set(1.74, -0.02, 0);
 axSmile.rotation.y = Math.PI / 2;
 axolotl.add(axBody, axHead, axTail, axFinL, axFinR, axGillL, axGillR, axEyeL, axEyeR, axSmile);
-axolotl.rotation.y = Math.PI;
 scene.add(axolotl);
 
 const cameraTarget = new THREE.Vector3();
@@ -251,6 +252,8 @@ let lastTime = performance.now();
 let alienSpawnTimer = 0;
 let pickupSpawnTimer = 0;
 let continueAllowed = !!data.save.hasSave;
+const worldRadius = 58;
+const worldWrapRadius = 70;
 
 function makeAlien() {
   const group = new THREE.Group();
@@ -270,14 +273,14 @@ function makeAlien() {
   const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 6, 18, Math.PI), new THREE.MeshBasicMaterial({ color: 0x365421 }));
   mouth.position.set(0, -0.18, 0.82);
   group.add(body, shell, eye1, eye2, pupil1, pupil2, horn, horn2, mouth);
-  const r = 18 + Math.random() * 24;
+  const r = 20 + Math.random() * 42;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -1.5 + Math.random() * 3, Math.sin(a) * r);
   scene.add(group);
   aliens.push({ mesh: group, hp: 18 + state.level * 5, speed: 0.9 + Math.random() * 0.8, bob: Math.random() * Math.PI * 2 });
 }
 
-function makePickup(kind = Math.random() < 0.12 ? 'steak' : 'worm') {
+function makePickup(kind = Math.random() < 0.22 ? 'steak' : 'worm') {
   const group = new THREE.Group();
   if (kind === 'steak') {
     const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.55, 0.7), new THREE.MeshStandardMaterial({ color: 0x8f2b2b, roughness: 0.8 }));
@@ -289,7 +292,9 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : 'worm') {
     marbling2.rotation.z = -0.8;
     marbling1.position.set(-0.15, 0.02, 0.2);
     marbling2.position.set(0.18, -0.05, -0.12);
-    group.add(base, fat, marbling1, marbling2);
+    const shine = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: 0xffeee6, emissive: 0x442222 }));
+    shine.position.set(-0.06, 0.1, -0.18);
+    group.add(base, fat, marbling1, marbling2, shine);
   } else {
     const body = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
       new THREE.Vector3(-0.32, 0, 0),
@@ -305,7 +310,7 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : 'worm') {
     band2.rotation.x = 1.05;
     group.add(body, band1, band2);
   }
-  const r = 6 + Math.random() * 34;
+  const r = 8 + Math.random() * 48;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -2 + Math.random() * 3.5, Math.sin(a) * r);
   group.rotation.set(Math.random(), Math.random(), Math.random());
@@ -528,41 +533,67 @@ window.addEventListener('resize', () => {
 });
 
 function updatePlayer(dt) {
-  const dir = new THREE.Vector3();
-  const forward = new THREE.Vector3(-Math.sin(player.yaw), Math.sin(player.pitch) * 0.9, -Math.cos(player.yaw));
+  const moveInput = new THREE.Vector2(
+    (keys.has(data.options.keybinds.right) ? 1 : 0) - (keys.has(data.options.keybinds.left) ? 1 : 0),
+    (keys.has(data.options.keybinds.forward) ? 1 : 0) - (keys.has(data.options.keybinds.backward) ? 1 : 0)
+  );
+
   const flatForward = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
   const right = new THREE.Vector3(flatForward.z, 0, -flatForward.x);
-  if (keys.has(data.options.keybinds.forward)) dir.add(forward);
-  if (keys.has(data.options.keybinds.backward)) dir.sub(forward);
-  if (keys.has(data.options.keybinds.right)) dir.add(right);
-  if (keys.has(data.options.keybinds.left)) dir.sub(right);
-  if (dir.lengthSq()) dir.normalize();
+  const flatDir = new THREE.Vector3();
+  if (moveInput.lengthSq() > 0) {
+    moveInput.normalize();
+    flatDir.addScaledVector(right, moveInput.x);
+    flatDir.addScaledVector(flatForward, moveInput.y);
+    flatDir.normalize();
+  }
 
-  const speed = config.moveSpeed() * (keys.has('Mouse0') ? 1.55 : 1);
-  const desiredVelocity = dir.multiplyScalar(speed);
-  player.velocity.lerp(desiredVelocity, Math.min(0.2, dt * config.accel()));
-  if (!dir.lengthSq()) player.velocity.multiplyScalar(Math.max(0.92, 1 - dt * 2.2));
+  const lookVertical = Math.sin(player.pitch);
+  const verticalIntent = moveInput.y > 0.05 ? lookVertical : moveInput.y < -0.05 ? -lookVertical * 0.65 : 0;
+  const desiredVelocity = new THREE.Vector3(
+    flatDir.x,
+    verticalIntent,
+    flatDir.z
+  );
+
+  if (desiredVelocity.lengthSq() > 0) desiredVelocity.normalize().multiplyScalar(config.moveSpeed() * (keys.has('Mouse0') ? 1.45 : 1));
+  player.velocity.lerp(desiredVelocity, Math.min(0.16, dt * config.accel()));
+  if (!desiredVelocity.lengthSq()) player.velocity.multiplyScalar(Math.max(0.93, 1 - dt * 1.8));
   player.pos.addScaledVector(player.velocity, dt);
 
-  const radius = 34;
-  if (player.pos.length() > radius) player.pos.setLength(radius);
+  if (player.pos.x > worldWrapRadius) player.pos.x = -worldWrapRadius;
+  if (player.pos.x < -worldWrapRadius) player.pos.x = worldWrapRadius;
+  if (player.pos.z > worldWrapRadius) player.pos.z = -worldWrapRadius;
+  if (player.pos.z < -worldWrapRadius) player.pos.z = worldWrapRadius;
   player.pos.y = Math.max(-8.5, Math.min(4.5, player.pos.y));
 
   axolotl.position.copy(player.pos);
   if (player.velocity.lengthSq() > 0.001) {
-    axolotl.rotation.y = Math.atan2(player.velocity.x, player.velocity.z);
+    axolotl.rotation.y = Math.atan2(-player.velocity.x, -player.velocity.z);
   } else {
-    axolotl.rotation.y = player.yaw + Math.PI;
+    axolotl.rotation.y = player.yaw;
   }
+  axolotl.rotation.x = THREE.MathUtils.lerp(axolotl.rotation.x, player.pitch * 0.35, 0.08);
   axolotl.rotation.z = Math.sin(performance.now() * 0.006) * 0.08;
   axTail.rotation.y = Math.sin(performance.now() * 0.01) * 0.45;
   axFinL.rotation.x = Math.sin(performance.now() * 0.012) * 0.35;
   axFinR.rotation.x = -Math.sin(performance.now() * 0.012) * 0.35;
 
-  cameraOffset.set(Math.sin(player.yaw) * 6, 3.2 + Math.sin(player.pitch) * 1.5, Math.cos(player.yaw) * 6);
-  cameraTarget.copy(player.pos).add(new THREE.Vector3(0, 1.2, 0));
-  camera.position.lerp(cameraTarget.clone().add(cameraOffset), 0.12);
-  camera.lookAt(cameraTarget);
+  cameraOffset.set(Math.sin(player.yaw) * 6.8, 2.5 - Math.sin(player.pitch) * 1.2, Math.cos(player.yaw) * 6.8);
+  cameraTarget.copy(player.pos).add(new THREE.Vector3(0, 1.15, 0));
+  camera.position.lerp(cameraTarget.clone().add(cameraOffset), 0.1);
+  camera.lookAt(cameraTarget.clone().add(new THREE.Vector3(0, player.pitch * 1.2, 0)));
+
+  water.position.x = player.pos.x;
+  water.position.z = player.pos.z;
+  floor.position.x = player.pos.x;
+  floor.position.z = player.pos.z;
+  for (const reed of reeds) {
+    if (reed.position.x - player.pos.x > worldRadius) reed.position.x -= worldRadius * 2;
+    if (reed.position.x - player.pos.x < -worldRadius) reed.position.x += worldRadius * 2;
+    if (reed.position.z - player.pos.z > worldRadius) reed.position.z -= worldRadius * 2;
+    if (reed.position.z - player.pos.z < -worldRadius) reed.position.z += worldRadius * 2;
+  }
 }
 
 document.addEventListener('mousedown', e => { if (e.button === 0) keys.add('Mouse0'); });
@@ -571,6 +602,12 @@ document.addEventListener('mouseup', e => { if (e.button === 0) keys.delete('Mou
 function updateAliens(dt) {
   alienSpawnTimer += dt;
   if (alienSpawnTimer > 6 && aliens.length < 10) { alienSpawnTimer = 0; makeAlien(); }
+  for (const alien of aliens) {
+    if (alien.mesh.position.x - player.pos.x > worldRadius) alien.mesh.position.x -= worldRadius * 2;
+    if (alien.mesh.position.x - player.pos.x < -worldRadius) alien.mesh.position.x += worldRadius * 2;
+    if (alien.mesh.position.z - player.pos.z > worldRadius) alien.mesh.position.z -= worldRadius * 2;
+    if (alien.mesh.position.z - player.pos.z < -worldRadius) alien.mesh.position.z += worldRadius * 2;
+  }
   for (let i = aliens.length - 1; i >= 0; i--) {
     const alien = aliens[i];
     const toPlayer = player.pos.clone().sub(alien.mesh.position);
@@ -599,9 +636,13 @@ function updateAliens(dt) {
 
 function updatePickups(dt) {
   pickupSpawnTimer += dt;
-  if (pickupSpawnTimer > 3.2 && pickups.length < 14) { pickupSpawnTimer = 0; makePickup(); }
+  if (pickupSpawnTimer > 2.8 && pickups.length < 16) { pickupSpawnTimer = 0; makePickup(); }
   for (let i = pickups.length - 1; i >= 0; i--) {
     const p = pickups[i];
+    if (p.mesh.position.x - player.pos.x > worldRadius) p.mesh.position.x -= worldRadius * 2;
+    if (p.mesh.position.x - player.pos.x < -worldRadius) p.mesh.position.x += worldRadius * 2;
+    if (p.mesh.position.z - player.pos.z > worldRadius) p.mesh.position.z -= worldRadius * 2;
+    if (p.mesh.position.z - player.pos.z < -worldRadius) p.mesh.position.z += worldRadius * 2;
     p.mesh.rotation.y += dt * p.spin;
     p.mesh.position.y += Math.sin(performance.now() * 0.002 + i) * 0.002;
     const dist = p.mesh.position.distanceTo(player.pos);
