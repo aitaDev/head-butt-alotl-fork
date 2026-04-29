@@ -348,6 +348,32 @@ const worldRadius = 100;
 let isGameOver = false;
 let narwhalBuffUntil = 0;
 let whaleChatCooldownUntil = 0;
+let lastScubaAt = 0;
+let audioUnlocked = false;
+
+const audio = {
+  underwater: new Audio('./assets/audio/underwater-loop.mp3'),
+  scuba: new Audio('./assets/audio/scuba.mp3'),
+  whoosh: new Audio('./assets/audio/whoosh.mp3'),
+  whale: new Audio('./assets/audio/freesound_community-lowwhalesong.mp3')
+};
+audio.underwater.loop = true;
+audio.underwater.volume = 0.35;
+audio.scuba.volume = 0.5;
+audio.whoosh.loop = true;
+audio.whoosh.volume = 0.35;
+audio.whale.volume = 0.55;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  for (const sound of Object.values(audio)) {
+    sound.play().then(() => {
+      sound.pause();
+      sound.currentTime = 0;
+    }).catch(() => {});
+  }
+}
 
 function makeAlien() {
   const group = new THREE.Group();
@@ -594,6 +620,14 @@ function showNotice(text) {
 }
 
 function updateHUD() {
+  if (audioUnlocked) {
+    if (player.pos.distanceTo(whale.position) < 18) {
+      if (audio.whale.paused) audio.whale.play().catch(() => {});
+    } else {
+      audio.whale.pause();
+      audio.whale.currentTime = 0;
+    }
+  }
   const xpNeed = config.xpToNext();
   el.xpFill.style.width = `${(state.xp / xpNeed) * 100}%`;
   el.xpLabel.textContent = `XP ${state.xp}/${xpNeed}  •  Level ${state.level}`;
@@ -679,6 +713,8 @@ function startGame(continueGame = false) {
   isGameOver = false;
   gameStarted = true;
   openOverlay(null);
+  unlockAudio();
+  if (audioUnlocked) audio.underwater.play().catch(() => {});
   renderer.domElement.requestPointerLock();
   persist();
   updateHUD();
@@ -689,6 +725,10 @@ function startGame(continueGame = false) {
 
 function quitToTitle() {
   paused = true;
+  for (const sound of Object.values(audio)) {
+    sound.pause();
+    sound.currentTime = 0;
+  }
   document.exitPointerLock();
   openOverlay('mainMenu');
   persist();
@@ -743,6 +783,7 @@ document.addEventListener('keydown', e => {
 
 document.addEventListener('keyup', e => keys.delete(e.code));
 renderer.domElement.addEventListener('click', () => {
+  unlockAudio();
   if (gameStarted && !pointerLocked && !paused) renderer.domElement.requestPointerLock();
 });
 
@@ -752,11 +793,11 @@ el.continueBtn.disabled = !continueAllowed;
 el.optionsBtn.onclick = () => { renderOptions(); openOverlay('optionsMenu'); };
 el.pauseOptionsBtn.onclick = () => { renderOptions(); openOverlay('optionsMenu'); };
 el.closeOptionsBtn.onclick = () => openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu');
-el.resumeBtn.onclick = () => { paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
+el.resumeBtn.onclick = () => { unlockAudio(); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.charBtn.onclick = () => { renderUpgradeMenu(); openOverlay('upgradeMenu'); };
 el.closeUpgradeBtn.onclick = () => openOverlay('pauseMenu');
 el.quitBtn.onclick = quitToTitle;
-el.retryBtn.onclick = () => startGame(false);
+el.retryBtn.onclick = () => { unlockAudio(); startGame(false); };
 el.gameOverTitleBtn.onclick = quitToTitle;
 el.closeWhaleChatBtn.onclick = () => { paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.graphicsDown.onclick = () => setGraphics(-1);
@@ -819,6 +860,20 @@ function updatePlayer(dt) {
   if (player.pos.y > -2.5) {
     player.pos.y = -2.5;
     player.verticalVelocity = Math.min(0, player.verticalVelocity);
+  }
+  if (audioUnlocked) {
+    if (!paused && audio.underwater.paused) audio.underwater.play().catch(() => {});
+    if (sprintPressed && desiredVelocity.lengthSq() > 0) {
+      if (audio.whoosh.paused) audio.whoosh.play().catch(() => {});
+    } else {
+      audio.whoosh.pause();
+      audio.whoosh.currentTime = 0;
+    }
+    if (performance.now() - lastScubaAt > 20000) {
+      lastScubaAt = performance.now();
+      audio.scuba.currentTime = 0;
+      audio.scuba.play().catch(() => {});
+    }
   }
   if (sprintPressed && desiredVelocity.lengthSq() > 0) {
     takeDamage(dt * config.sprintDrain());
