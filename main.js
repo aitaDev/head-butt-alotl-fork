@@ -282,19 +282,25 @@ let isGameOver = false;
 
 function makeAlien() {
   const group = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.6, 1.4, 6, 12), new THREE.MeshStandardMaterial({ color: 0x88d66f, emissive: 0x214d15, roughness: 0.45, metalness: 0.08 }));
-  const belly = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.0, 0.55), new THREE.MeshStandardMaterial({ color: 0xb8f29a, roughness: 0.7 }));
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.72, 16, 16), new THREE.MeshStandardMaterial({ color: 0x8cf07d, emissive: 0x245d1b, roughness: 0.35, metalness: 0.15 }));
+  const types = [
+    { name: 'grunt', body: 0x88d66f, head: 0x8cf07d, belly: 0xb8f29a, horn: true, arms: true, scaleMin: 0.6, scaleMax: 1.4, hp: 1, speed: 1.1, damage: 1 },
+    { name: 'brute', body: 0x5678ff, head: 0x7a92ff, belly: 0xb7c2ff, horn: false, arms: true, scaleMin: 1.8, scaleMax: 3.4, hp: 2.8, speed: 0.7, damage: 2.7 },
+    { name: 'spike', body: 0xd66f88, head: 0xf08ca8, belly: 0xf2b8c9, horn: true, arms: false, scaleMin: 0.9, scaleMax: 2.1, hp: 1.6, speed: 1.0, damage: 1.8 },
+    { name: 'tiny', body: 0xe0d45a, head: 0xf7ed8e, belly: 0xfff6b8, horn: false, arms: true, scaleMin: 0.35, scaleMax: 0.7, hp: 0.55, speed: 1.6, damage: 0.55 }
+  ];
+  const type = types[Math.floor(Math.random() * types.length)];
+
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.6, 1.4, 6, 12), new THREE.MeshStandardMaterial({ color: type.body, emissive: 0x214d15, roughness: 0.45, metalness: 0.08 }));
+  const belly = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.0, 0.55), new THREE.MeshStandardMaterial({ color: type.belly, roughness: 0.7 }));
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.72, 16, 16), new THREE.MeshStandardMaterial({ color: type.head, emissive: 0x245d1b, roughness: 0.35, metalness: 0.15 }));
   const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10), new THREE.MeshBasicMaterial({ color: 0x111111 }));
   const eye2 = eye1.clone();
   const pupil1 = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff4d4d }));
   const pupil2 = pupil1.clone();
-  const armL = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.65, 4, 8), new THREE.MeshStandardMaterial({ color: 0x7ecb68 }));
+  const armL = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.65, 4, 8), new THREE.MeshStandardMaterial({ color: type.body }));
   const armR = armL.clone();
-  const legL = new THREE.Mesh(new THREE.CapsuleGeometry(0.13, 0.75, 4, 8), new THREE.MeshStandardMaterial({ color: 0x72be5d }));
+  const legL = new THREE.Mesh(new THREE.CapsuleGeometry(0.13, 0.75, 4, 8), new THREE.MeshStandardMaterial({ color: type.body }));
   const legR = legL.clone();
-  const horn = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xb8ffb0, emissive: 0x274611 }));
-  const horn2 = horn.clone();
   const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 6, 18, Math.PI), new THREE.MeshBasicMaterial({ color: 0x365421 }));
   head.position.set(0, 0.7, 0);
   belly.position.set(0, -0.05, 0.38);
@@ -303,16 +309,29 @@ function makeAlien() {
   armL.position.set(-0.6, 0.08, 0); armR.position.set(0.6, 0.08, 0);
   legL.position.set(-0.28, -0.98, 0); legR.position.set(0.28, -0.98, 0);
   armL.rotation.z = 0.65; armR.rotation.z = -0.65;
-  horn.position.set(-0.28, 1.38, 0.12); horn2.position.set(0.28, 1.38, 0.12);
   mouth.position.set(0, 0.42, 0.62);
-  group.add(body, belly, head, eye1, eye2, pupil1, pupil2, armL, armR, legL, legR, horn, horn2, mouth);
-  const scale = 0.7 + Math.random() * 2.2;
+  group.add(body, belly, head, eye1, eye2, pupil1, pupil2, legL, legR, mouth);
+  if (type.arms) group.add(armL, armR);
+  if (type.horn) {
+    const horn = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xb8ffb0, emissive: 0x274611 }));
+    const horn2 = horn.clone();
+    horn.position.set(-0.28, 1.38, 0.12);
+    horn2.position.set(0.28, 1.38, 0.12);
+    group.add(horn, horn2);
+  } else {
+    const fin = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.08, 8, 20), new THREE.MeshStandardMaterial({ color: type.head, emissive: 0x1a2d44, transparent: true, opacity: 0.7 }));
+    fin.rotation.x = Math.PI / 2;
+    fin.position.y = 1.1;
+    group.add(fin);
+  }
+
+  const scale = type.scaleMin + Math.random() * (type.scaleMax - type.scaleMin);
   group.scale.setScalar(scale);
   const r = 20 + Math.random() * 42;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -72 + Math.random() * 62, Math.sin(a) * r);
   scene.add(group);
-  aliens.push({ mesh: group, hp: (18 + state.level * 5) * scale * 1.3, speed: Math.max(0.45, 1.2 - scale * 0.18) + Math.random() * 0.45, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale });
+  aliens.push({ mesh: group, hp: (18 + state.level * 5) * scale * 1.3 * type.hp, speed: Math.max(0.35, type.speed - scale * 0.12) + Math.random() * 0.35, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale * type.damage, kind: type.name });
 }
 
 function makePickup(kind = Math.random() < 0.22 ? 'steak' : 'worm') {
