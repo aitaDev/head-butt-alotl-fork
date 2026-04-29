@@ -2,8 +2,9 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.3.1';
+const gameVersion = 'v0.3.2';
 const patchNotes = [
+  'v0.3.2  Halved whale size, added whale swimming movement, and restored menu button sound triggers.',
   'v0.3.1  Fixed tutorial dismissal, restored whale interaction radius, added solid collisions, and corrected shark facing.',
   'v0.3.0  Upgrades visibly change axolotl, new creatures: jellyfish/seahorses/orbs/anemones, bubble particles, animated kelp, bioluminescent glow, lore tablets, light rays, treasure chests.',
   'v0.2.0  Added menu patch notes, version tag, flashier XP UI, and bigger coral pass.',
@@ -325,26 +326,23 @@ function resolveSolidCollision(pos, solidPos, radius) {
 }
 
 const whale = new THREE.Group();
-const whaleBody = new THREE.Mesh(new THREE.BoxGeometry(135, 48, 48), new THREE.MeshStandardMaterial({ color: 0x4a6f96, roughness: 0.8 }));
-const whaleHead = new THREE.Mesh(new THREE.BoxGeometry(58, 38, 38), new THREE.MeshStandardMaterial({ color: 0x5d84aa, roughness: 0.75 }));
-const whaleTailL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.18, 1.5), new THREE.MeshStandardMaterial({ color: 0x486b90 }));
+const whaleBody = new THREE.Mesh(new THREE.BoxGeometry(67.5, 24, 24), new THREE.MeshStandardMaterial({ color: 0x4a6f96, roughness: 0.8 }));
+const whaleHead = new THREE.Mesh(new THREE.BoxGeometry(29, 19, 19), new THREE.MeshStandardMaterial({ color: 0x5d84aa, roughness: 0.75 }));
+const whaleTailL = new THREE.Mesh(new THREE.BoxGeometry(9, 0.9, 7.5), new THREE.MeshStandardMaterial({ color: 0x486b90 }));
 const whaleTailR = whaleTailL.clone();
-const whaleFinL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 0.8), new THREE.MeshStandardMaterial({ color: 0x3e6186 }));
+const whaleFinL = new THREE.Mesh(new THREE.BoxGeometry(9, 0.75, 4), new THREE.MeshStandardMaterial({ color: 0x3e6186 }));
 const whaleFinR = whaleFinL.clone();
-whaleHead.position.set(84, 2, 0);
-whaleTailL.position.set(-88, 7, 18);
-whaleTailR.position.set(-88, 7, -18);
+whaleHead.position.set(42, 1, 0);
+whaleTailL.position.set(-44, 3.5, 9);
+whaleTailR.position.set(-44, 3.5, -9);
 whaleTailL.rotation.y = 0.45;
 whaleTailR.rotation.y = -0.45;
-whaleFinL.position.set(8, -18, 27);
-whaleFinR.position.set(8, -18, -27);
-whaleTailL.scale.set(10, 10, 10);
-whaleTailR.scale.set(10, 10, 10);
-whaleFinL.scale.set(10, 10, 10);
-whaleFinR.scale.set(10, 10, 10);
+whaleFinL.position.set(4, -9, 13.5);
+whaleFinR.position.set(4, -9, -13.5);
 whale.add(whaleBody, whaleHead, whaleTailL, whaleTailR, whaleFinL, whaleFinR);
 whale.position.set(180, -65, -100);
 scene.add(whale);
+let whaleSwimAngle = 0;
 
 const stars = new THREE.Group();
 for (let i = 0; i < 120; i++) {
@@ -507,6 +505,18 @@ const anemones = [];
 const loreTablets = [];
 const bubbles = [];
 const kelpBlades = [];
+const urchins = [];
+const crabs = [];
+const starfish = [];
+const crystals = [];
+const tentacles = [];
+const depthZones = [];
+const pearls = [];
+const planktonPatches = [];
+const moteGroup = new THREE.Group();
+scene.add(moteGroup);
+let trailParticles = [];
+const particleBurst = [];
 let damageTextStack = 0;
 
 // ── Light rays from surface ──
@@ -889,6 +899,182 @@ const loreTexts = [
   'The ancient ones say: swim fast, head-butt harder, never stop.'
 ];
 
+function makeUrchin() {
+  const group = new THREE.Group();
+  const colors = [0x7be0ff, 0xff8ce8, 0xffc84a, 0x8aff8a, 0xff8080];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  for (let i = 0; i < 14; i++) {
+    const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.015, 0.55 + Math.random() * 0.45, 4),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.6 }));
+    const angle = (i / 14) * Math.PI * 2;
+    const phi = Math.random() * Math.PI;
+    spine.position.set(Math.sin(phi) * Math.cos(angle) * 0.32, Math.cos(phi) * 0.32, Math.sin(phi) * Math.sin(angle) * 0.32);
+    spine.rotation.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+    group.add(spine);
+  }
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6),
+    new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.9 }));
+  group.add(body);
+  const r = 10 + Math.random() * 88; const a = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a) * r, -83.5, Math.sin(a) * r);
+  scene.add(group);
+  urchins.push({ mesh: group, hp: 18 + Math.random() * 12, bob: Math.random() * Math.PI * 2, hitCooldown: 0 });
+}
+
+function makeCrab() {
+  const group = new THREE.Group();
+  const shellColor = 0xd4451a + Math.floor(Math.random() * 3) * 0x111100;
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(0.52, 10, 8),
+    new THREE.MeshStandardMaterial({ color: shellColor, roughness: 0.75 }));
+  shell.scale.y = 0.55;
+  group.add(shell);
+  for (let i = 0; i < 6; i++) {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.52, 0.07),
+      new THREE.MeshStandardMaterial({ color: shellColor, roughness: 0.8 }));
+    const side = i < 3 ? 1 : -1;
+    const idx = i % 3;
+    leg.position.set(side * 0.52, -0.22, (idx - 1) * 0.28);
+    leg.rotation.z = side * 0.55;
+    group.add(leg);
+  }
+  const claw = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.18),
+    new THREE.MeshStandardMaterial({ color: 0xcc5522, roughness: 0.7 }));
+  claw.position.set(0.72, -0.04, 0);
+  const clawL = claw.clone(); clawL.position.set(-0.72, -0.04, 0);
+  group.add(claw, clawL);
+  const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 5, 4), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+  const eyeR = eyeL.clone();
+  eyeL.position.set(0.18, 0.28, 0.14); eyeR.position.set(0.18, 0.28, -0.14);
+  group.add(eyeL, eyeR);
+  const r = 8 + Math.random() * 90; const a2 = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a2) * r, -83.5, Math.sin(a2) * r);
+  group.rotation.y = Math.random() * Math.PI * 2;
+  scene.add(group);
+  crabs.push({ mesh: group, hp: 14 + Math.random() * 8, speed: 0.8 + Math.random() * 1.2, bob: Math.random() * Math.PI * 2, wanderAngle: Math.random() * Math.PI * 2, hitCooldown: 0 });
+}
+
+function makeStarfish() {
+  const group = new THREE.Group();
+  const colors = [0xff6644, 0xff44aa, 0x44ffaa, 0xffdd44, 0xdd88ff];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const armCount = 5 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < armCount; i++) {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.1, 0.14),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.78 }));
+    arm.rotation.z = (i / armCount) * Math.PI * 2;
+    arm.position.set(Math.cos(arm.rotation.z) * 0.55, Math.sin(arm.rotation.z) * 0.55, 0);
+    group.add(arm);
+  }
+  const center = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, armCount),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 }));
+  group.add(center);
+  const r = 8 + Math.random() * 88; const a = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a) * r, -84.0, Math.sin(a) * r);
+  group.rotation.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+  scene.add(group);
+  starfish.push({ mesh: group, color, bob: Math.random() * Math.PI * 2 });
+}
+
+function makeCrystal() {
+  const group = new THREE.Group();
+  const colors = [0x44ddff, 0xdd44ff, 0xff44dd, 0x44ffaa, 0xffdd44];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const clusterCount = 2 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < clusterCount; i++) {
+    const h = 0.9 + Math.random() * 2.5;
+    const shard = new THREE.Mesh(new THREE.CylinderGeometry(0.04 + Math.random() * 0.08, 0.02, h, 5),
+      new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.5, transparent: true, opacity: 0.75, roughness: 0.1, metalness: 0.6 }));
+    shard.position.set((Math.random() - 0.5) * 0.9, h / 2, (Math.random() - 0.5) * 0.9);
+    shard.rotation.set((Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * Math.PI, (Math.random() - 0.5) * 0.4);
+    group.add(shard);
+  }
+  const r = 12 + Math.random() * 80; const a = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a) * r, -55 + Math.random() * 60, Math.sin(a) * r);
+  scene.add(group);
+  crystals.push({ mesh: group, color, bob: Math.random() * Math.PI * 2, phase: Math.random() * Math.PI * 2 });
+}
+
+function makeKraken() {
+  const baseAngle = Math.random() * Math.PI * 2;
+  const mesh = new THREE.Group();
+  const segs = [];
+  for (let s = 0; s < 7; s++) {
+    const seg = new THREE.Mesh(new THREE.SphereGeometry(0.32 - s * 0.035, 8, 6),
+      new THREE.MeshStandardMaterial({ color: 0x6a2d8a, roughness: 0.85 }));
+    seg.position.x = s * 0.52;
+    mesh.add(seg);
+    segs.push(seg);
+  }
+  mesh.rotation.y = baseAngle;
+  const r = 30 + Math.random() * 65; const a = Math.random() * Math.PI * 2;
+  mesh.position.set(Math.cos(a) * r, -78, Math.sin(a) * r);
+  scene.add(mesh);
+  tentacles.push({ mesh, segs, baseAngle, phase: Math.random() * Math.PI * 2 });
+}
+
+function makePearl() {
+  const colors = [0xfff4e8, 0xffe8f4, 0xe8f4ff, 0xfff8e8, 0xf4ffe8];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.22 + Math.random() * 0.12, 10, 8),
+    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.4, transparent: true, opacity: 0.85, roughness: 0.05, metalness: 0.8 }));
+  const r = 10 + Math.random() * 85; const a = Math.random() * Math.PI * 2;
+  orb.position.set(Math.cos(a) * r, -83.2, Math.sin(a) * r);
+  scene.add(orb);
+  pearls.push({ mesh: orb, spin: (Math.random() - 0.5) * 2.0, bob: Math.random() * Math.PI * 2 });
+}
+
+function makePlanktonPatch() {
+  const group = new THREE.Group();
+  const colors = [0x44ffaa, 0x88ffaa, 0x44ddff, 0xccffee, 0x88ffcc];
+  for (let i = 0; i < 28; i++) {
+    const col = colors[Math.floor(Math.random() * colors.length)];
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.04 + Math.random() * 0.08, 4, 4),
+      new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.45 }));
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * 2.8;
+    p.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 2.5, Math.sin(angle) * radius);
+    p.userData.baseOpacity = 0.25 + Math.random() * 0.3;
+    p.userData.phase = Math.random() * Math.PI * 2;
+    group.add(p);
+  }
+  const r = 15 + Math.random() * 75; const a = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a) * r, -52 + Math.random() * 38, Math.sin(a) * r);
+  scene.add(group);
+  planktonPatches.push({ mesh: group, bob: Math.random() * Math.PI * 2, phase: Math.random() * Math.PI * 2 });
+}
+
+function makeDepthZones() {
+  const zoneDefs = [
+    { y: -8,  color: 0x88ccff, opacity: 0.07, label: 'Surface Waters' },
+    { y: -28, color: 0x2288cc, opacity: 0.09, label: 'Shallow Reef' },
+    { y: -52, color: 0x1155aa, opacity: 0.11, label: 'Mid Twilight' },
+    { y: -78, color: 0x0a2266, opacity: 0.13, label: 'Abyssal Deep' }
+  ];
+  for (const def of zoneDefs) {
+    const zone = new THREE.Mesh(
+      new THREE.CylinderGeometry(220, 220, 18, 28, 1, true),
+      new THREE.MeshBasicMaterial({ color: def.color, transparent: true, opacity: def.opacity, side: THREE.BackSide })
+    );
+    zone.position.y = def.y;
+    scene.add(zone);
+    depthZones.push(zone);
+  }
+}
+
+function makeMotes() {
+  const moteColors = [0xaaffcc, 0xffd4aa, 0xccddff, 0xddffaa, 0xffccff];
+  for (let i = 0; i < 80; i++) {
+    const color = moteColors[Math.floor(Math.random() * moteColors.length)];
+    const mote = new THREE.Mesh(new THREE.SphereGeometry(0.07 + Math.random() * 0.09, 5, 5),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.5 }));
+    mote.position.set((Math.random() - 0.5) * worldRadius, -20 + Math.random() * 80, (Math.random() - 0.5) * worldRadius);
+    mote.userData.phase = Math.random() * Math.PI * 2;
+    mote.userData.speed = 0.5 + Math.random() * 0.9;
+    mote.userData.baseY = mote.position.y;
+    moteGroup.add(mote);
+  }
+}
+
 function makeLoreTablet() {
   const group = new THREE.Group();
   const stone = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.4, 0.28),
@@ -933,6 +1119,15 @@ for (let i = 0; i < 5; i++) makeSeahorse();
 for (let i = 0; i < 12; i++) makeGlowOrb();
 for (let i = 0; i < 14; i++) makeAnemone();
 for (let i = 0; i < 4; i++) makeLoreTablet();
+for (let i = 0; i < 8; i++) makeUrchin();
+for (let i = 0; i < 7; i++) makeCrab();
+for (let i = 0; i < 9; i++) makeStarfish();
+for (let i = 0; i < 6; i++) makeCrystal();
+for (let i = 0; i < 4; i++) makeKraken();
+for (let i = 0; i < 10; i++) makePearl();
+for (let i = 0; i < 8; i++) makePlanktonPatch();
+makeDepthZones();
+makeMotes();
 
 function addXp(amount) {
   state.xp += amount;
@@ -1187,14 +1382,14 @@ renderer.domElement.addEventListener('click', () => {
   if (gameStarted && !pointerLocked && !paused) renderer.domElement.requestPointerLock();
 });
 
-el.newGameBtn.onclick = () => { audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); startGame(false); paused = true; openOverlay('tutorialMenu'); };
-el.continueBtn.onclick = () => { audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); continueAllowed && startGame(true); };
+el.newGameBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); startGame(false); paused = true; openOverlay('tutorialMenu'); };
+el.continueBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); continueAllowed && startGame(true); };
 el.continueBtn.disabled = !continueAllowed;
-el.optionsBtn.onclick = () => { audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
-el.pauseOptionsBtn.onclick = () => { audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
-el.patchNotesBtn.onclick = () => { audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderPatchNotes(); openOverlay('patchNotesMenu'); };
-el.closePatchNotesBtn.onclick = () => openOverlay('mainMenu');
-el.closeOptionsBtn.onclick = () => openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu');
+el.optionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
+el.pauseOptionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
+el.patchNotesBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderPatchNotes(); openOverlay('patchNotesMenu'); };
+el.closePatchNotesBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay('mainMenu'); };
+el.closeOptionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
 el.resumeBtn.onclick = () => { unlockAudio(); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.charBtn.onclick = () => { renderUpgradeMenu(); openOverlay('upgradeMenu'); };
 el.closeUpgradeBtn.onclick = () => openOverlay('pauseMenu');
@@ -1202,7 +1397,7 @@ el.quitBtn.onclick = quitToTitle;
 el.retryBtn.onclick = () => { unlockAudio(); startGame(false); };
 el.gameOverTitleBtn.onclick = quitToTitle;
 el.closeWhaleChatBtn.onclick = () => { paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
-el.closeTutorialBtn.onclick = () => { paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
+el.closeTutorialBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.graphicsDown.onclick = () => setGraphics(-1);
 el.graphicsUp.onclick = () => setGraphics(1);
 el.soundSlider.oninput = e => { data.options.sound = Number(e.target.value); persist(); renderOptions(); };
@@ -1614,6 +1809,11 @@ function animate(now) {
   lastTime = now;
   stars.rotation.y += dt * 0.03;
   lightRays.rotation.y += dt * 0.04;
+  whaleSwimAngle += dt * 0.08;
+  whale.position.x = 180 + Math.cos(whaleSwimAngle) * 90;
+  whale.position.z = -100 + Math.sin(whaleSwimAngle) * 70;
+  whale.position.y = -65 + Math.sin(whaleSwimAngle * 1.7) * 6;
+  whale.lookAt(180 + Math.cos(whaleSwimAngle + 0.2) * 90, whale.position.y, -100 + Math.sin(whaleSwimAngle + 0.2) * 70);
   if (!paused && gameStarted) {
     updatePlayer(dt);
     updateAliens(dt, now);
