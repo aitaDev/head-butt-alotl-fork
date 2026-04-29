@@ -1061,7 +1061,7 @@ function setGraphics(delta) {
 }
 
 function openOverlay(id) {
-  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu']) el[key].classList.add('hidden');
+  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu', 'tutorialMenu']) el[key].classList.add('hidden');
   if (id) el[id].classList.remove('hidden');
 }
 
