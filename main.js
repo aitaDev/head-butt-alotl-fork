@@ -323,6 +323,7 @@ const octopi = [];
 const narwhals = [];
 const floatingTexts = [];
 const ripples = [];
+let damageTextStack = 0;
 const keys = new Set();
 let lastTime = performance.now();
 let alienSpawnTimer = 0;
@@ -441,10 +442,16 @@ function spawnDamageText(position, amount, crit = false) {
   elText.className = `damage-number${crit ? ' crit' : ''}`;
   elText.textContent = `${crit ? 'CRIT ' : ''}-${Math.max(1, Math.round(amount))}`;
   document.getElementById('ui').appendChild(elText);
+  const x = window.innerWidth * 0.5 + (Math.random() - 0.5) * 120;
+  const y = window.innerHeight * 0.42 + damageTextStack * 18;
+  damageTextStack = (damageTextStack + 1) % 4;
+  elText.style.left = `${x}px`;
+  elText.style.top = `${y}px`;
   floatingTexts.push({
     el: elText,
-    worldPos: position.clone().add(new THREE.Vector3(0, 1.2, 0)),
-    velocity: new THREE.Vector3((Math.random() - 0.5) * 0.2, 1.6, (Math.random() - 0.5) * 0.2),
+    hudX: x,
+    hudY: y,
+    rise: 0,
     life: 0.95,
     crit
   });
@@ -942,15 +949,11 @@ function updateFloatingTexts(dt) {
   for (let i = floatingTexts.length - 1; i >= 0; i--) {
     const text = floatingTexts[i];
     text.life -= dt;
-    text.worldPos.addScaledVector(text.velocity, dt);
-    text.velocity.y += 0.35 * dt;
-    const screen = text.worldPos.clone().project(camera);
-    const x = (screen.x * 0.5 + 0.5) * innerWidth;
-    const y = (-screen.y * 0.5 + 0.5) * innerHeight;
-    text.el.style.left = `${x}px`;
-    text.el.style.top = `${y}px`;
+    text.rise += dt * 55;
+    text.el.style.left = `${text.hudX}px`;
+    text.el.style.top = `${text.hudY - text.rise}px`;
     text.el.style.opacity = `${Math.max(0, Math.min(1, text.life * 1.4))}`;
-    if (text.life <= 0 || screen.z > 1.2) {
+    if (text.life <= 0) {
       text.el.remove();
       floatingTexts.splice(i, 1);
     }
