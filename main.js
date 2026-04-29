@@ -310,6 +310,7 @@ const aliens = [];
 const pickups = [];
 const sharks = [];
 const octopi = [];
+const narwhals = [];
 const ripples = [];
 const keys = new Set();
 let lastTime = performance.now();
@@ -319,6 +320,7 @@ let continueAllowed = !!data.save.hasSave;
 const worldRadius = 100;
 const worldWrapRadius = 120;
 let isGameOver = false;
+let narwhalBuffUntil = 0;
 
 function makeAlien() {
   const group = new THREE.Group();
@@ -370,7 +372,7 @@ function makeAlien() {
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -72 + Math.random() * 62, Math.sin(a) * r);
   scene.add(group);
-  aliens.push({ mesh: group, hp: (18 + state.level * 5) * scale * 1.3 * type.hp, speed: Math.max(0.35, type.speed - scale * 0.12) + Math.random() * 0.35, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale * type.damage, kind: type.name });
+  aliens.push({ mesh: group, hp: (38 + state.level * 9) * scale * 1.8 * type.hp, speed: Math.max(0.35, type.speed - scale * 0.12) + Math.random() * 0.35, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale * type.damage, kind: type.name });
 }
 
 function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45 ? 'fish' : 'worm') {
@@ -422,6 +424,25 @@ function spawnRipple(position, color = 0xffffff) {
   ripples.push({ mesh, life: 0.7 });
 }
 
+function makeNarwhal() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.3, 1.3), new THREE.MeshStandardMaterial({ color: 0xd7f1ff, roughness: 0.7 }));
+  const head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: 0xeaf8ff, roughness: 0.6 }));
+  const horn = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.12, 0.12), new THREE.MeshStandardMaterial({ color: 0xf5f0d8, roughness: 0.5 }));
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: 0xb9dced }));
+  body.position.set(0, 0, 0);
+  head.position.set(2.7, 0.05, 0);
+  horn.position.set(3.7, 0.2, 0);
+  tail.position.set(-2.3, 0, 0);
+  tail.rotation.y = 0.25;
+  group.add(body, head, horn, tail);
+  const r = 18 + Math.random() * 65;
+  const a = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a) * r, -55 + Math.random() * 35, Math.sin(a) * r);
+  scene.add(group);
+  narwhals.push({ mesh: group, activeUntil: 0, following: false, bob: Math.random() * Math.PI * 2 });
+}
+
 function makeShark() {
   const group = new THREE.Group();
   const body = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.35, 1.35), new THREE.MeshStandardMaterial({ color: 0x6f8897, roughness: 0.7 }));
@@ -462,6 +483,7 @@ for (let i = 0; i < 5; i++) makeAlien();
 for (let i = 0; i < 10; i++) makePickup();
 for (let i = 0; i < 4; i++) makeShark();
 for (let i = 0; i < 10; i++) makeOctopus();
+for (let i = 0; i < 2; i++) makeNarwhal();
 
 function addXp(amount) {
   state.xp += amount;
@@ -515,6 +537,9 @@ function updateHUD() {
   el.aliensBonked.textContent = state.stats.aliensBonked;
   if (player.pos.distanceTo(whale.position) < 14) {
     showNotice('🐋 Keep the oceans clean. Pollution hurts every creature down here, and it all flows back to us.');
+  }
+  if (narwhalBuffUntil > performance.now()) {
+    showNotice('🦄 Narwhal ally active, double damage for 1 minute');
   }
 }
 
@@ -788,7 +813,8 @@ function updateAliens(dt) {
     alien.mesh.lookAt(player.pos);
 
     if (dist < 1.8) {
-      const ram = player.velocity.length() * config.ramPower() * 0.18;
+      const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
+      const ram = player.velocity.length() * config.ramPower() * 0.18 * damageMultiplier;
       alien.hp -= ram;
       takeDamage(alien.damage * dt + 5 * (1 - Math.min(1, player.velocity.length() / (4 + state.upgrades.head))) * dt);
       if (ram > 1.5) spawnRipple(alien.mesh.position, 0xffe08a);
@@ -840,6 +866,30 @@ function updatePickups(dt) {
   }
 }
 
+function updateNarwhals(dt) {
+  for (const narwhal of narwhals) {
+    narwhal.bob += dt * 1.8;
+    const target = narwhal.following && narwhal.activeUntil > performance.now() ? player.pos : narwhal.mesh.position;
+    if (narwhal.following && narwhal.activeUntil > performance.now()) {
+      const escortPos = player.pos.clone().add(new THREE.Vector3(Math.sin(performance.now() * 0.001) * 3, 0.8, Math.cos(performance.now() * 0.001) * 3));
+      const move = escortPos.sub(narwhal.mesh.position);
+      if (move.length() > 0.001) narwhal.mesh.position.addScaledVector(move.normalize(), dt * 6);
+      narwhal.mesh.lookAt(player.pos);
+    }
+    narwhal.mesh.position.y += Math.sin(narwhal.bob) * 0.02;
+    if (!narwhal.following && narwhal.mesh.position.distanceTo(player.pos) < 4) {
+      narwhal.following = true;
+      narwhal.activeUntil = performance.now() + 60000;
+      narwhalBuffUntil = narwhal.activeUntil;
+      showNotice('A rare narwhal joins you and doubles your damage');
+    }
+    if (narwhal.following && narwhal.activeUntil <= performance.now()) {
+      narwhal.following = false;
+      showNotice('Your narwhal friend swims away');
+    }
+  }
+}
+
 function updateSharks(dt) {
   for (let i = sharks.length - 1; i >= 0; i--) {
     const shark = sharks[i];
@@ -877,6 +927,7 @@ function animate(now) {
   if (!paused && gameStarted) {
     updatePlayer(dt);
     updateAliens(dt);
+    updateNarwhals(dt);
     updateSharks(dt);
     updatePickups(dt);
     for (const octo of octopi) {
