@@ -2,8 +2,9 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.3.5';
+const gameVersion = 'v0.4.0';
 const patchNotes = [
+  'v0.4.0  Depth gauge — real-time dive indicator with zone name and visual fill. Deep waters darken the world.',
   'v0.3.5  Anglerfish lurking in the deep — glowing lures, aggressive hunting in dark waters, pulsing bioluminescence.',
   'v0.3.4  Seabed creatures now live: urchins spike on contact, crabs scuttle and deal damage, starfish are collectible with respawn.',
   'v0.3.3  HP bar flashes red while sprinting, screen shake on critical headbutts.',
@@ -194,6 +195,11 @@ app.innerHTML = `
   </div>
   <div id="hud">
     <div class="bar xp-bar-shell"><div id="xpFill" class="fill"></div><div class="barLabel" id="xpLabel"></div></div>
+  </div>
+  <div id="depthIndicator" class="card depth-card">
+    <div class="depth-label">DEPTH</div>
+    <div class="depth-bar"><div id="depthFill" class="depth-fill"></div></div>
+    <div id="depthZoneName" class="depth-zone-name">Surface Waters</div>
   </div>
   <div id="xpBurst" class="hidden">✦ XP GAIN ✦</div>
   <div id="levelUpFlash" class="hidden">✦ LEVEL UP ✦</div>
@@ -1688,6 +1694,15 @@ function updatePlayer(dt) {
   const lookTarget = cameraTarget.clone().add(new THREE.Vector3(-Math.sin(player.yaw) * 8, Math.sin(player.pitch) * 8, -Math.cos(player.yaw) * 8));
   camera.lookAt(lookTarget);
   renderer.setClearColor(player.pos.y > -10 ? 0x7ed0ff : 0x1676d2);
+
+  // Depth indicator update
+  const depthY = Math.max(-85, Math.min(0, player.pos.y));
+  const depthPercent = Math.min(100, Math.max(0, (-depthY / 85) * 100));
+  el.depthFill.style.height = `${depthPercent}%`;
+  const zoneNames = ['Surface', 'Shallow', 'Midwater', 'Deep', 'Abyssal'];
+  const zoneIndex = Math.min(4, Math.floor(depthPercent / 20));
+  el.depthZoneName.textContent = zoneNames[zoneIndex];
+  el.depthIndicator.style.borderColor = depthPercent > 70 ? 'rgba(160,60,220,0.5)' : depthPercent > 40 ? 'rgba(60,120,200,0.4)' : 'rgba(100,200,255,0.3)';
 
   water.position.x = player.pos.x;
   water.position.z = player.pos.z;
