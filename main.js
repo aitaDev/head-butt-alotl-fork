@@ -14,6 +14,7 @@ const defaults = {
       left: 'KeyA',
       right: 'KeyD',
       jump: 'Space',
+      sprint: 'ShiftLeft',
       upgrades: 'KeyU',
       pause: 'Escape'
     }
@@ -52,6 +53,7 @@ const config = {
   accel: () => 5.8 + state.upgrades.fins * 0.6,
   verticalAccel: () => 10,
   jumpStrength: () => 7.5 + state.upgrades.fins * 0.4,
+  sprintDrain: () => 4.5,
   xpToNext: () => 50 + (state.level - 1) * 35
 };
 
@@ -64,6 +66,16 @@ const upgradesMeta = [
 
 app.innerHTML = `
 <div id="ui">
+  <div id="gameOverMenu" class="overlay hidden">
+    <div class="panel">
+      <h1 style="font-size:44px;color:#ff4d6d;text-shadow:0 0 18px rgba(255,0,64,0.6)">GAME OVER</h1>
+      <p class="subtitle" style="color:#ffb3c1">The pond went silent. The aliens are still out there.</p>
+      <div class="menu-buttons">
+        <button id="retryBtn">Rise Again</button>
+        <button id="gameOverTitleBtn" class="secondary">Quit to Title</button>
+      </div>
+    </div>
+  </div>
   <div id="mainMenu" class="overlay">
     <div class="panel">
       <h1 class="title">Head-Butt-Alotl</h1>
@@ -162,7 +174,7 @@ function resetState() {
 }
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x0f3a55, 12, 120);
+scene.fog = new THREE.Fog(0x0b5ea8, 18, 180);
 const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 300);
 camera.position.set(0, 2, 6);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -176,17 +188,17 @@ sun.position.set(20, 30, 10);
 scene.add(sun);
 
 const water = new THREE.Mesh(
-  new THREE.CylinderGeometry(80, 80, 12, data.options.graphics === 'low' ? 24 : 64),
-  new THREE.MeshPhongMaterial({ color: 0x1a6d8a, transparent: true, opacity: 0.92 })
+  new THREE.CylinderGeometry(140, 140, 90, data.options.graphics === 'low' ? 24 : 64),
+  new THREE.MeshPhongMaterial({ color: 0x1f8fff, emissive: 0x0b4f96, transparent: true, opacity: 0.88, shininess: 45 })
 );
-water.position.y = -6;
+water.position.y = -40;
 scene.add(water);
 
 const floor = new THREE.Mesh(
-  new THREE.CylinderGeometry(82, 82, 2, 64),
-  new THREE.MeshStandardMaterial({ color: 0x4f6f36 })
+  new THREE.CylinderGeometry(142, 142, 8, 64),
+  new THREE.MeshStandardMaterial({ color: 0xd1b276, roughness: 0.95 })
 );
-floor.position.y = -13;
+floor.position.y = -86;
 scene.add(floor);
 
 const reeds = [];
@@ -197,7 +209,7 @@ for (let i = 0; i < 120; i++) {
   );
   const r = 20 + Math.random() * 50;
   const a = Math.random() * Math.PI * 2;
-  reed.position.set(Math.cos(a) * r, -10.5 + reed.geometry.parameters.height / 2, Math.sin(a) * r);
+  reed.position.set(Math.cos(a) * r, -83 + reed.geometry.parameters.height / 2, Math.sin(a) * r);
   reeds.push(reed);
   scene.add(reed);
 }
@@ -205,13 +217,13 @@ for (let i = 0; i < 120; i++) {
 const stars = new THREE.Group();
 for (let i = 0; i < 120; i++) {
   const p = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), new THREE.MeshBasicMaterial({ color: 0xb8ffb0 }));
-  p.position.set((Math.random() - 0.5) * 100, 8 + Math.random() * 20, (Math.random() - 0.5) * 100);
+  p.position.set((Math.random() - 0.5) * 140, 20 + Math.random() * 45, (Math.random() - 0.5) * 140);
   stars.add(p);
 }
 scene.add(stars);
 
 const player = {
-  pos: new THREE.Vector3(0, -1.6, 0),
+  pos: new THREE.Vector3(0, -12, 0),
   yaw: 0,
   pitch: 0,
   velocity: new THREE.Vector3(),
@@ -262,8 +274,9 @@ let lastTime = performance.now();
 let alienSpawnTimer = 0;
 let pickupSpawnTimer = 0;
 let continueAllowed = !!data.save.hasSave;
-const worldRadius = 58;
-const worldWrapRadius = 70;
+const worldRadius = 100;
+const worldWrapRadius = 120;
+let isGameOver = false;
 
 function makeAlien() {
   const group = new THREE.Group();
@@ -301,7 +314,7 @@ function makeAlien() {
 function makePickup(kind = Math.random() < 0.22 ? 'steak' : 'worm') {
   const group = new THREE.Group();
   if (kind === 'steak') {
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.55, 0.7), new THREE.MeshStandardMaterial({ color: 0x8f2b2b, roughness: 0.8 }));
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.55, 0.7), new THREE.MeshStandardMaterial({ color: 0xa52f2f, roughness: 0.32, metalness: 0.08 }));
     const fat = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.16), new THREE.MeshStandardMaterial({ color: 0xf4d5c2, roughness: 0.9 }));
     const marbling1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 6), new THREE.MeshStandardMaterial({ color: 0xf7e4d8 }));
     const marbling2 = marbling1.clone();
@@ -310,7 +323,7 @@ function makePickup(kind = Math.random() < 0.22 ? 'steak' : 'worm') {
     marbling2.rotation.z = -0.8;
     marbling1.position.set(-0.15, 0.02, 0.2);
     marbling2.position.set(0.18, -0.05, -0.12);
-    const shine = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: 0xffeee6, emissive: 0x442222 }));
+    const shine = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: 0xffeee6, emissive: 0x663333, roughness: 0.05, metalness: 0.2 }));
     shine.position.set(-0.06, 0.1, -0.18);
     group.add(base, fat, marbling1, marbling2, shine);
   } else {
@@ -359,14 +372,12 @@ function addXp(amount) {
 
 function takeDamage(amount) {
   state.health = Math.max(0, state.health - amount);
-  if (state.health <= 0) {
+  if (state.health <= 0 && !isGameOver) {
+    isGameOver = true;
     paused = true;
     pointerLocked = false;
     document.exitPointerLock();
-    el.pauseMenu.classList.remove('hidden');
-    showNotice('You got bonked out. Resume or quit to title.');
-    state.health = config.maxHealth();
-    player.pos.set(0, -1.6, 0);
+    openOverlay('gameOverMenu');
   }
 }
 
@@ -430,7 +441,7 @@ function renderOptions() {
   el.soundSlider.value = data.options.sound;
   el.musicSlider.value = data.options.music;
   el.keybindList.innerHTML = '';
-  const labels = { forward: 'Forward', backward: 'Backward', left: 'Left', right: 'Right', jump: 'Surface Jump', upgrades: 'Upgrades', pause: 'Pause' };
+  const labels = { forward: 'Forward', backward: 'Backward', left: 'Left', right: 'Right', jump: 'Surface Jump', sprint: 'Sprint', upgrades: 'Upgrades', pause: 'Pause' };
   for (const [key, code] of Object.entries(data.options.keybinds)) {
     const row = document.createElement('div');
     row.className = 'keybind';
@@ -455,7 +466,7 @@ function setGraphics(delta) {
 }
 
 function openOverlay(id) {
-  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu']) el[key].classList.add('hidden');
+  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu']) el[key].classList.add('hidden');
   if (id) el[id].classList.remove('hidden');
 }
 
@@ -463,8 +474,10 @@ function startGame(continueGame = false) {
   if (!continueGame) resetState();
   else Object.assign(state, structuredClone(data.save));
   state.health = Math.min(config.maxHealth(), state.health || config.maxHealth());
-  player.pos.set(0, -1.6, 0);
+  player.pos.set(0, -12, 0);
+  player.verticalVelocity = 0;
   paused = false;
+  isGameOver = false;
   gameStarted = true;
   openOverlay(null);
   renderer.domElement.requestPointerLock();
@@ -534,11 +547,13 @@ el.continueBtn.onclick = () => continueAllowed && startGame(true);
 el.continueBtn.disabled = !continueAllowed;
 el.optionsBtn.onclick = () => { renderOptions(); openOverlay('optionsMenu'); };
 el.pauseOptionsBtn.onclick = () => { renderOptions(); openOverlay('optionsMenu'); };
-el.closeOptionsBtn.onclick = () => openOverlay(gameStarted && paused ? 'pauseMenu' : 'mainMenu');
+el.closeOptionsBtn.onclick = () => openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu');
 el.resumeBtn.onclick = () => { paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.charBtn.onclick = () => { renderUpgradeMenu(); openOverlay('upgradeMenu'); };
 el.closeUpgradeBtn.onclick = () => openOverlay('pauseMenu');
 el.quitBtn.onclick = quitToTitle;
+el.retryBtn.onclick = () => startGame(false);
+el.gameOverTitleBtn.onclick = quitToTitle;
 el.graphicsDown.onclick = () => setGraphics(-1);
 el.graphicsUp.onclick = () => setGraphics(1);
 el.soundSlider.oninput = e => { data.options.sound = Number(e.target.value); persist(); renderOptions(); };
@@ -556,6 +571,7 @@ function updatePlayer(dt) {
     (keys.has(data.options.keybinds.forward) ? 1 : 0) - (keys.has(data.options.keybinds.backward) ? 1 : 0)
   );
   const jumpPressed = keys.has(data.options.keybinds.jump);
+  const sprintPressed = keys.has(data.options.keybinds.sprint);
 
   const flatForward = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
   const right = new THREE.Vector3(flatForward.z, 0, -flatForward.x);
@@ -571,7 +587,8 @@ function updatePlayer(dt) {
   const verticalIntent = moveInput.y > 0.05 ? lookVertical : moveInput.y < -0.05 ? -lookVertical * 0.65 : 0;
   const desiredVelocity = new THREE.Vector3(flatDir.x, 0, flatDir.z);
 
-  if (desiredVelocity.lengthSq() > 0) desiredVelocity.normalize().multiplyScalar(config.moveSpeed() * (keys.has('Mouse0') ? 1.45 : 1));
+  const sprintMultiplier = sprintPressed ? 1.9 : (keys.has('Mouse0') ? 1.45 : 1);
+  if (desiredVelocity.lengthSq() > 0) desiredVelocity.normalize().multiplyScalar(config.moveSpeed() * sprintMultiplier);
   player.velocity.x = THREE.MathUtils.lerp(player.velocity.x, desiredVelocity.x, Math.min(0.22, dt * config.accel()));
   player.velocity.z = THREE.MathUtils.lerp(player.velocity.z, desiredVelocity.z, Math.min(0.22, dt * config.accel()));
   if (!desiredVelocity.lengthSq()) {
@@ -579,7 +596,7 @@ function updatePlayer(dt) {
     player.velocity.z *= Math.max(0.9, 1 - dt * 2.6);
   }
 
-  const nearSurface = player.pos.y > -1.2;
+  const nearSurface = player.pos.y > -4;
   const wantsSurfaceJump = jumpPressed && nearSurface;
   if (wantsSurfaceJump) {
     player.verticalVelocity = config.jumpStrength();
@@ -596,13 +613,16 @@ function updatePlayer(dt) {
   if (player.pos.x < -worldWrapRadius) player.pos.x = worldWrapRadius;
   if (player.pos.z > worldWrapRadius) player.pos.z = -worldWrapRadius;
   if (player.pos.z < -worldWrapRadius) player.pos.z = worldWrapRadius;
-  if (player.pos.y < -8.5) {
-    player.pos.y = -8.5;
+  if (player.pos.y < -82) {
+    player.pos.y = -82;
     player.verticalVelocity = Math.max(0, player.verticalVelocity);
   }
-  if (player.pos.y > 5.8) {
-    player.pos.y = 5.8;
+  if (player.pos.y > 8.5) {
+    player.pos.y = 8.5;
     player.verticalVelocity = Math.min(0, player.verticalVelocity);
+  }
+  if (sprintPressed && desiredVelocity.lengthSq() > 0) {
+    takeDamage(dt * config.sprintDrain());
   }
 
   axolotl.position.copy(player.pos);
@@ -620,10 +640,12 @@ function updatePlayer(dt) {
   axLegBL.rotation.z = 0.1 - Math.sin(performance.now() * 0.014) * 0.1;
   axLegBR.rotation.z = -0.1 + Math.sin(performance.now() * 0.014) * 0.1;
 
-  cameraOffset.set(Math.sin(player.yaw) * 6.8, 2.5 - Math.sin(player.pitch) * 1.2, Math.cos(player.yaw) * 6.8);
+  cameraOffset.set(Math.sin(player.yaw) * 7.4, 2.8 - Math.sin(player.pitch) * 1.2, Math.cos(player.yaw) * 7.4);
   cameraTarget.copy(player.pos).add(new THREE.Vector3(0, 0.7, 0));
+  scene.fog.color.set(player.pos.y > -3 ? 0x5cbcff : 0x0b5ea8);
   camera.position.lerp(cameraTarget.clone().add(cameraOffset), 0.1);
   camera.lookAt(cameraTarget.clone().add(new THREE.Vector3(0, player.pitch * 1.2, 0)));
+  renderer.setClearColor(player.pos.y > -3 ? 0x7ed0ff : 0x1676d2);
 
   water.position.x = player.pos.x;
   water.position.z = player.pos.z;
