@@ -738,14 +738,27 @@ function makeLeviathan() {
 function makeShark() {
   const group = new THREE.Group();
   const body = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.35, 1.35), new THREE.MeshStandardMaterial({ color: 0x6f8897, roughness: 0.7 }));
+  const back = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.55, 1.05), new THREE.MeshStandardMaterial({ color: 0x5f7685, roughness: 0.78 }));
+  const belly = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.38, 0.9), new THREE.MeshStandardMaterial({ color: 0xdfe8ea, roughness: 0.9 }));
   const fin = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.0, 0.35), new THREE.MeshStandardMaterial({ color: 0x5b7280 }));
   const tail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x698391 }));
   const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.25, 0.8), new THREE.MeshStandardMaterial({ color: 0xe9e9e9 }));
+  const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+  const eyeR = eyeL.clone();
+  const gillL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.02), new THREE.MeshStandardMaterial({ color: 0x425563 }));
+  const gillR = gillL.clone();
   tail.rotation.y = 0.25;
+  back.position.set(-0.2, 0.28, 0);
+  belly.position.set(-0.15, -0.42, 0);
   fin.position.set(0.1, 0.9, 0);
   tail.position.set(-2.5, 0, 0);
   jaw.position.set(2.1, -0.25, 0);
-  group.add(body, fin, tail, jaw);
+  eyeL.position.set(1.75, 0.1, 0.38);
+  eyeR.position.set(1.75, 0.1, -0.38);
+  gillL.position.set(1.1, -0.05, 0.68);
+  gillR.position.set(1.1, -0.05, -0.68);
+  group.add(body, back, belly, fin, tail, jaw, eyeL, eyeR, gillL, gillR);
+  group.rotation.y = Math.PI / 2;
   const r = 20 + Math.random() * 75;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -60 + Math.random() * 40, Math.sin(a) * r);
@@ -1459,6 +1472,7 @@ function updateSharks(dt, now) {
     shark.bob += dt * 2.8;
     shark.mesh.position.y += Math.sin(shark.bob) * 0.02;
     shark.mesh.lookAt(player.pos);
+    shark.mesh.rotation.y += Math.PI / 2;
     if (dist < 2.6) {
       if (!shark.hitCooldown || now - shark.hitCooldown > 120) {
         const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
