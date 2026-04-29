@@ -236,13 +236,12 @@ for (let i = 0; i < 45; i++) {
 }
 
 const whale = new THREE.Group();
-const whaleBody = new THREE.Mesh(new THREE.CapsuleGeometry(3.2, 9, 8, 16), new THREE.MeshStandardMaterial({ color: 0x4a6f96, roughness: 0.8 }));
+const whaleBody = new THREE.Mesh(new THREE.BoxGeometry(8.6, 3.2, 3.2), new THREE.MeshStandardMaterial({ color: 0x4a6f96, roughness: 0.8 }));
 const whaleHead = new THREE.Mesh(new THREE.BoxGeometry(3.8, 2.6, 2.8), new THREE.MeshStandardMaterial({ color: 0x5d84aa, roughness: 0.75 }));
 const whaleTailL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.18, 1.5), new THREE.MeshStandardMaterial({ color: 0x486b90 }));
 const whaleTailR = whaleTailL.clone();
 const whaleFinL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 0.8), new THREE.MeshStandardMaterial({ color: 0x3e6186 }));
 const whaleFinR = whaleFinL.clone();
-whaleBody.rotation.z = Math.PI / 2;
 whaleHead.position.set(5.2, 0.15, 0);
 whaleTailL.position.set(-5.8, 0.45, 1.1);
 whaleTailR.position.set(-5.8, 0.45, -1.1);
@@ -256,7 +255,7 @@ scene.add(whale);
 
 const stars = new THREE.Group();
 for (let i = 0; i < 120; i++) {
-  const p = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), new THREE.MeshBasicMaterial({ color: 0xb8ffb0 }));
+  const p = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: 0xb8ffb0 }));
   p.position.set((Math.random() - 0.5) * 140, 20 + Math.random() * 45, (Math.random() - 0.5) * 140);
   stars.add(p);
 }
@@ -331,18 +330,18 @@ function makeAlien() {
   ];
   const type = types[Math.floor(Math.random() * types.length)];
 
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.6, 1.4, 6, 12), new THREE.MeshStandardMaterial({ color: type.body, emissive: 0x214d15, roughness: 0.45, metalness: 0.08 }));
-  const belly = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.0, 0.55), new THREE.MeshStandardMaterial({ color: type.belly, roughness: 0.7 }));
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.72, 16, 16), new THREE.MeshStandardMaterial({ color: type.head, emissive: 0x245d1b, roughness: 0.35, metalness: 0.15 }));
-  const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.0, 0.95), new THREE.MeshStandardMaterial({ color: type.body, emissive: 0x214d15, roughness: 0.45, metalness: 0.08 }));
+  const belly = new THREE.Mesh(new THREE.BoxGeometry(0.75, 1.1, 0.2), new THREE.MeshStandardMaterial({ color: type.belly, roughness: 0.7 }));
+  const head = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.2, 1.2), new THREE.MeshStandardMaterial({ color: type.head, emissive: 0x245d1b, roughness: 0.35, metalness: 0.15 }));
+  const eye1 = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), new THREE.MeshBasicMaterial({ color: 0x111111 }));
   const eye2 = eye1.clone();
-  const pupil1 = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff4d4d }));
+  const pupil1 = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.07), new THREE.MeshBasicMaterial({ color: 0xff4d4d }));
   const pupil2 = pupil1.clone();
-  const armL = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.65, 4, 8), new THREE.MeshStandardMaterial({ color: type.body }));
+  const armL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.85, 0.22), new THREE.MeshStandardMaterial({ color: type.body }));
   const armR = armL.clone();
-  const legL = new THREE.Mesh(new THREE.CapsuleGeometry(0.13, 0.75, 4, 8), new THREE.MeshStandardMaterial({ color: type.body }));
+  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.95, 0.24), new THREE.MeshStandardMaterial({ color: type.body }));
   const legR = legL.clone();
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 6, 18, Math.PI), new THREE.MeshBasicMaterial({ color: 0x365421 }));
+  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.05), new THREE.MeshBasicMaterial({ color: 0x365421 }));
   head.position.set(0, 0.7, 0);
   belly.position.set(0, -0.05, 0.38);
   eye1.position.set(-0.25, 0.82, 0.55); eye2.position.set(0.25, 0.82, 0.55);
@@ -354,14 +353,13 @@ function makeAlien() {
   group.add(body, belly, head, eye1, eye2, pupil1, pupil2, legL, legR, mouth);
   if (type.arms) group.add(armL, armR);
   if (type.horn) {
-    const horn = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xb8ffb0, emissive: 0x274611 }));
+    const horn = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.6, 0.16), new THREE.MeshStandardMaterial({ color: 0xb8ffb0, emissive: 0x274611 }));
     const horn2 = horn.clone();
     horn.position.set(-0.28, 1.38, 0.12);
     horn2.position.set(0.28, 1.38, 0.12);
     group.add(horn, horn2);
   } else {
-    const fin = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.08, 8, 20), new THREE.MeshStandardMaterial({ color: type.head, emissive: 0x1a2d44, transparent: true, opacity: 0.7 }));
-    fin.rotation.x = Math.PI / 2;
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.16, 0.35), new THREE.MeshStandardMaterial({ color: type.head, emissive: 0x1a2d44, transparent: true, opacity: 0.7 }));
     fin.position.y = 1.1;
     group.add(fin);
   }
@@ -380,7 +378,7 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45
   if (kind === 'steak') {
     const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.55, 0.7), new THREE.MeshStandardMaterial({ color: 0xa52f2f, roughness: 0.32, metalness: 0.08 }));
     const fat = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.16), new THREE.MeshStandardMaterial({ color: 0xf4d5c2, roughness: 0.9 }));
-    const marbling1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 6), new THREE.MeshStandardMaterial({ color: 0xf7e4d8 }));
+    const marbling1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.55, 0.06), new THREE.MeshStandardMaterial({ color: 0xf7e4d8 }));
     const marbling2 = marbling1.clone();
     fat.position.set(0.02, 0.18, 0.28);
     marbling1.rotation.z = 1.1;
@@ -391,7 +389,7 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45
     shine.position.set(-0.06, 0.1, -0.18);
     group.add(base, fat, marbling1, marbling2, shine);
   } else if (kind === 'fish') {
-    const body = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 12), new THREE.MeshStandardMaterial({ color: 0x5cc8ff, roughness: 0.55 }));
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.38, 0.32), new THREE.MeshStandardMaterial({ color: 0x5cc8ff, roughness: 0.55 }));
     body.scale.set(1.6, 1, 0.8);
     const tail = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.18, 0.45), new THREE.MeshStandardMaterial({ color: 0x88e0ff }));
     const fin = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.22, 0.08), new THREE.MeshStandardMaterial({ color: 0xb8f2ff }));
@@ -399,13 +397,8 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45
     fin.position.set(0, 0.24, 0);
     group.add(body, tail, fin);
   } else {
-    const body = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.32, 0, 0),
-      new THREE.Vector3(-0.1, 0.12, 0.1),
-      new THREE.Vector3(0.08, -0.1, -0.08),
-      new THREE.Vector3(0.3, 0.04, 0)
-    ]), 24, 0.08, 8, false), new THREE.MeshStandardMaterial({ color: 0xc98a52, roughness: 0.95 }));
-    const band1 = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.012, 6, 12), new THREE.MeshStandardMaterial({ color: 0x9c6436 }));
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.16, 0.16), new THREE.MeshStandardMaterial({ color: 0xc98a52, roughness: 0.95 }));
+    const band1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.18, 0.18), new THREE.MeshStandardMaterial({ color: 0x9c6436 }));
     const band2 = band1.clone();
     band1.position.set(-0.08, 0.03, 0.05);
     band2.position.set(0.14, -0.03, -0.04);
@@ -431,11 +424,11 @@ function spawnRipple(position, color = 0xffffff) {
 
 function makeShark() {
   const group = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.7, 3.5, 6, 14), new THREE.MeshStandardMaterial({ color: 0x6f8897, roughness: 0.7 }));
-  const fin = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.0, 6), new THREE.MeshStandardMaterial({ color: 0x5b7280 }));
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.35, 1.35), new THREE.MeshStandardMaterial({ color: 0x6f8897, roughness: 0.7 }));
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.0, 0.35), new THREE.MeshStandardMaterial({ color: 0x5b7280 }));
   const tail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x698391 }));
   const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.25, 0.8), new THREE.MeshStandardMaterial({ color: 0xe9e9e9 }));
-  body.rotation.z = Math.PI / 2;
+  tail.rotation.y = 0.25;
   fin.position.set(0.1, 0.9, 0);
   tail.position.set(-2.5, 0, 0);
   jaw.position.set(2.1, -0.25, 0);
@@ -449,9 +442,9 @@ function makeShark() {
 
 function makeOctopus() {
   const group = new THREE.Group();
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.8, 14, 14), new THREE.MeshStandardMaterial({ color: 0xa45bff, roughness: 0.8 }));
+  const head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.4), new THREE.MeshStandardMaterial({ color: 0xa45bff, roughness: 0.8 }));
   for (let i = 0; i < 8; i++) {
-    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.12, 1.8, 6), new THREE.MeshStandardMaterial({ color: 0x8b47dd, roughness: 0.85 }));
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.8, 0.12), new THREE.MeshStandardMaterial({ color: 0x8b47dd, roughness: 0.85 }));
     const angle = (i / 8) * Math.PI * 2;
     arm.position.set(Math.cos(angle) * 0.35, -1.0, Math.sin(angle) * 0.35);
     arm.rotation.z = (Math.random() - 0.5) * 0.6;
