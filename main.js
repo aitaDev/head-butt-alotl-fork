@@ -246,21 +246,21 @@ for (let i = 0; i < 45; i++) {
 }
 
 const whale = new THREE.Group();
-const whaleBody = new THREE.Mesh(new THREE.BoxGeometry(8.6, 3.2, 3.2), new THREE.MeshStandardMaterial({ color: 0x4a6f96, roughness: 0.8 }));
-const whaleHead = new THREE.Mesh(new THREE.BoxGeometry(3.8, 2.6, 2.8), new THREE.MeshStandardMaterial({ color: 0x5d84aa, roughness: 0.75 }));
+const whaleBody = new THREE.Mesh(new THREE.BoxGeometry(13.5, 4.8, 4.8), new THREE.MeshStandardMaterial({ color: 0x4a6f96, roughness: 0.8 }));
+const whaleHead = new THREE.Mesh(new THREE.BoxGeometry(5.8, 3.8, 3.8), new THREE.MeshStandardMaterial({ color: 0x5d84aa, roughness: 0.75 }));
 const whaleTailL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.18, 1.5), new THREE.MeshStandardMaterial({ color: 0x486b90 }));
 const whaleTailR = whaleTailL.clone();
 const whaleFinL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 0.8), new THREE.MeshStandardMaterial({ color: 0x3e6186 }));
 const whaleFinR = whaleFinL.clone();
-whaleHead.position.set(5.2, 0.15, 0);
-whaleTailL.position.set(-5.8, 0.45, 1.1);
-whaleTailR.position.set(-5.8, 0.45, -1.1);
+whaleHead.position.set(8.4, 0.2, 0);
+whaleTailL.position.set(-8.8, 0.7, 1.8);
+whaleTailR.position.set(-8.8, 0.7, -1.8);
 whaleTailL.rotation.y = 0.45;
 whaleTailR.rotation.y = -0.45;
-whaleFinL.position.set(0.4, -1.1, 1.8);
-whaleFinR.position.set(0.4, -1.1, -1.8);
+whaleFinL.position.set(0.8, -1.8, 2.7);
+whaleFinR.position.set(0.8, -1.8, -2.7);
 whale.add(whaleBody, whaleHead, whaleTailL, whaleTailR, whaleFinL, whaleFinR);
-whale.position.set(18, -38, -10);
+whale.position.set(18, -56, -10);
 scene.add(whale);
 
 const stars = new THREE.Group();
@@ -683,6 +683,11 @@ document.addEventListener('keydown', e => {
     rebinding = null;
     persist();
     renderOptions();
+    return;
+  }
+  if (!el.whaleChatMenu.classList.contains('hidden') && e.code === 'Space') {
+    e.preventDefault();
+    el.closeWhaleChatBtn.click();
     return;
   }
   keys.add(e.code);
