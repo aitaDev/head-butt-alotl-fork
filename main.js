@@ -54,6 +54,7 @@ const config = {
   verticalAccel: () => 10,
   jumpStrength: () => 7.5 + state.upgrades.fins * 0.4,
   sprintDrain: () => 4.5,
+  maxBoostMultiplier: () => 5,
   xpToNext: () => 50 + (state.level - 1) * 35
 };
 
@@ -228,7 +229,8 @@ const player = {
   pitch: 0,
   velocity: new THREE.Vector3(),
   radius: 1.2,
-  verticalVelocity: 0
+  verticalVelocity: 0,
+  forwardBoost: 1
 };
 
 const axolotl = new THREE.Group();
@@ -304,11 +306,13 @@ function makeAlien() {
   horn.position.set(-0.28, 1.38, 0.12); horn2.position.set(0.28, 1.38, 0.12);
   mouth.position.set(0, 0.42, 0.62);
   group.add(body, belly, head, eye1, eye2, pupil1, pupil2, armL, armR, legL, legR, horn, horn2, mouth);
+  const scale = 0.7 + Math.random() * 2.2;
+  group.scale.setScalar(scale);
   const r = 20 + Math.random() * 42;
   const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -1.5 + Math.random() * 3, Math.sin(a) * r);
+  group.position.set(Math.cos(a) * r, -72 + Math.random() * 62, Math.sin(a) * r);
   scene.add(group);
-  aliens.push({ mesh: group, hp: 18 + state.level * 5, speed: 0.9 + Math.random() * 0.8, bob: Math.random() * Math.PI * 2 });
+  aliens.push({ mesh: group, hp: (18 + state.level * 5) * scale * 1.3, speed: Math.max(0.45, 1.2 - scale * 0.18) + Math.random() * 0.45, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale });
 }
 
 function makePickup(kind = Math.random() < 0.22 ? 'steak' : 'worm') {
@@ -343,7 +347,7 @@ function makePickup(kind = Math.random() < 0.22 ? 'steak' : 'worm') {
   }
   const r = 8 + Math.random() * 48;
   const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -2 + Math.random() * 3.5, Math.sin(a) * r);
+  group.position.set(Math.cos(a) * r, -76 + Math.random() * 68, Math.sin(a) * r);
   group.rotation.set(Math.random(), Math.random(), Math.random());
   scene.add(group);
   pickups.push({ mesh: group, kind, spin: (Math.random() - 0.5) * 1.4 });
@@ -474,7 +478,7 @@ function startGame(continueGame = false) {
   if (!continueGame) resetState();
   else Object.assign(state, structuredClone(data.save));
   state.health = Math.min(config.maxHealth(), state.health || config.maxHealth());
-  player.pos.set(0, -12, 0);
+  player.pos.set(0, -18, 0);
   player.verticalVelocity = 0;
   paused = false;
   isGameOver = false;
@@ -587,7 +591,11 @@ function updatePlayer(dt) {
   const verticalIntent = moveInput.y > 0.05 ? lookVertical : moveInput.y < -0.05 ? -lookVertical * 0.65 : 0;
   const desiredVelocity = new THREE.Vector3(flatDir.x, 0, flatDir.z);
 
-  const sprintMultiplier = sprintPressed ? 1.9 : (keys.has('Mouse0') ? 1.45 : 1);
+  const holdingForward = moveInput.y > 0.05;
+  if (holdingForward) player.forwardBoost = Math.min(config.maxBoostMultiplier(), player.forwardBoost + dt * 0.75);
+  else player.forwardBoost = Math.max(1, player.forwardBoost - dt * 1.6);
+
+  const sprintMultiplier = (sprintPressed ? 1.9 : (keys.has('Mouse0') ? 1.45 : 1)) * player.forwardBoost;
   if (desiredVelocity.lengthSq() > 0) desiredVelocity.normalize().multiplyScalar(config.moveSpeed() * sprintMultiplier);
   player.velocity.x = THREE.MathUtils.lerp(player.velocity.x, desiredVelocity.x, Math.min(0.22, dt * config.accel()));
   player.velocity.z = THREE.MathUtils.lerp(player.velocity.z, desiredVelocity.z, Math.min(0.22, dt * config.accel()));
@@ -596,14 +604,7 @@ function updatePlayer(dt) {
     player.velocity.z *= Math.max(0.9, 1 - dt * 2.6);
   }
 
-  const nearSurface = player.pos.y > -4;
-  const wantsSurfaceJump = jumpPressed && nearSurface;
-  if (wantsSurfaceJump) {
-    player.verticalVelocity = config.jumpStrength();
-  } else {
-    player.verticalVelocity = THREE.MathUtils.lerp(player.verticalVelocity, verticalIntent * config.moveSpeed(), Math.min(0.45, dt * config.verticalAccel()));
-  }
-  if (player.pos.y > -0.4 || player.verticalVelocity > 0) player.verticalVelocity -= 14 * dt;
+  player.verticalVelocity = THREE.MathUtils.lerp(player.verticalVelocity, verticalIntent * config.moveSpeed() * Math.min(2, player.forwardBoost), Math.min(0.65, dt * config.verticalAccel()));
 
   player.pos.x += player.velocity.x * dt;
   player.pos.z += player.velocity.z * dt;
@@ -617,8 +618,8 @@ function updatePlayer(dt) {
     player.pos.y = -82;
     player.verticalVelocity = Math.max(0, player.verticalVelocity);
   }
-  if (player.pos.y > 8.5) {
-    player.pos.y = 8.5;
+  if (player.pos.y > -2.5) {
+    player.pos.y = -2.5;
     player.verticalVelocity = Math.min(0, player.verticalVelocity);
   }
   if (sprintPressed && desiredVelocity.lengthSq() > 0) {
@@ -631,21 +632,25 @@ function updatePlayer(dt) {
   } else {
     axolotl.rotation.y = player.yaw + Math.PI / 2;
   }
+  const swimSpeed = Math.min(3.2, 0.6 + player.velocity.length() * 0.25);
+  const swimPhase = performance.now() * 0.006 * swimSpeed;
   axolotl.rotation.x = THREE.MathUtils.lerp(axolotl.rotation.x, player.pitch * 0.28, 0.12);
-  axolotl.rotation.z = Math.sin(performance.now() * 0.006) * 0.05;
-  axTail.rotation.y = Math.sin(performance.now() * 0.01) * 0.45;
-  axTailTip.rotation.y = Math.sin(performance.now() * 0.014) * 0.55;
-  axLegFL.rotation.z = 0.18 + Math.sin(performance.now() * 0.014) * 0.12;
-  axLegFR.rotation.z = -0.18 - Math.sin(performance.now() * 0.014) * 0.12;
-  axLegBL.rotation.z = 0.1 - Math.sin(performance.now() * 0.014) * 0.1;
-  axLegBR.rotation.z = -0.1 + Math.sin(performance.now() * 0.014) * 0.1;
+  axolotl.rotation.z = Math.sin(swimPhase) * 0.05;
+  axBody.position.y = Math.sin(swimPhase * 0.7) * 0.08;
+  axHead.position.y = 0.06 + Math.sin(swimPhase * 0.7 + 0.4) * 0.05;
+  axTail.rotation.y = Math.sin(swimPhase * 1.3) * 0.55;
+  axTailTip.rotation.y = Math.sin(swimPhase * 1.8) * 0.7;
+  axLegFL.rotation.z = 0.18 + Math.sin(swimPhase * 1.4) * 0.18;
+  axLegFR.rotation.z = -0.18 - Math.sin(swimPhase * 1.4) * 0.18;
+  axLegBL.rotation.z = 0.1 - Math.sin(swimPhase * 1.4) * 0.14;
+  axLegBR.rotation.z = -0.1 + Math.sin(swimPhase * 1.4) * 0.14;
 
   cameraOffset.set(Math.sin(player.yaw) * 7.4, 2.8 - Math.sin(player.pitch) * 1.2, Math.cos(player.yaw) * 7.4);
   cameraTarget.copy(player.pos).add(new THREE.Vector3(0, 0.7, 0));
-  scene.fog.color.set(player.pos.y > -3 ? 0x5cbcff : 0x0b5ea8);
+  scene.fog.color.set(player.pos.y > -10 ? 0x5cbcff : 0x0b5ea8);
   camera.position.lerp(cameraTarget.clone().add(cameraOffset), 0.1);
   camera.lookAt(cameraTarget.clone().add(new THREE.Vector3(0, player.pitch * 1.2, 0)));
-  renderer.setClearColor(player.pos.y > -3 ? 0x7ed0ff : 0x1676d2);
+  renderer.setClearColor(player.pos.y > -10 ? 0x7ed0ff : 0x1676d2);
 
   water.position.x = player.pos.x;
   water.position.z = player.pos.z;
@@ -676,14 +681,14 @@ function updateAliens(dt) {
     const toPlayer = player.pos.clone().sub(alien.mesh.position);
     const dist = toPlayer.length();
     if (dist > 0.001) alien.mesh.position.addScaledVector(toPlayer.normalize(), alien.speed * dt);
-    alien.bob += dt * 2;
-    alien.mesh.position.y += Math.sin(alien.bob) * 0.01;
+    alien.bob += dt * (1.2 + alien.scale * 0.2);
+    alien.mesh.position.y += Math.sin(alien.bob) * 0.01 * alien.scale;
     alien.mesh.lookAt(player.pos);
 
     if (dist < 1.8) {
       const ram = player.velocity.length() * config.ramPower() * 0.18;
       alien.hp -= ram;
-      takeDamage(7 * dt + 4 * (1 - Math.min(1, player.velocity.length() / 4)) * dt);
+      takeDamage(alien.damage * dt + 5 * (1 - Math.min(1, player.velocity.length() / (4 + state.upgrades.head))) * dt);
       if (ram > 1.5) spawnRipple(alien.mesh.position, 0xffe08a);
       if (alien.hp <= 0) {
         scene.remove(alien.mesh);
@@ -707,7 +712,7 @@ function updatePickups(dt) {
     if (p.mesh.position.z - player.pos.z > worldRadius) p.mesh.position.z -= worldRadius * 2;
     if (p.mesh.position.z - player.pos.z < -worldRadius) p.mesh.position.z += worldRadius * 2;
     p.mesh.rotation.y += dt * p.spin;
-    p.mesh.position.y += Math.sin(performance.now() * 0.002 + i) * 0.002;
+    p.mesh.position.y += Math.sin(performance.now() * 0.002 + i) * 0.01;
     const dist = p.mesh.position.distanceTo(player.pos);
     if (dist < config.pickupRadius()) {
       scene.remove(p.mesh);
