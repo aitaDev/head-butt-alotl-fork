@@ -239,7 +239,6 @@ axEyeR.position.set(1.52, 0.26, -0.23);
 axSmile.position.set(1.74, -0.02, 0);
 axSmile.rotation.y = Math.PI / 2;
 axolotl.add(axBody, axHead, axTail, axFinL, axFinR, axGillL, axGillR, axEyeL, axEyeR, axSmile);
-axolotl.rotation.y = -Math.PI / 2;
 scene.add(axolotl);
 
 const cameraTarget = new THREE.Vector3();
@@ -570,9 +569,9 @@ function updatePlayer(dt) {
 
   axolotl.position.copy(player.pos);
   if (player.velocity.lengthSq() > 0.001) {
-    axolotl.rotation.y = Math.atan2(-player.velocity.x, -player.velocity.z);
+    axolotl.rotation.y = Math.atan2(-player.velocity.x, -player.velocity.z) + Math.PI / 2;
   } else {
-    axolotl.rotation.y = player.yaw;
+    axolotl.rotation.y = player.yaw + Math.PI / 2;
   }
   axolotl.rotation.x = THREE.MathUtils.lerp(axolotl.rotation.x, player.pitch * 0.35, 0.08);
   axolotl.rotation.z = Math.sin(performance.now() * 0.006) * 0.08;
