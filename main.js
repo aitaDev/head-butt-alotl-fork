@@ -118,7 +118,7 @@ app.innerHTML = `
         <button id="optionsBtn" class="secondary">Options</button>
         <button id="patchNotesBtn" class="secondary">Patch Notes</button>
       </div>
-      <div id="versionTag">${gameVersion}</div>
+      <div id="versionTag">${gameVersion} by Phishie</div>
     </div>
   </div>
 
@@ -1079,6 +1079,7 @@ function startGame(continueGame = false) {
   if (audioUnlocked) audio.underwater.play().catch(() => {});
   renderer.domElement.requestPointerLock();
   persist();
+  refreshAxolotlVisuals();
   updateHUD();
   renderUpgradeMenu();
   continueAllowed = true;
@@ -1168,7 +1169,7 @@ el.closeUpgradeBtn.onclick = () => openOverlay('pauseMenu');
 el.quitBtn.onclick = quitToTitle;
 el.retryBtn.onclick = () => { unlockAudio(); startGame(false); };
 el.gameOverTitleBtn.onclick = quitToTitle;
-el.closeWhaleChatBtn.onclick = () => { audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
+el.closeWhaleChatBtn.onclick = () => { paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.closeTutorialBtn.onclick = () => { audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.graphicsDown.onclick = () => setGraphics(-1);
 el.graphicsUp.onclick = () => setGraphics(1);
@@ -1502,11 +1503,61 @@ function updateRipples(dt) {
   }
 }
 
+function updateCreatureInteractions(now) {
+  // Jellyfish — headbutt them for XP + currency
+  for (let i = jellyfish.length - 1; i >= 0; i--) {
+    const jf = jellyfish[i];
+    const dist = jf.mesh.position.distanceTo(player.pos);
+    if (dist < 2.2 && player.velocity.length() > 1.5) {
+      const dmg = player.velocity.length() * config.ramPower() * 0.12;
+      if (dmg > 2) {
+        scene.remove(jf.mesh);
+        jellyfish.splice(i, 1);
+        state.currency += 3 + Math.floor(Math.random() * 3);
+        addXp(8);
+        spawnRipple(jf.mesh.position, jf.color || 0xff88cc);
+        showNotice('💙 Jellyfish bonked! Shimmering XP');
+        audio.eat.currentTime = 0;
+        audio.eat.play().catch(() => {});
+      }
+    }
+  }
+  // Seahorses — headbutt to collect, then they respawn elsewhere
+  for (let i = seahorses.length - 1; i >= 0; i--) {
+    const sh = seahorses[i];
+    const dist = sh.mesh.position.distanceTo(player.pos);
+    if (dist < 2.0 && player.velocity.length() > 1.2) {
+      scene.remove(sh.mesh);
+      seahorses.splice(i, 1);
+      state.currency += 2;
+      addXp(5);
+      spawnRipple(sh.mesh.position, 0xffd700);
+      showNotice('🐴 Seahorse startled! +5 XP');
+      setTimeout(() => { if (gameStarted) makeSeahorse(); }, 3000);
+    }
+  }
+  // Glow Orbs — swim through to collect (no headbutt needed, just proximity when moving fast)
+  for (let i = glowOrbs.length - 1; i >= 0; i--) {
+    const orb = glowOrbs[i];
+    const dist = orb.mesh.position.distanceTo(player.pos);
+    if (dist < 2.5) {
+      scene.remove(orb.mesh);
+      glowOrbs.splice(i, 1);
+      state.currency += 5;
+      addXp(15);
+      spawnRipple(orb.mesh.position, orb.color || 0x44ffaa);
+      showNotice('✨ Bioluminescent orb absorbed! +15 XP');
+      setTimeout(() => { if (gameStarted && glowOrbs.length < 16) makeGlowOrb(); }, 5000);
+    }
+  }
+}
+
 function animate(now) {
   requestAnimationFrame(animate);
   const dt = Math.min(0.033, (now - lastTime) / 1000);
   lastTime = now;
   stars.rotation.y += dt * 0.03;
+  lightRays.rotation.y += dt * 0.04;
   if (!paused && gameStarted) {
     updatePlayer(dt);
     updateAliens(dt, now);
@@ -1518,12 +1569,150 @@ function animate(now) {
       octo.bob += dt * 1.5;
       octo.mesh.position.y = -82 + Math.sin(octo.bob) * 0.5;
     }
+    updateJellyfish(dt);
+    updateSeahorses(dt);
+    updateGlowOrbs(dt, now);
+    updateAnemones(dt);
+    updateLoreTablets(dt);
+    updateBubbles(dt);
+    updateKelp(dt);
     updateFloatingTexts(dt);
     updateRipples(dt);
+    updateCreatureInteractions(now);
     persist();
     updateHUD();
   }
   renderer.render(scene, camera);
+}
+
+function updateJellyfish(dt) {
+  for (const jf of jellyfish) {
+    jf.bob += dt * 1.1;
+    jf.phase += dt * 0.6;
+    jf.mesh.position.y += Math.sin(jf.bob) * 0.018;
+    jf.mesh.position.x += Math.sin(jf.phase) * 0.006;
+    jf.mesh.position.z += Math.cos(jf.phase * 0.7) * 0.006;
+    // Pulse the bell
+    const bell = jf.mesh.children[0];
+    if (bell) bell.scale.y = 0.9 + Math.sin(jf.bob * 2) * 0.12;
+    // Recycle
+    const dx = jf.mesh.position.x - player.pos.x;
+    const dz = jf.mesh.position.z - player.pos.z;
+    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
+      jf.mesh.position.x = player.pos.x + (Math.random() - 0.5) * worldRadius * 1.6;
+      jf.mesh.position.z = player.pos.z + (Math.random() - 0.5) * worldRadius * 1.6;
+    }
+  }
+}
+
+function updateSeahorses(dt) {
+  for (const sh of seahorses) {
+    sh.bob += dt * 1.4;
+    sh.mesh.position.y += Math.sin(sh.bob) * 0.015;
+    sh.wanderAngle += dt * 0.4;
+    sh.mesh.position.x += Math.cos(sh.wanderAngle) * sh.speed * dt;
+    sh.mesh.position.z += Math.sin(sh.wanderAngle) * sh.speed * dt;
+    sh.mesh.rotation.y = sh.wanderAngle + Math.PI / 2;
+    const dx = sh.mesh.position.x - player.pos.x;
+    const dz = sh.mesh.position.z - player.pos.z;
+    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
+      sh.wanderAngle = Math.random() * Math.PI * 2;
+      sh.mesh.position.x = player.pos.x + (Math.random() - 0.5) * worldRadius * 1.4;
+      sh.mesh.position.z = player.pos.z + (Math.random() - 0.5) * worldRadius * 1.4;
+    }
+  }
+}
+
+function updateGlowOrbs(dt, now) {
+  for (const orb of glowOrbs) {
+    orb.bob += dt * 2.2;
+    orb.phase += dt * 0.8;
+    orb.mesh.position.y += Math.sin(orb.bob) * 0.012;
+    const intensity = 0.8 + Math.sin(orb.phase * 3 + now * 0.001) * 0.4;
+    orb.mesh.children[0].material.emissiveIntensity = intensity;
+    orb.mesh.children[1].material.opacity = 0.08 + Math.sin(orb.phase * 2) * 0.07;
+    const dx = orb.mesh.position.x - player.pos.x;
+    const dz = orb.mesh.position.z - player.pos.z;
+    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
+      orb.mesh.position.x = player.pos.x + (Math.random() - 0.5) * worldRadius * 1.6;
+      orb.mesh.position.z = player.pos.z + (Math.random() - 0.5) * worldRadius * 1.6;
+    }
+  }
+}
+
+function updateAnemones(dt) {
+  for (const anem of anemones) {
+    anem.bob += dt * 1.6;
+    for (const tentacle of anem.tentacles) {
+      tentacle.rotation.z = (Math.random() - 0.5) * 0.6 + Math.sin(anem.bob + tentacle.position.x) * 0.3;
+    }
+    const dx = anem.mesh.position.x - player.pos.x;
+    const dz = anem.mesh.position.z - player.pos.z;
+    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
+      const r = 8 + Math.random() * 90;
+      const a = Math.random() * Math.PI * 2;
+      anem.mesh.position.x = player.pos.x + Math.cos(a) * r;
+      anem.mesh.position.z = player.pos.z + Math.sin(a) * r;
+    }
+  }
+}
+
+function updateLoreTablets(dt) {
+  for (const tablet of loreTablets) {
+    tablet.bob += dt * 0.8;
+    tablet.mesh.position.y = -83.8 + Math.sin(tablet.bob) * 0.08;
+    const dist = tablet.mesh.position.distanceTo(player.pos);
+    if (dist < 5 && !tablet.read) {
+      tablet.read = true;
+      showNotice(`📜 "${tablet.text}"`);
+    }
+    if (dist > 14 && tablet.read) tablet.read = false;
+    const dx = tablet.mesh.position.x - player.pos.x;
+    const dz = tablet.mesh.position.z - player.pos.z;
+    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
+      const r = 15 + Math.random() * 70;
+      const a = Math.random() * Math.PI * 2;
+      tablet.mesh.position.x = player.pos.x + Math.cos(a) * r;
+      tablet.mesh.position.z = player.pos.z + Math.sin(a) * r;
+      tablet.read = false;
+    }
+  }
+}
+
+function updateBubbles(dt) {
+  // Spawn bubbles from axolotl
+  if (Math.random() < 0.18) {
+    const b = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05 + Math.random() * 0.08, 6, 6),
+      new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.55 })
+    );
+    b.position.copy(axolotl.position).add(new THREE.Vector3((Math.random() - 0.5) * 1.2, 0.5, (Math.random() - 0.5) * 0.8));
+    scene.add(b);
+    bubbles.push({ mesh: b, life: 2.2 + Math.random() * 1.2, speed: 1.2 + Math.random() * 0.8 });
+  }
+  for (let i = bubbles.length - 1; i >= 0; i--) {
+    const b = bubbles[i];
+    b.life -= dt;
+    b.mesh.position.y += b.speed * dt;
+    b.mesh.material.opacity = Math.max(0, b.life * 0.3);
+    if (b.life <= 0) { scene.remove(b.mesh); bubbles.splice(i, 1); }
+  }
+}
+
+function updateKelp(dt) {
+  const t = performance.now() * 0.001;
+  for (const blade of kelpBlades) {
+    blade.rotation.z = Math.sin(t * blade.userData.speed + blade.userData.phase) * 0.25;
+    blade.rotation.x = Math.sin(t * blade.userData.speed * 0.7 + blade.userData.phase) * 0.08;
+    const dx = blade.position.x - player.pos.x;
+    const dz = blade.position.z - player.pos.z;
+    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
+      const r = 6 + Math.random() * 92;
+      const a = Math.random() * Math.PI * 2;
+      blade.position.x = player.pos.x + Math.cos(a) * r;
+      blade.position.z = player.pos.z + Math.sin(a) * r;
+    }
+  }
 }
 
 updateHUD();
