@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; font-family: 'Press Start 2P', monospace; background: #02131f; color: #fff; }
-canvas { display: block; }
+canvas { display: block; transition: opacity 0.25s ease; }
 .hidden { display: none !important; }
 #app, #ui { position: fixed; inset: 0; }
 #ui { pointer-events: none; }
@@ -23,23 +23,89 @@ canvas { display: block; }
   background: rgba(8,18,34,0.96); border: 1px solid rgba(130,170,255,0.35); border-radius: 18px;
   box-shadow: 0 20px 80px rgba(0,0,0,0.45); padding: 28px; position: relative;
 }
+.main-menu-panel {
+  width: min(96vw, 980px);
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+  align-items: center;
+  gap: 28px;
+  background: linear-gradient(135deg, rgba(24,65,130,0.96), rgba(9,26,54,0.98));
+  border: 1px solid rgba(140,210,255,0.35);
+}
+.main-menu-copy { text-align: left; }
+.main-menu-art {
+  min-height: 320px;
+  border-radius: 18px;
+  background: radial-gradient(circle at 30% 20%, rgba(120,220,255,0.22), rgba(20,40,80,0.12) 45%, rgba(6,14,30,0.05) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.main-menu-art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.12), transparent 30%), radial-gradient(circle at 20% 75%, rgba(90,180,255,0.15), transparent 28%);
+}
 h1, h2, h3, p { margin-top: 0; }
 .title { font-size: 40px; margin-bottom: 6px; color: #9fdcff; }
 .subtitle { color: #a7bbd8; margin-bottom: 20px; }
 .menu-buttons, .stack { display: grid; gap: 12px; }
 button {
-  appearance: none; border: 0; border-radius: 12px; padding: 14px 16px; cursor: pointer;
-  background: linear-gradient(180deg, #5ad1ff, #2f78ff); color: white; font-weight: 700; font-size: 12px; text-transform: uppercase;
+  appearance: none; border: 1px solid rgba(180,235,255,0.3); border-radius: 6px; padding: 14px 16px; cursor: pointer;
+  background: linear-gradient(180deg, #5aaeff, #2563d6); color: white; font-weight: 700; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  box-shadow: 0 8px 24px rgba(20,90,200,0.25); transition: transform 0.08s ease, filter 0.15s ease, border-color 0.15s ease;
 }
-button.secondary { background: rgba(255,255,255,0.08); }
+button:hover { filter: brightness(1.08); border-color: rgba(220,245,255,0.55); }
+button:active { transform: translateY(1px) scale(0.995); }
+button.secondary { background: linear-gradient(180deg, #244268, #132743); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 #versionTag {
-  position: absolute;
-  right: 18px;
-  bottom: 14px;
+  margin-top: 16px;
   font-size: 10px;
   color: #ffd27d;
   text-shadow: 2px 2px 0 #000;
+}
+.menu-axolotl {
+  position: relative;
+  width: 260px;
+  height: 170px;
+  transform: rotate(-8deg);
+}
+.menu-body, .menu-head, .menu-tail, .menu-eye, .menu-gill { position: absolute; }
+.menu-body {
+  width: 128px; height: 78px; left: 72px; top: 48px; border-radius: 48px;
+  background: linear-gradient(180deg, #ff9bc6, #ff6fb2);
+  box-shadow: inset 0 -10px 0 rgba(180,40,110,0.18), 0 16px 40px rgba(0,0,0,0.18);
+}
+.menu-head {
+  width: 86px; height: 72px; left: 156px; top: 42px; border-radius: 32px;
+  background: linear-gradient(180deg, #ffb0d2, #ff7fbc);
+}
+.menu-tail {
+  width: 74px; height: 20px; left: 18px; top: 80px; border-radius: 16px;
+  background: linear-gradient(180deg, #ff8fbe, #ff5fa8);
+}
+.menu-tail::before, .menu-tail::after {
+  content: ''; position: absolute; width: 34px; height: 18px; left: -8px; border-radius: 18px; background: inherit;
+}
+.menu-tail::before { top: -10px; transform: rotate(-22deg); }
+.menu-tail::after { top: 12px; transform: rotate(22deg); }
+.menu-eye {
+  width: 9px; height: 9px; border-radius: 50%; background: #161616; top: 70px;
+}
+.eye-left { left: 208px; }
+.eye-right { left: 225px; }
+.menu-gill {
+  width: 42px; height: 14px; background: linear-gradient(180deg, #ffb3df, #ff79c5); border-radius: 14px;
+}
+.gill-left { left: 164px; top: 32px; transform: rotate(-24deg); }
+.gill-right { left: 164px; top: 110px; transform: rotate(24deg); }
+@media (max-width: 760px) {
+  .main-menu-panel { grid-template-columns: 1fr; }
+  .main-menu-art { min-height: 220px; order: -1; }
 }
 .patch-note {
   background: rgba(255,255,255,0.05);

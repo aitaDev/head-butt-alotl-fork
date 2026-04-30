@@ -129,16 +129,29 @@ app.innerHTML = `
     </div>
   </div>
   <div id="mainMenu" class="overlay">
-    <div class="panel">
-      <h1 class="title">Head-Butt-Alotl</h1>
-      <p class="subtitle">Save the pond by headbutting alien invaders and gobbling worms for power.</p>
-      <div class="menu-buttons">
-        <button id="newGameBtn">New Game</button>
-        <button id="continueBtn">Continue</button>
-        <button id="optionsBtn" class="secondary">Options</button>
-        <button id="patchNotesBtn" class="secondary">Patch Notes</button>
+    <div class="panel main-menu-panel">
+      <div class="main-menu-copy">
+        <h1 class="title">Head-Butt-Alotl</h1>
+        <p class="subtitle">Save the pond by headbutting alien invaders and gobbling worms for power.</p>
+        <div class="menu-buttons">
+          <button id="newGameBtn">New Game</button>
+          <button id="continueBtn">Continue</button>
+          <button id="optionsBtn" class="secondary">Options</button>
+          <button id="patchNotesBtn" class="secondary">Patch Notes</button>
+        </div>
+        <div id="versionTag">${gameVersion} by Phishie</div>
       </div>
-      <div id="versionTag">${gameVersion} by Phishie</div>
+      <div class="main-menu-art" aria-hidden="true">
+        <div class="menu-axolotl">
+          <div class="menu-tail"></div>
+          <div class="menu-body"></div>
+          <div class="menu-head"></div>
+          <div class="menu-eye eye-left"></div>
+          <div class="menu-eye eye-right"></div>
+          <div class="menu-gill gill-left"></div>
+          <div class="menu-gill gill-right"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1485,6 +1498,7 @@ function setGraphics(delta) {
 function openOverlay(id) {
   for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu', 'tutorialMenu', 'upgradeHintMenu', 'storyMenu']) el[key].classList.add('hidden');
   if (id) el[id].classList.remove('hidden');
+  if (renderer?.domElement) renderer.domElement.style.opacity = id === 'mainMenu' ? '0' : '1';
 }
 
 function startGame(continueGame = false) {
