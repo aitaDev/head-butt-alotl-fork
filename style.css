@@ -8,7 +8,11 @@ canvas { display: block; transition: opacity 0.25s ease; }
 .panel, .overlay { pointer-events: auto; }
 .overlay {
   position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle at top, rgba(60,100,180,1), rgba(2,18,42,1)); z-index: 20;
+  background:
+    radial-gradient(circle at 15% 18%, rgba(126,255,224,0.30), transparent 24%),
+    radial-gradient(circle at 82% 14%, rgba(255,185,230,0.22), transparent 22%),
+    linear-gradient(180deg, rgba(61,171,255,1) 0%, rgba(40,124,232,1) 32%, rgba(22,160,170,1) 68%, rgba(24,122,86,1) 100%);
+  z-index: 20;
 }
 .thunder-panel {
   animation: thunderPulse 0.18s steps(2) infinite alternate;
@@ -37,8 +41,8 @@ canvas { display: block; transition: opacity 0.25s ease; }
   min-height: 320px;
   border-radius: 18px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(192,255,223,0.24), transparent 26%),
-    linear-gradient(180deg, rgba(54,165,219,0.98) 0%, rgba(28,132,191,0.98) 36%, rgba(18,124,145,0.98) 62%, rgba(29,116,84,0.98) 100%);
+    radial-gradient(circle at 50% 0%, rgba(236,255,240,0.26), transparent 26%),
+    linear-gradient(180deg, rgba(88,196,255,0.98) 0%, rgba(40,153,228,0.98) 34%, rgba(43,190,176,0.98) 64%, rgba(70,150,98,0.98) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,10 +54,10 @@ canvas { display: block; transition: opacity 0.25s ease; }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 70% 30%, rgba(255,255,255,0.14), transparent 28%),
-    radial-gradient(circle at 20% 75%, rgba(178,255,210,0.18), transparent 24%),
-    repeating-linear-gradient(168deg, rgba(255,255,255,0.1) 0 10px, rgba(255,255,255,0) 10px 30px);
-  opacity: 0.65;
+    radial-gradient(circle at 70% 30%, rgba(255,255,255,0.18), transparent 28%),
+    radial-gradient(circle at 20% 75%, rgba(205,255,214,0.20), transparent 24%),
+    repeating-linear-gradient(168deg, rgba(255,255,255,0.12) 0 10px, rgba(255,255,255,0) 10px 30px);
+  opacity: 0.72;
 }
 h1, h2, h3, p { margin-top: 0; }
 .title { font-size: 40px; margin-bottom: 6px; color: #9fdcff; }
