@@ -1002,7 +1002,7 @@ function makeUrchin() {
   group.add(body);
   const r = 10 + Math.random() * 88; const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -83.5, Math.sin(a) * r);
-  group.scale.setScalar(2);
+  group.scale.setScalar(2 + Math.random() * 4);
   scene.add(group);
   urchins.push({ mesh: group, hp: (18 + Math.random() * 12) * 2, bob: Math.random() * Math.PI * 2, hitCooldown: 0 });
 }
@@ -2398,9 +2398,9 @@ function updateSeabedCreatures(dt, now) {
     if (urchin.hitCooldown > 0) urchin.hitCooldown -= dt;
     const dist = urchin.mesh.position.distanceTo(player.pos);
     if (dist < 1.8 + player.radius) {
-      resolveSolidCollision(player.pos, urchin.mesh.position, 3.6 + player.radius);
+      resolveSolidCollision(player.pos, urchin.mesh.position, urchin.mesh.scale.x * 1.8 + player.radius);
       if (urchin.hitCooldown <= 0) {
-        takeDamage(8 * dt, 'a sea urchin');
+        takeDamage(4 * urchin.mesh.scale.x * dt, 'a sea urchin');
         if (debugGodMode && urchin.hp > 0) {
           scene.remove(urchin.mesh);
           urchins.splice(j, 1);
