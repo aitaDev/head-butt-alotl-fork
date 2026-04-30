@@ -1140,30 +1140,44 @@ function makeShark(overridePos) {
 
 function makeTuna(overridePos) {
   const group = new THREE.Group();
-  // Body: 1.8 wide(X) x 2.2 tall(Y) x 6.5 long(Z). At rotation.y=PI/2, Z→world X (forward).
-  const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.2, 6.5), new THREE.MeshStandardMaterial({ color: 0x3a6f9f, roughness: 0.65 }));
-  const belly = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.8, 5.8), new THREE.MeshStandardMaterial({ color: 0xc8dff0, roughness: 0.8 }));
-  const back = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.9, 4.5), new THREE.MeshStandardMaterial({ color: 0x2a5f8f, roughness: 0.7 }));
-  const tail = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.8, 0.4), new THREE.MeshStandardMaterial({ color: 0x3a6f9f, roughness: 0.65 }));
-  const finTop = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.4, 1.2), new THREE.MeshStandardMaterial({ color: 0x2a5f8f, roughness: 0.7 }));
-  const finSideL = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 0.2), new THREE.MeshStandardMaterial({ color: 0x336699, roughness: 0.72 }));
+  // Body: 1.8 wide(X) x 2.2 tall(Y) x 13.0 long(Z). At rotation.y=PI/2, Z→world X (forward).
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.2, 13.0), new THREE.MeshStandardMaterial({ color: 0x3a6f9f, roughness: 0.65 }));
+  const belly = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.8, 11.6), new THREE.MeshStandardMaterial({ color: 0xc8dff0, roughness: 0.8 }));
+  const back = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.9, 9.0), new THREE.MeshStandardMaterial({ color: 0x2a5f8f, roughness: 0.7 }));
+  const tailGroup = new THREE.Group();
+  const tailBase = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 1.0), new THREE.MeshStandardMaterial({ color: 0x2a5f8f }));
+  const tailUpper = new THREE.Mesh(new THREE.BoxGeometry(0.15, 3.6, 0.15), new THREE.MeshStandardMaterial({ color: 0x3a6f9f, roughness: 0.65 }));
+  const tailLower = tailUpper.clone();
+  const tailMid = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.8, 0.12), new THREE.MeshStandardMaterial({ color: 0x336699, roughness: 0.72 }));
+  tailUpper.position.set(0, 2.0, 0);
+  tailLower.position.set(0, -2.0, 0);
+  tailMid.position.set(0, 0, 0);
+  tailGroup.add(tailBase, tailUpper, tailLower, tailMid);
+  tailGroup.position.set(0, 0, -6.8);
+  tailGroup.rotation.z = 0.28;
+  const finTop = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.8, 2.4), new THREE.MeshStandardMaterial({ color: 0x2a5f8f, roughness: 0.7 }));
+  const finSideL = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.8, 0.2), new THREE.MeshStandardMaterial({ color: 0x336699, roughness: 0.72 }));
   const finSideR = finSideL.clone();
-  const tailBase = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.5), new THREE.MeshStandardMaterial({ color: 0x2a5f8f }));
-  tail.rotation.y = 0.28;
-  back.position.set(0, 0.6, -0.5);
-  belly.position.set(0, -0.5, -0.4);
-  finTop.position.set(0, 1.1, 0.5);
-  finSideL.position.set(0.7, -0.3, 0.8);
-  finSideR.position.set(-0.7, -0.3, 0.8);
-  tail.position.set(0, 0, -3.4);
-  tailBase.position.set(0, 0, -3.0);
-  group.add(body, belly, back, tail, tailBase, finTop, finSideL, finSideR);
+  const pectoralL = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.8, 0.2), new THREE.MeshStandardMaterial({ color: 0x3a6f9f, roughness: 0.7 }));
+  const pectoralR = pectoralL.clone();
+  const analFin = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.4, 1.2), new THREE.MeshStandardMaterial({ color: 0x2a5f8f, roughness: 0.7 }));
+  back.position.set(0, 0.6, -1.0);
+  belly.position.set(0, -0.5, -0.8);
+  finTop.position.set(0, 1.1, 1.0);
+  finSideL.position.set(0.7, -0.3, 1.6);
+  finSideR.position.set(-0.7, -0.3, 1.6);
+  pectoralL.position.set(0.9, -0.6, 0.5);
+  pectoralL.rotation.z = 0.4;
+  pectoralR.position.set(-0.9, -0.6, 0.5);
+  pectoralR.rotation.z = -0.4;
+  analFin.position.set(0, -0.6, -4.0);
+  group.add(body, belly, back, tailGroup, finTop, finSideL, finSideR, pectoralL, pectoralR, analFin);
   const r = 15 + Math.random() * 80;
   const a = Math.random() * Math.PI * 2;
   group.rotation.y = Math.PI / 2;
   group.position.set(overridePos ? overridePos.x : Math.cos(a) * r, overridePos ? overridePos.y : -55 + Math.random() * 35, overridePos ? overridePos.z : Math.sin(a) * r);
   scene.add(group);
-  tunas.push({ mesh: group, speed: 1.8 + Math.random() * 0.8, hp: 1000, bob: Math.random() * Math.PI * 2, hitCooldown: 0, collisionRadius: 4.5, friendly: true, wanderAngle: Math.random() * Math.PI * 2 });
+  tunas.push({ mesh: group, speed: 1.8 + Math.random() * 0.8, hp: 3000, bob: Math.random() * Math.PI * 2, hitCooldown: 0, collisionRadius: 9, friendly: true, wanderAngle: Math.random() * Math.PI * 2 });
 }
 
 function makeOctopus(overridePos) {
