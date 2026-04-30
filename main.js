@@ -1038,7 +1038,7 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45
   const maxR = kind === 'fish' ? 110 : 48;
   const r = minR + Math.random() * (maxR - minR);
   const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, kind === 'worm' ? -82.5 : -76 + Math.random() * 68, Math.sin(a) * r);
+  group.position.set(Math.cos(a) * r, kind === 'worm' ? -35 - Math.random() * 52 : -76 + Math.random() * 68, Math.sin(a) * r);
   group.rotation.set(Math.random(), Math.random(), Math.random());
   scene.add(group);
   const collisionRadius = kind === 'steak' ? 1.1 : kind === 'fish' ? 0.95 : 0.7;
