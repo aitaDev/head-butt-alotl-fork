@@ -601,6 +601,9 @@ const keys = new Set();
 let lastTime = performance.now();
 let alienSpawnTimer = 0;
 let pickupSpawnTimer = 0;
+let sharkSpawnTimer = 0;
+let anglerSpawnTimer = 0;
+let leviathanSpawnTimer = 0;
 let continueAllowed = !!data.save.hasSave;
 const worldRadius = 100;
 let isGameOver = false;
@@ -1157,6 +1160,12 @@ function makeAnglerfish() {
 }
 
 function updateAnglerfish(dt, now) {
+  anglerSpawnTimer += dt;
+  const elapsed = (performance.now() - roundStartedAt) / 1000;
+  if (state.level >= 5 && elapsed >= 150 && anglerfish.length < 1 && anglerSpawnTimer > 25) {
+    anglerSpawnTimer = 0;
+    makeAnglerfish();
+  }
   for (let i = anglerfish.length - 1; i >= 0; i--) {
     const af = anglerfish[i];
     // Recycle around player
@@ -1869,8 +1878,13 @@ document.addEventListener('mouseup', e => { if (e.button === 0) keys.delete('Mou
 
 function updateAliens(dt, now) {
   alienSpawnTimer += dt;
-  const hostileDelayPassed = performance.now() - roundStartedAt >= 60000;
-  if (hostileDelayPassed && alienSpawnTimer > 7.5 && aliens.length < 1) { alienSpawnTimer = 0; makeAlien(); }
+  const elapsed = (performance.now() - roundStartedAt) / 1000;
+  let targetAliens = 0;
+  if (elapsed >= 30 && elapsed < 60) targetAliens = 1;
+  else if (elapsed >= 60 && elapsed < 120) targetAliens = 2;
+  else if (elapsed >= 120 && elapsed < 180) targetAliens = 3;
+  else if (elapsed >= 180) targetAliens = 4;
+  if (alienSpawnTimer > 7.5 && aliens.length < targetAliens) { alienSpawnTimer = 0; makeAlien(); }
   for (const alien of aliens) {
     if (alien.mesh.position.x - player.pos.x > worldRadius) alien.mesh.position.x -= worldRadius * 2;
     if (alien.mesh.position.x - player.pos.x < -worldRadius) alien.mesh.position.x += worldRadius * 2;
@@ -1967,6 +1981,12 @@ function updateNarwhals(dt) {
 }
 
 function updateLeviathans(dt, now) {
+  leviathanSpawnTimer += dt;
+  const elapsed = (performance.now() - roundStartedAt) / 1000;
+  if (state.level >= 7 && elapsed >= 210 && leviathans.length < 1 && leviathanSpawnTimer > 45) {
+    leviathanSpawnTimer = 0;
+    makeLeviathan();
+  }
   let nearLeviathan = false;
   for (let i = leviathans.length - 1; i >= 0; i--) {
     const leviathan = leviathans[i];
@@ -1989,6 +2009,12 @@ function updateLeviathans(dt, now) {
 }
 
 function updateSharks(dt, now) {
+  sharkSpawnTimer += dt;
+  const elapsed = (performance.now() - roundStartedAt) / 1000;
+  if (state.level >= 3 && elapsed >= 90 && sharks.length < 1 && sharkSpawnTimer > 20) {
+    sharkSpawnTimer = 0;
+    makeShark();
+  }
   for (let i = sharks.length - 1; i >= 0; i--) {
     const shark = sharks[i];
     if (shark.mesh.position.x - player.pos.x > worldRadius) shark.mesh.position.x -= worldRadius * 2;
