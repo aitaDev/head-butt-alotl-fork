@@ -8,6 +8,40 @@
 </head>
 <body>
   <div id="app"></div>
+  <div id="debugMenu" class="overlay hidden">
+    <div class="panel" style="min-width:300px;">
+      <h2 style="color:#9fdcff;font-family:'Press Start 2P',monospace;font-size:14px;margin-bottom:20px;">DEBUG MENU</h2>
+      <label style="display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" id="debugHideFloor" /> Hide Floor
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" id="debugShowCoords" /> Show Player Coords
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;margin-bottom:20px;cursor:pointer;">
+        <input type="checkbox" id="debugGodMode" /> God Mode
+      </label>
+      <div style="margin-bottom:20px;">
+        <div style="margin-bottom:8px;color:#a7bbd8;font-family:'Press Start 2P',monospace;font-size:9px;">SPAWN MOB:</div>
+        <select id="debugSpawnSelect" style="width:100%;padding:10px;font-family:'Press Start 2P',monospace;font-size:10px;background:#1a2a44;color:#fff;border:1px solid rgba(140,210,255,0.35);border-radius:4px;">
+          <option value="">Select mob...</option>
+          <option value="alien">Alien</option>
+          <option value="shark">Shark</option>
+          <option value="anglerfish">Anglerfish</option>
+          <option value="leviathan">Leviathan</option>
+          <option value="crab">Crab</option>
+          <option value="urchin">Urchin</option>
+          <option value="jellyfish">Jellyfish</option>
+          <option value="pearl">Pearl</option>
+        </select>
+        <button id="debugSpawnBtn" style="margin-top:10px;width:100%;">SPAWN</button>
+      </div>
+      <button id="debugCloseBtn" style="width:100%;">CLOSE</button>
+    </div>
+  </div>
+  <div id="debugCoords" style="position:fixed;top:12px;left:12px;background:rgba(0,0,0,0.7);color:#9fdcff;font-family:'Press Start 2P',monospace;font-size:9px;padding:10px 14px;border-radius:4px;pointer-events:none;z-index:1000;display:none;line-height:1.8;">
+    <div id="debugPos">x:0 y:0 z:0</div>
+    <div id="debugVel">vel:0</div>
+  </div>
   <script type="module" src="./main.js"></script>
 </body>
 </html>

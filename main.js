@@ -2,7 +2,11 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.4.0';
+const gameVersion = 'v0.4.0-debug';
+const isFork = true;
+let debugGodMode = false;
+let debugHideFloor = false;
+let debugShowCoords = false;
 const patchNotes = [
   'v0.4.0  Depth gauge — real-time dive indicator with zone name and visual fill. Deep waters darken the world.',
   'v0.3.5  Anglerfish lurking in the deep — glowing lures, aggressive hunting in dark waters, pulsing bioluminescence.',
@@ -1212,6 +1216,7 @@ function updateAnglerfish(dt, now) {
     // Contact damage
     if (dist < af.collisionRadius + player.radius) {
       if (af.hitCooldown <= 0) {
+        if (debugGodMode) { anglerfish.splice(i, 1); scene.remove(af.mesh); return; }
         takeDamage(af.damage * dt, 'an anglerfish');
         af.hitCooldown = 0.4;
         spawnRipple(af.mesh.position, af.lureColor || 0x00ffcc);
@@ -1379,6 +1384,7 @@ function addXp(amount) {
 }
 
 function takeDamage(amount, cause = null) {
+  if (debugGodMode) return;
   if (cause) lastDamageCause = cause;
   state.health = Math.max(0, state.health - amount);
   if (state.health <= 0 && !isGameOver) {
@@ -1627,6 +1633,16 @@ document.addEventListener('mousemove', e => {
   player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch));
 });
 
+function toggleDebugMenu() {
+  const panel = document.getElementById('debugMenu');
+  if (!panel) return;
+  if (panel.classList.contains('hidden')) {
+    openOverlay('debugMenu');
+  } else {
+    openOverlay(null);
+  }
+}
+
 document.addEventListener('keydown', e => {
   if (rebinding) {
     data.options.keybinds[rebinding] = e.code;
@@ -1635,6 +1651,7 @@ document.addEventListener('keydown', e => {
     renderOptions();
     return;
   }
+  if (e.code === 'F3' && isFork) { e.preventDefault(); toggleDebugMenu(); return; }
   if (!el.whaleChatMenu.classList.contains('hidden') && e.code === 'Space') {
     e.preventDefault();
     continueWhaleDialog();
@@ -1876,6 +1893,45 @@ function updatePlayer(dt) {
 document.addEventListener('mousedown', e => { if (e.button === 0) keys.add('Mouse0'); });
 document.addEventListener('mouseup', e => { if (e.button === 0) keys.delete('Mouse0'); });
 
+if (isFork) {
+  const debugHideFloorCheck = document.getElementById('debugHideFloor');
+  const debugShowCoordsCheck = document.getElementById('debugShowCoords');
+  const debugGodModeCheck = document.getElementById('debugGodMode');
+  const debugSpawnSelect = document.getElementById('debugSpawnSelect');
+  const debugSpawnBtn = document.getElementById('debugSpawnBtn');
+  const debugCloseBtn = document.getElementById('debugCloseBtn');
+
+  if (debugHideFloorCheck) {
+    debugHideFloorCheck.addEventListener('change', e => {
+      debugHideFloor = e.target.checked;
+      if (floor) floor.visible = !debugHideFloor;
+    });
+  }
+  if (debugShowCoordsCheck) {
+    debugShowCoordsCheck.addEventListener('change', e => { debugShowCoords = e.target.checked; });
+  }
+  if (debugGodModeCheck) {
+    debugGodModeCheck.addEventListener('change', e => { debugGodMode = e.target.checked; });
+  }
+  if (debugSpawnBtn) {
+    debugSpawnBtn.onclick = () => {
+      const type = debugSpawnSelect.value;
+      if (!type) return;
+      if (type === 'alien') makeAlien();
+      else if (type === 'shark') makeShark();
+      else if (type === 'anglerfish') makeAnglerfish();
+      else if (type === 'leviathan') makeLeviathan();
+      else if (type === 'crab') makeCrab();
+      else if (type === 'urchin') makeUrchin();
+      else if (type === 'jellyfish') makeJellyfish();
+      else if (type === 'pearl') makePearl();
+    };
+  }
+  if (debugCloseBtn) {
+    debugCloseBtn.onclick = () => openOverlay(null);
+  }
+}
+
 function updateAliens(dt, now) {
   alienSpawnTimer += dt;
   const elapsed = (performance.now() - roundStartedAt) / 1000;
@@ -1912,6 +1968,7 @@ function updateAliens(dt, now) {
         const crit = sprintingCrit || movingCrit;
         const dealt = crit ? ram * 1.5 : ram;
         alien.hp -= dealt;
+        if (debugGodMode && dealt > 0) alien.hp = 0;
         killed = alien.hp <= 0;
         audio.eat.currentTime = 0;
         audio.eat.play().catch(() => {});
@@ -2040,6 +2097,7 @@ function updateSharks(dt, now) {
         const crit = sprintingCrit || movingCrit;
         const dealt = crit ? ram * 1.5 : ram;
         shark.hp -= dealt;
+        if (debugGodMode && dealt > 0) shark.hp = 0;
         killed = shark.hp <= 0;
         audio.eat.currentTime = 0;
         audio.eat.play().catch(() => {});
@@ -2177,6 +2235,10 @@ function animate(now) {
     updateSeabedCreatures(dt, now);
     persist();
     updateHUD();
+    if (debugShowCoords && el.debugCoords) {
+      el.debugPos.textContent = `x:${player.pos.x.toFixed(1)} y:${player.pos.y.toFixed(1)} z:${player.pos.z.toFixed(1)}`;
+      el.debugVel.textContent = `vel:${player.velocity.length().toFixed(1)}`;
+    }
   }
   renderer.render(scene, camera);
   if (!el.mainMenu.classList.contains('hidden')) {
@@ -2338,6 +2400,10 @@ function updateSeabedCreatures(dt, now) {
       resolveSolidCollision(player.pos, urchin.mesh.position, 1.8 + player.radius);
       if (urchin.hitCooldown <= 0) {
         takeDamage(4 * dt, 'a sea urchin');
+        if (debugGodMode && urchin.hp > 0) {
+          scene.remove(urchin.mesh);
+          urchins.splice(j, 1);
+        }
         urchin.hitCooldown = 0.5;
       }
     }
@@ -2360,6 +2426,11 @@ function updateSeabedCreatures(dt, now) {
     if (dist < 1.5 + player.radius) {
       resolveSolidCollision(player.pos, crab.mesh.position, 1.5 + player.radius);
       if (crab.hitCooldown <= 0) {
+        if (debugGodMode) {
+          scene.remove(crab.mesh);
+          crabs.splice(i, 1);
+          return;
+        }
         takeDamage(3 * dt, 'a crab with attitude');
         crab.hitCooldown = 0.4;
         crab.wanderAngle = Math.random() * Math.PI * 2;
