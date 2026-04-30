@@ -1430,7 +1430,7 @@ function renderUpgradeMenu() {
     const cost = meta.cost(lvl);
     const row = document.createElement('div');
     row.className = 'upgrade';
-    row.innerHTML = `<div><strong>${meta.name}</strong><div class="small">${meta.desc} (Level ${lvl}/5)</div></div><div class="value">${lvl >= 5 ? 'MAX' : cost + ' Salted Silver'}</div>`;
+    row.innerHTML = `<div><strong>${meta.name}</strong><div class="small">${meta.desc} (Level ${lvl}/5)</div></div><div class="value">${lvl >= 5 ? 'MAX' : `<span class="coin-icon" aria-hidden="true"></span> ${cost}`}</div>`;
     const btn = document.createElement('button');
     btn.textContent = lvl >= 5 ? 'Maxed' : 'Upgrade';
     btn.disabled = lvl >= 5 || state.currency < cost;
