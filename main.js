@@ -2,8 +2,8 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.5.0';
-const isFork = false;
+const gameVersion = 'v0.5.0-debug';
+const isFork = true;
 let debugGodMode = false;
 let debugHideFloor = false;
 let debugShowCoords = false;
@@ -67,6 +67,37 @@ const state = {
   upgrades: { ...data.save.upgrades },
   stats: { ...data.save.stats }
 };
+
+const skins = [
+  { name: 'Bluey',      body: 0x5bb8f5, stripe: 0x3a8fd4, head: 0x88c8ff, gills: 0x3399e6, legs: 0x4499e0, tail: 0x88c4ff },
+  { name: 'Dazi Pink', body: 0xff9ecf, stripe: 0xf58cbc, head: 0xffadd7, gills: 0xff5ca8, legs: 0xff8fca, tail: 0xffbddf },
+  { name: 'Shrek',     body: 0x78dd55, stripe: 0x5cb83a, head: 0x99ee77, gills: 0x44aa33, legs: 0x55bb44, tail: 0x88dd66 }
+];
+let currentSkinIndex = 1;
+
+function applySkin(idx) {
+  currentSkinIndex = ((idx % skins.length) + skins.length) % skins.length;
+  const s = skins[currentSkinIndex];
+  axBody.material.color.setHex(s.body);
+  axBodyStripe.material.color.setHex(s.stripe);
+  axHead.material.color.setHex(s.head);
+  axGillL.material.color.setHex(s.gills);
+  axGillR.material.color.setHex(s.gills);
+  axLegFL.material.color.setHex(s.legs);
+  axLegFR.material.color.setHex(s.legs);
+  axLegBL.material.color.setHex(s.legs);
+  axLegBR.material.color.setHex(s.legs);
+  axTail.material.color.setHex(s.stripe);
+  axTailTip.material.color.setHex(s.tail);
+  const nameEl = document.getElementById('skinName');
+  const swatchEl = document.getElementById('skinSwatch');
+  if (nameEl) nameEl.textContent = s.name;
+  if (swatchEl) swatchEl.style.background = '#' + s.body.toString(16).padStart(6,'0');
+}
+
+function nextSkin(delta) {
+  applySkin(currentSkinIndex + delta);
+}
 
 const config = {
   moveSpeed: () => 7 + state.upgrades.fins * 1.4,
@@ -138,6 +169,14 @@ app.innerHTML = `
       <div class="main-menu-copy">
         <h1 class="title">Head-Butt-Alotl</h1>
         <p class="subtitle">Save the pond by headbutting alien invaders and gobbling worms for power.</p>
+        <div class="skin-chooser">
+          <button id="skinUpBtn" class="skin-arrow">▲</button>
+          <div class="skin-name-wrap">
+            <div id="skinName">Dazi Pink</div>
+            <div class="skin-swatch" id="skinSwatch"></div>
+          </div>
+          <button id="skinDownBtn" class="skin-arrow">▼</button>
+        </div>
         <div class="menu-buttons">
           <button id="newGameBtn">New Game</button>
           <button id="continueBtn">Continue</button>
@@ -724,6 +763,7 @@ const menuPreviewAxolotl = axolotl.clone(true);
 menuPreviewAxolotl.position.set(0, 0, 0);
 menuPreviewAxolotl.rotation.set(0.15, -0.7, 0);
 menuPreviewScene.add(menuPreviewAxolotl);
+applySkin(currentSkinIndex);
 
 // --- Upgrade visual meshes (dynamically shown/hidden based on upgrade level) ---
 const upgradeVisuals = {
@@ -1890,6 +1930,7 @@ function openOverlay(id) {
   for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu', 'tutorialMenu', 'upgradeHintMenu', 'storyMenu', 'debugMenu']) el[key].classList.add('hidden');
   if (id) el[id].classList.remove('hidden');
   if (renderer?.domElement) renderer.domElement.style.opacity = (id === 'mainMenu' || id === 'storyMenu' || id === 'tutorialMenu') ? '0' : '1';
+  if (id === 'mainMenu') applySkin(currentSkinIndex);
 }
 
 function startGame(continueGame = false) {
@@ -2072,6 +2113,8 @@ renderer.domElement.addEventListener('click', () => {
   if (gameStarted && !pointerLocked && !paused) renderer.domElement.requestPointerLock();
 });
 
+el.skinUpBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); nextSkin(1); };
+el.skinDownBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); nextSkin(-1); };
 el.newGameBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); prepareNewGame(); storyIndex = 0; el.storyText.textContent = storyParagraphs[0]; openOverlay('storyMenu'); };
 el.continueBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); continueAllowed && startGame(true); };
 el.continueBtn.disabled = !continueAllowed;

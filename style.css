@@ -224,3 +224,48 @@ input[type="range"] { width: 180px; }
   font-size: 8px; color: #9fd4ff; text-shadow: 1px 1px 0 #000; margin-top: 8px;
   line-height: 1.3; min-height: 24px;
 }
+
+/* ── Skin chooser ── */
+.skin-chooser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(140,210,255,0.2);
+  border-radius: 8px;
+  padding: 12px 24px;
+  width: 160px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.skin-name-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+#skinName {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.skin-swatch {
+  width: 48px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+}
+.skin-arrow {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #9fdcff;
+  cursor: pointer;
+  padding: 4px 12px;
+  transition: color 0.15s;
+}
+.skin-arrow:hover { color: #fff; }
+.skin-arrow:active { color: #ff9ecf; }
