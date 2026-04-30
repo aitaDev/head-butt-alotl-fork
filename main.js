@@ -117,7 +117,7 @@ app.innerHTML = `
   <div id="upgradeHintMenu" class="overlay hidden">
     <div class="panel">
       <h2>Character Upgrades</h2>
-      <p class="subtitle">You have 20 Salted Silver. Hit C to open Character Upgrades and spend it.</p>
+      <p class="subtitle">You have 20 Silver. Hit C to open Character Upgrades and spend it.</p>
       <div class="small space-continue">Hit space to continue</div>
     </div>
   </div>
@@ -185,9 +185,9 @@ app.innerHTML = `
   <div id="upgradeMenu" class="overlay hidden">
     <div class="panel" style="width:min(96vw,820px);max-width:820px">
       <h2>Axolotl Evolution</h2>
-      <p class="subtitle">Spend Salted Silver on upgrades.</p>
+      <p class="subtitle">Spend Silver on upgrades.</p>
       <div class="row"><span>Level</span><span class="value" id="upLevel"></span></div>
-      <div class="row"><span>Salted Silver</span><span class="value" id="upCurrency"></span></div>
+      <div class="row"><span>Silver</span><span class="value" id="upCurrency"></span></div>
       <div class="bar"><div id="upgradeXpFill" class="fill"></div><div class="barLabel" id="upgradeXpLabel"></div></div>
       <div style="height:12px"></div>
       <div id="upgradeList"></div>
@@ -198,7 +198,7 @@ app.innerHTML = `
   </div>
 
   <div class="topbar">
-    <div class="card" id="scoreCard">Salted Silver: <span id="currency">0</span></div>
+    <div class="card" id="scoreCard">Silver: <span id="currency">0</span></div>
     <div class="card" id="statCard">Aliens bonked: <span id="aliensBonked">0</span></div>
   </div>
 
@@ -1369,7 +1369,7 @@ function buyUpgrade(key) {
   const level = state.upgrades[key];
   if (level >= 5) return;
   const cost = meta.cost(level);
-  if (state.currency < cost) return showNotice('Not enough Salted Silver');
+  if (state.currency < cost) return showNotice('Not enough Silver');
   state.currency -= cost;
   state.upgrades[key] += 1;
   if (key === 'lungs') state.health = Math.min(config.maxHealth(), state.health + 20);
@@ -1430,7 +1430,7 @@ function renderUpgradeMenu() {
     const cost = meta.cost(lvl);
     const row = document.createElement('div');
     row.className = 'upgrade';
-    row.innerHTML = `<div><strong>${meta.name}</strong><div class="small">${meta.desc} (Level ${lvl}/5)</div></div><div class="value">${lvl >= 5 ? 'MAX' : cost + ' Salted Silver'}</div>`;
+    row.innerHTML = `<div><strong>${meta.name}</strong><div class="small">${meta.desc} (Level ${lvl}/5)</div></div><div class="value">${lvl >= 5 ? 'MAX' : cost + ' Silver'}</div>`;
     const btn = document.createElement('button');
     btn.textContent = lvl >= 5 ? 'Maxed' : 'Upgrade';
     btn.disabled = lvl >= 5 || state.currency < cost;
