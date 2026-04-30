@@ -8,7 +8,7 @@ canvas { display: block; transition: opacity 0.25s ease; }
 .panel, .overlay { pointer-events: auto; }
 .overlay {
   position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle at top, rgba(60,100,180,0.35), rgba(0,0,0,0.85)); z-index: 20;
+  background: radial-gradient(circle at top, rgba(60,100,180,1), rgba(2,18,42,1)); z-index: 20;
 }
 .thunder-panel {
   animation: thunderPulse 0.18s steps(2) infinite alternate;
@@ -36,7 +36,7 @@ canvas { display: block; transition: opacity 0.25s ease; }
 .main-menu-art {
   min-height: 320px;
   border-radius: 18px;
-  background: radial-gradient(circle at 30% 20%, rgba(120,220,255,0.22), rgba(20,40,80,0.12) 45%, rgba(6,14,30,0.05) 100%);
+  background: linear-gradient(180deg, rgba(31,120,215,0.95), rgba(7,45,96,0.98));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +47,7 @@ canvas { display: block; transition: opacity 0.25s ease; }
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.12), transparent 30%), radial-gradient(circle at 20% 75%, rgba(90,180,255,0.15), transparent 28%);
+  background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.12), transparent 30%), radial-gradient(circle at 20% 75%, rgba(120,220,255,0.20), transparent 28%);
 }
 h1, h2, h3, p { margin-top: 0; }
 .title { font-size: 40px; margin-bottom: 6px; color: #9fdcff; }
@@ -68,41 +68,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   color: #ffd27d;
   text-shadow: 2px 2px 0 #000;
 }
-.menu-axolotl {
+.main-menu-axolotl-image {
   position: relative;
-  width: 260px;
-  height: 170px;
-  transform: rotate(-8deg);
+  z-index: 1;
+  width: min(100%, 380px);
+  max-height: 360px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 40px rgba(0,0,0,0.28));
 }
-.menu-body, .menu-head, .menu-tail, .menu-eye, .menu-gill { position: absolute; }
-.menu-body {
-  width: 128px; height: 78px; left: 72px; top: 48px; border-radius: 48px;
-  background: linear-gradient(180deg, #ff9bc6, #ff6fb2);
-  box-shadow: inset 0 -10px 0 rgba(180,40,110,0.18), 0 16px 40px rgba(0,0,0,0.18);
-}
-.menu-head {
-  width: 86px; height: 72px; left: 156px; top: 42px; border-radius: 32px;
-  background: linear-gradient(180deg, #ffb0d2, #ff7fbc);
-}
-.menu-tail {
-  width: 74px; height: 20px; left: 18px; top: 80px; border-radius: 16px;
-  background: linear-gradient(180deg, #ff8fbe, #ff5fa8);
-}
-.menu-tail::before, .menu-tail::after {
-  content: ''; position: absolute; width: 34px; height: 18px; left: -8px; border-radius: 18px; background: inherit;
-}
-.menu-tail::before { top: -10px; transform: rotate(-22deg); }
-.menu-tail::after { top: 12px; transform: rotate(22deg); }
-.menu-eye {
-  width: 9px; height: 9px; border-radius: 50%; background: #161616; top: 70px;
-}
-.eye-left { left: 208px; }
-.eye-right { left: 225px; }
-.menu-gill {
-  width: 42px; height: 14px; background: linear-gradient(180deg, #ffb3df, #ff79c5); border-radius: 14px;
-}
-.gill-left { left: 164px; top: 32px; transform: rotate(-24deg); }
-.gill-right { left: 164px; top: 110px; transform: rotate(24deg); }
 @media (max-width: 760px) {
   .main-menu-panel { grid-template-columns: 1fr; }
   .main-menu-art { min-height: 220px; order: -1; }

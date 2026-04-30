@@ -142,15 +142,7 @@ app.innerHTML = `
         <div id="versionTag">${gameVersion} by Phishie</div>
       </div>
       <div class="main-menu-art" aria-hidden="true">
-        <div class="menu-axolotl">
-          <div class="menu-tail"></div>
-          <div class="menu-body"></div>
-          <div class="menu-head"></div>
-          <div class="menu-eye eye-left"></div>
-          <div class="menu-eye eye-right"></div>
-          <div class="menu-gill gill-left"></div>
-          <div class="menu-gill gill-right"></div>
-        </div>
+        <img class="main-menu-axolotl-image" src="./assets/ui/happy-pink-axolotl-menu.png" alt="" />
       </div>
     </div>
   </div>
