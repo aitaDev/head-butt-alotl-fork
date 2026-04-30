@@ -142,7 +142,7 @@ app.innerHTML = `
         <div id="versionTag">${gameVersion} by Phishie</div>
       </div>
       <div class="main-menu-art" aria-hidden="true">
-        <img class="main-menu-axolotl-image" src="./assets/ui/happy-pink-axolotl-menu.png" alt="" />
+        <div id="menuPreview"></div>
       </div>
     </div>
   </div>
@@ -434,6 +434,23 @@ axEyeL.position.set(1.8, 0.22, 0.24);
 axEyeR.position.set(1.8, 0.22, -0.24);
 axolotl.add(axBody, axBodyStripe, axHead, axMouth, axTail, axTailTip, axLegFL, axLegFR, axLegBL, axLegBR, axGillL, axGillR, axEyeL, axEyeR);
 scene.add(axolotl);
+
+const menuPreviewScene = new THREE.Scene();
+const menuPreviewCamera = new THREE.PerspectiveCamera(35, 360 / 320, 0.1, 100);
+menuPreviewCamera.position.set(0, 1.2, 8);
+const menuPreviewRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+menuPreviewRenderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+menuPreviewRenderer.setSize(360, 320);
+menuPreviewRenderer.domElement.className = 'menu-preview-canvas';
+el.menuPreview.appendChild(menuPreviewRenderer.domElement);
+menuPreviewScene.add(new THREE.AmbientLight(0xffffff, 1.8));
+const menuPreviewLight = new THREE.DirectionalLight(0xcfefff, 1.6);
+menuPreviewLight.position.set(2, 3, 4);
+menuPreviewScene.add(menuPreviewLight);
+const menuPreviewAxolotl = axolotl.clone(true);
+menuPreviewAxolotl.position.set(0, 0, 0);
+menuPreviewAxolotl.rotation.set(0.15, -0.7, 0);
+menuPreviewScene.add(menuPreviewAxolotl);
 
 // --- Upgrade visual meshes (dynamically shown/hidden based on upgrade level) ---
 const upgradeVisuals = {
@@ -2132,6 +2149,10 @@ function animate(now) {
     updateHUD();
   }
   renderer.render(scene, camera);
+  if (!el.mainMenu.classList.contains('hidden')) {
+    menuPreviewAxolotl.rotation.y += dt * 0.9;
+    menuPreviewRenderer.render(menuPreviewScene, menuPreviewCamera);
+  }
 }
 
 function updateJellyfish(dt) {

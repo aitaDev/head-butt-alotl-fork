@@ -68,12 +68,19 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   color: #ffd27d;
   text-shadow: 2px 2px 0 #000;
 }
-.main-menu-axolotl-image {
+#menuPreview {
   position: relative;
   z-index: 1;
   width: min(100%, 380px);
-  max-height: 360px;
-  object-fit: contain;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.menu-preview-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
   filter: drop-shadow(0 18px 40px rgba(0,0,0,0.28));
 }
 @media (max-width: 760px) {
