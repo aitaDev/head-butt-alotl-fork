@@ -444,6 +444,7 @@ for (let i = 0; i < 60; i++) {
 }
 
 const kelp = [];
+const ships = [];
 for (let i = 0; i < 18; i++) {
   const h = 30 + Math.random() * 55;
   const segments = Math.floor(h / 2.5);
@@ -481,6 +482,153 @@ function resolveSolidCollision(pos, solidPos, radius) {
   offset.normalize().multiplyScalar(radius - dist + 0.001);
   pos.add(offset);
   return true;
+}
+
+function makeShip() {
+  const group = new THREE.Group();
+  const hullColor = 0x6b4226;
+  const deckColor = 0x8b5e3c;
+  // Main hull
+  const hull = new THREE.Mesh(
+    new THREE.BoxGeometry(16, 4.5, 5.5),
+    new THREE.MeshStandardMaterial({ color: hullColor, roughness: 0.85 })
+  );
+  hull.position.y = 0;
+  group.add(hull);
+  // Bow (front)
+  const bow = new THREE.Mesh(
+    new THREE.BoxGeometry(3, 3.5, 5.5),
+    new THREE.MeshStandardMaterial({ color: hullColor, roughness: 0.85 })
+  );
+  bow.position.set(9.5, 0.5, 0);
+  group.add(bow);
+  // Stern (back)
+  const stern = new THREE.Mesh(
+    new THREE.BoxGeometry(3, 3, 5),
+    new THREE.MeshStandardMaterial({ color: hullColor, roughness: 0.85 })
+  );
+  stern.position.set(-8.5, 0.5, 0);
+  group.add(stern);
+  // Deck planks
+  const deck = new THREE.Mesh(
+    new THREE.BoxGeometry(14, 0.25, 5),
+    new THREE.MeshStandardMaterial({ color: deckColor, roughness: 0.9 })
+  );
+  deck.position.y = 2.5;
+  group.add(deck);
+  // Cabin (mid-ship)
+  const cabin = new THREE.Mesh(
+    new THREE.BoxGeometry(5, 3, 4),
+    new THREE.MeshStandardMaterial({ color: 0x7a4f2f, roughness: 0.88 })
+  );
+  cabin.position.set(1, 4.5, 0);
+  group.add(cabin);
+  const cabinRoof = new THREE.Mesh(
+    new THREE.BoxGeometry(5.5, 0.3, 4.4),
+    new THREE.MeshStandardMaterial({ color: 0x5a3a1f, roughness: 0.9 })
+  );
+  cabinRoof.position.set(1, 6.1, 0);
+  group.add(cabinRoof);
+  // Crow's nest
+  const nest = new THREE.Mesh(
+    new THREE.BoxGeometry(1.8, 1.2, 1.8),
+    new THREE.MeshStandardMaterial({ color: 0x5a3a1f, roughness: 0.9 })
+  );
+  nest.position.set(-5, 7.5, 0);
+  group.add(nest);
+  const mast = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12, 0.15, 9, 6),
+    new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.85 })
+  );
+  mast.position.set(-5, 12, 0);
+  group.add(mast);
+  // Boom (horizontal pole)
+  const boom = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08, 0.1, 5, 5),
+    new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.85 })
+  );
+  boom.rotation.z = Math.PI / 2;
+  boom.position.set(-2.5, 10.5, 0);
+  group.add(boom);
+  // Cannon ports on hull
+  for (let c = 0; c < 5; c++) {
+    const port = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.35, 0.3),
+      new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.95 })
+    );
+    port.position.set(-4 + c * 2, 0.5, 2.85);
+    group.add(port);
+    const port2 = port.clone();
+    port2.position.z = -2.85;
+    group.add(port2);
+  }
+  // Railings
+  for (let r = 0; r < 6; r++) {
+    const post = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 1.2, 0.12),
+      new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.8 })
+    );
+    post.position.set(-5 + r * 2.5, 3.1, 2.7);
+    group.add(post);
+    const post2 = post.clone();
+    post2.position.z = -2.7;
+    group.add(post2);
+  }
+  // Anchor
+  const anchor = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 1.2, 0.3),
+    new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.7 })
+  );
+  anchor.position.set(9.5, -1.5, 2);
+  group.add(anchor);
+  // Wheel
+  const wheel = new THREE.Mesh(
+    new THREE.TorusGeometry(0.8, 0.1, 6, 12),
+    new THREE.MeshStandardMaterial({ color: 0x5a3020, roughness: 0.75 })
+  );
+  wheel.position.set(-7, 5.5, 0);
+  wheel.rotation.x = Math.PI / 2;
+  group.add(wheel);
+  // Broken mast near bow
+  const brokenMast = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.14, 5, 6),
+    new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.85 })
+  );
+  brokenMast.position.set(5, 3, 1.5);
+  brokenMast.rotation.z = 0.3;
+  brokenMast.rotation.x = -0.2;
+  group.add(brokenMast);
+  // Shipwreck tilt
+  group.rotation.z = 0.12;
+  group.rotation.x = -0.08;
+  // Position away from coral
+  let sx, sz;
+  let attempts = 0;
+  do {
+    sx = (Math.random() - 0.5) * 140;
+    sz = (Math.random() - 0.5) * 140;
+    attempts++;
+  } while (attempts < 20 && coral.some(c => Math.hypot(c.position.x - sx, c.position.z - sz) < 22));
+  group.position.set(sx, -84.5, sz);
+  scene.add(group);
+  ships.push({ mesh: group });
+  // Spawn coins around ship
+  const coinCount = 8 + Math.floor(Math.random() * 10);
+  for (let ci = 0; ci < coinCount; ci++) {
+    const ca = Math.random() * Math.PI * 2;
+    const cr = 3 + Math.random() * 14;
+    const cx = sx + Math.cos(ca) * cr;
+    const cz = sz + Math.sin(ca) * cr;
+    const coin = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.35, 0.35, 0.12, 10),
+      new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.5, metalness: 0.9 })
+    );
+    coin.position.set(cx, -83.5, cz);
+    coin.rotation.x = Math.random() * Math.PI;
+    coin.rotation.z = Math.random() * Math.PI;
+    scene.add(coin);
+    pearls.push({ mesh: coin, bob: Math.random() * Math.PI * 2, type: 'coin' });
+  }
 }
 
 const whale = new THREE.Group();
@@ -1517,6 +1665,7 @@ for (let i = 0; i < 14; i++) makeAnemone();
 for (let i = 0; i < 7; i++) makeCrab();
 // starfish removed
 for (let i = 0; i < 6; i++) makeCrystal();
+if (Math.random() < 0.25) makeShip();
 for (let i = 0; i < 4; i++) makeKraken();
 for (let i = 0; i < 10; i++) makePearl();
 for (let i = 0; i < 8; i++) makePlanktonPatch();
@@ -1709,7 +1858,7 @@ function startGame(continueGame = false) {
 function prepareNewGame() {
   resetState();
   state.health = Math.min(config.maxHealth(), state.health || config.maxHealth());
-  player.pos.set(0, -18, 0);
+  player.pos.set(0, -35, 0);
   player.verticalVelocity = 0;
   paused = true;
   isGameOver = false;
@@ -2182,6 +2331,16 @@ function updatePickups(dt) {
         state.currency += 4;
         state.health = Math.min(config.maxHealth(), state.health + 4);
         showNotice('You snapped up a fish');
+      } else if (p.kind === 'coin') {
+        state.currency += 5;
+        addXp(5);
+        showNotice('🪙 Found a coin!');
+        spawnRipple(player.pos, 0xd8d8d8);
+      } else if (p.kind === 'pearl') {
+        state.currency += 15;
+        addXp(12);
+        showNotice('💎 Pearl collected!');
+        spawnRipple(player.pos, 0xeeeeff);
       } else {
         state.stats.wormsEaten += 1;
         addXp(6);
