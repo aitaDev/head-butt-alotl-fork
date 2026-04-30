@@ -1404,10 +1404,8 @@ function updateHUD() {
   el.currency.textContent = state.currency;
   el.aliensBonked.textContent = state.stats.aliensBonked;
   if (!upgradeHintShown && state.currency >= 20) {
-    upgradeHintShown = true;
-    paused = true;
-    document.exitPointerLock();
-    openOverlay('upgradeHintMenu');
+    showUpgradeHintPopup();
+    return;
   }
   if (player.pos.distanceTo(whale.position) < 115 && performance.now() > whaleChatCooldownUntil && !paused) {
     paused = true;
@@ -1546,6 +1544,13 @@ function continueUpgradeHint() {
   paused = false;
   openOverlay(null);
   renderer.domElement.requestPointerLock();
+}
+
+function showUpgradeHintPopup() {
+  upgradeHintShown = true;
+  paused = true;
+  document.exitPointerLock();
+  openOverlay('upgradeHintMenu');
 }
 
 function advanceStory() {
