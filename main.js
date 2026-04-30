@@ -854,11 +854,7 @@ function makeJellyfish() {
   const color = bellColors[Math.floor(Math.random() * bellColors.length)];
   const bell = new THREE.Mesh(new THREE.SphereGeometry(0.65 + Math.random() * 0.4, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2),
     new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.55, emissive: color, emissiveIntensity: 0.3, side: THREE.DoubleSide }));
-  bell.rotation.x = Math.PI;
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 }));
-  dome.position.y = 0.05;
-  dome.rotation.x = 0;
+  bell.rotation.x = 0;
   for (let i = 0; i < 6; i++) {
     const tentacle = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.4 + Math.random() * 1.2, 0.05),
       new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.5 }));
@@ -867,7 +863,7 @@ function makeJellyfish() {
     tentacle.rotation.z = (Math.random() - 0.5) * 0.35;
     group.add(tentacle);
   }
-  group.add(bell, dome);
+  group.add(bell);
   const r = 15 + Math.random() * 75;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -38 + Math.random() * 32, Math.sin(a) * r);
