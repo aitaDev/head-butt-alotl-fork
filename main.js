@@ -1028,7 +1028,7 @@ function makeCrab() {
   eyeL.position.set(0.18, 0.28, 0.14); eyeR.position.set(0.18, 0.28, -0.14);
   group.add(eyeL, eyeR);
   const r = 8 + Math.random() * 90; const a2 = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a2) * r, -100.0, Math.sin(a2) * r);
+  group.position.set(Math.cos(a2) * r, 50.0, Math.sin(a2) * r);
   group.rotation.y = Math.random() * Math.PI * 2;
   scene.add(group);
   crabs.push({ mesh: group, hp: (14 + Math.random() * 8) * 2, speed: 0.8 + Math.random() * 1.2, bob: Math.random() * Math.PI * 2, wanderAngle: Math.random() * Math.PI * 2, hitCooldown: 0 });
