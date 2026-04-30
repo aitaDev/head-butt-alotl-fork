@@ -1141,61 +1141,62 @@ function makeShark(overridePos) {
 
 function makeTuna(overridePos) {
   const group = new THREE.Group();
-  // Body: thick robust torpedo — 4.0 wide(X) x 5.5 tall(Y) x 26.0 long(Z)
-  // rotation.y=PI/2 makes local Z→world+X (forward)
-  const body = new THREE.Mesh(new THREE.BoxGeometry(4.0, 5.5, 26.0), new THREE.MeshStandardMaterial({ color: 0x2a5070, roughness: 0.6 }));
-  const belly = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.0, 23.0), new THREE.MeshStandardMaterial({ color: 0xc8e4f0, roughness: 0.7 }));
-  const back = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.5, 18.0), new THREE.MeshStandardMaterial({ color: 0x1a3a5a, roughness: 0.65 }));
-  // Main tail — large crescent shape
+  // Sleek torpedo body — 5.0 wide x 6.0 tall x 30.0 long
+  const body = new THREE.Mesh(new THREE.BoxGeometry(5.0, 6.0, 30.0), new THREE.MeshStandardMaterial({ color: 0x5588aa, roughness: 0.55 }));
+  const underbelly = new THREE.Mesh(new THREE.BoxGeometry(4.4, 2.5, 27.0), new THREE.MeshStandardMaterial({ color: 0xd4eef8, roughness: 0.65 }));
+  const midLine = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.2, 28.0), new THREE.MeshStandardMaterial({ color: 0x336688, roughness: 0.6 }));
+  // Stiff crescent tail — wide swept-back shape
   const tailGroup = new THREE.Group();
-  const tailNeck = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.8, 2.0), new THREE.MeshStandardMaterial({ color: 0x2a5070, roughness: 0.6 }));
-  const tailLeft = new THREE.Mesh(new THREE.BoxGeometry(0.3, 9.0, 0.3), new THREE.MeshStandardMaterial({ color: 0x2a5070, roughness: 0.6 }));
+  const tailStem = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.6, 3.0), new THREE.MeshStandardMaterial({ color: 0x5588aa, roughness: 0.55 }));
+  const tailLeft = new THREE.Mesh(new THREE.BoxGeometry(0.4, 11.0, 0.4), new THREE.MeshStandardMaterial({ color: 0x3a6a8a, roughness: 0.6 }));
   const tailRight = tailLeft.clone();
-  const tailLeftTip = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.5, 0.25), new THREE.MeshStandardMaterial({ color: 0x3a7090, roughness: 0.65 }));
-  const tailRightTip = tailLeftTip.clone();
-  tailLeft.position.set(0, 5.0, 0);
-  tailRight.position.set(0, -5.0, 0);
-  tailLeftTip.position.set(0, 9.5, 0);
-  tailRightTip.position.set(0, -9.5, 0);
-  tailGroup.add(tailNeck, tailLeft, tailRight, tailLeftTip, tailRightTip);
-  tailGroup.position.set(0, 0, -14.0);
-  tailGroup.rotation.z = 0.18;
-  // Dorsal fin — tall curved
-  const dorsal = new THREE.Mesh(new THREE.BoxGeometry(0.3, 7.0, 4.5), new THREE.MeshStandardMaterial({ color: 0x1a3a5a, roughness: 0.65 }));
-  const dorsalLead = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 1.5), new THREE.MeshStandardMaterial({ color: 0x2a5070, roughness: 0.6 }));
-  dorsal.position.set(0, 3.5, 2.0);
-  dorsal.rotation.z = 0.15;
-  dorsalLead.position.set(0, 2.5, 4.5);
-  dorsalLead.rotation.z = 0.2;
-  // Side fins
-  const finSideL = new THREE.Mesh(new THREE.BoxGeometry(6.0, 4.5, 0.3), new THREE.MeshStandardMaterial({ color: 0x2a5070, roughness: 0.6 }));
-  const finSideR = finSideL.clone();
-  finSideL.position.set(2.2, -0.8, 3.0);
-  finSideR.position.set(-2.2, -0.8, 3.0);
-  finSideL.rotation.z = 0.35;
-  finSideR.rotation.z = -0.35;
-  // Pectoral fins
-  const pectoralL = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.6, 0.25), new THREE.MeshStandardMaterial({ color: 0x3a7090, roughness: 0.65 }));
-  const pectoralR = pectoralL.clone();
-  pectoralL.position.set(1.8, -1.2, 1.0);
-  pectoralL.rotation.z = 0.5;
-  pectoralR.position.set(-1.8, -1.2, 1.0);
-  pectoralR.rotation.z = -0.5;
-  // Anal fin
-  const analFin = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.5, 2.5), new THREE.MeshStandardMaterial({ color: 0x1a3a5a, roughness: 0.65 }));
-  analFin.position.set(0, -2.0, -8.0);
-  // Gills / body lines
-  const gill = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.15, 0.15), new THREE.MeshStandardMaterial({ color: 0x1a3050, roughness: 0.8 }));
-  gill.position.set(0, 0.5, 5.0);
-  // Head / snout wedge
-  const snout = new THREE.Mesh(new THREE.BoxGeometry(3.4, 3.8, 4.0), new THREE.MeshStandardMaterial({ color: 0x2a5070, roughness: 0.6 }));
-  snout.position.set(0, 0.5, 13.0);
-  const snoutTip = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), new THREE.MeshStandardMaterial({ color: 0x3a7090, roughness: 0.65 }));
-  snoutTip.position.set(0, 0.3, 15.5);
+  const tailLeftFluke = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.0, 3.5), new THREE.MeshStandardMaterial({ color: 0x4477aa, roughness: 0.58 }));
+  const tailRightFluke = tailLeftFluke.clone();
+  tailLeft.position.set(0, 6.0, 0);
+  tailRight.position.set(0, -6.0, 0);
+  tailLeftFluke.position.set(0, 10.5, 1.5);
+  tailRightFluke.position.set(0, -10.5, 1.5);
+  tailLeftFluke.rotation.z = 0.2;
+  tailRightFluke.rotation.z = -0.2;
+  tailGroup.add(tailStem, tailLeft, tailRight, tailLeftFluke, tailRightFluke);
+  tailGroup.position.set(0, 0, -16.5);
+  tailGroup.rotation.z = 0.12;
+  // Tall singular dorsal fin — iconic tuna shape
+  const dorsal = new THREE.Mesh(new THREE.BoxGeometry(0.35, 9.0, 5.5), new THREE.MeshStandardMaterial({ color: 0x336688, roughness: 0.6 }));
+  const dorsalFin = new THREE.Mesh(new THREE.BoxGeometry(0.3, 5.5, 3.0), new THREE.MeshStandardMaterial({ color: 0x4477aa, roughness: 0.58 }));
+  dorsal.position.set(0, 4.5, 1.0);
+  dorsal.rotation.z = 0.1;
+  dorsalFin.position.set(0, 3.2, 3.5);
+  dorsalFin.rotation.z = 0.15;
+  // Swept pectoral fins — back and downward
+  const pectL = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.8, 0.25), new THREE.MeshStandardMaterial({ color: 0x4477aa, roughness: 0.6 }));
+  const pectR = pectL.clone();
+  pectL.position.set(2.5, -0.8, 4.0);
+  pectL.rotation.z = 0.55;
+  pectR.position.set(-2.5, -0.8, 4.0);
+  pectR.rotation.z = -0.55;
+  // Small anal fin
+  const analFin = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4.0, 3.0), new THREE.MeshStandardMaterial({ color: 0x336688, roughness: 0.6 }));
+  analFin.position.set(0, -2.8, -10.0);
+  // Horizontal stripe marks
+  const stripeA = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.18, 0.18), new THREE.MeshStandardMaterial({ color: 0x2a5577, roughness: 0.75 }));
+  const stripeB = stripeA.clone();
+  const stripeC = stripeA.clone();
+  stripeA.position.set(0, 2.2, 5.0);
+  stripeB.position.set(0, 0.8, 5.0);
+  stripeC.position.set(0, -0.5, 5.0);
+  // Head
+  const headMesh = new THREE.Mesh(new THREE.BoxGeometry(4.6, 4.8, 7.0), new THREE.MeshStandardMaterial({ color: 0x5588aa, roughness: 0.55 }));
+  headMesh.position.set(0, 0.4, 17.5);
+  const snout = new THREE.Mesh(new THREE.BoxGeometry(3.0, 3.2, 5.0), new THREE.MeshStandardMaterial({ color: 0x4477aa, roughness: 0.58 }));
+  snout.position.set(0, 0.2, 21.0);
   // Eye
-  const eye = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 6), new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.4 }));
-  eye.position.set(1.8, 1.5, 12.0);
-  group.add(body, belly, back, tailGroup, dorsal, dorsalLead, finSideL, finSideR, pectoralL, pectoralR, analFin, gill, snout, snoutTip, eye);
+  const eye = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 6), new THREE.MeshStandardMaterial({ color: 0xffee00, roughness: 0.4 }));
+  eye.position.set(2.2, 1.2, 18.5);
+  // Second smaller dorsal fin (rear)
+  const dorsal2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.5, 2.0), new THREE.MeshStandardMaterial({ color: 0x336688, roughness: 0.6 }));
+  dorsal2.position.set(0, 3.0, -5.0);
+  group.add(body, underbelly, midLine, tailGroup, dorsal, dorsalFin, pectL, pectR, analFin, stripeA, stripeB, stripeC, headMesh, snout, eye, dorsal2);
   const r = 15 + Math.random() * 80;
   const a = Math.random() * Math.PI * 2;
   group.rotation.y = Math.PI / 2;
