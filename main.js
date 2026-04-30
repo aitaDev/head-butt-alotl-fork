@@ -842,11 +842,12 @@ function makeShark() {
 
 function makeOctopus() {
   const group = new THREE.Group();
-  const head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.4), new THREE.MeshStandardMaterial({ color: 0xa45bff, roughness: 0.8 }));
+  const head = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.0, 2.4), new THREE.MeshStandardMaterial({ color: 0xa45bff, roughness: 0.8 }));
+  head.position.y = 0.35;
   for (let i = 0; i < 8; i++) {
     const arm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.8, 0.12), new THREE.MeshStandardMaterial({ color: 0x8b47dd, roughness: 0.85 }));
     const angle = (i / 8) * Math.PI * 2;
-    arm.position.set(Math.cos(angle) * 0.35, -1.0, Math.sin(angle) * 0.35);
+    arm.position.set(Math.cos(angle) * 0.5, -1.15, Math.sin(angle) * 0.5);
     arm.rotation.z = (Math.random() - 0.5) * 0.6;
     group.add(arm);
   }
