@@ -310,7 +310,7 @@ for (let i = 0; i < 260; i++) {
 }
 
 const coral = [];
-for (let i = 0; i < 90; i++) {
+for (let i = 0; i < 180; i++) {
   const group = new THREE.Group();
   const colors = [0xff7aa2, 0xff9966, 0xa66cff, 0xffcc66, 0x66e0ff, 0xff6680, 0xffaa55, 0x55ffcc, 0xff55aa, 0x99ff55];
   const color = colors[i % colors.length];
@@ -421,7 +421,7 @@ for (let i = 0; i < 90; i++) {
 
   const scale = 0.8 + Math.random() * 3.6;
   group.scale.setScalar(scale);
-  const r = 12 + Math.random() * 90;
+  const r = 12 + Math.random() * 75;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -83, Math.sin(a) * r);
   coral.push(group);
