@@ -2,12 +2,13 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.4.0-debug';
-const isFork = true;
+const gameVersion = 'v0.5.0';
+const isFork = false;
 let debugGodMode = false;
 let debugHideFloor = false;
 let debugShowCoords = false;
 const patchNotes = [
+  'v0.5.0  New tuna (sleek torpedo, crescent tail, 3000HP, straight swim), redesigned worms (segmented curvy, pink head), kelp forest, pirate ship wrecks with coin loot, 6 coral types, doubled coral density, rare tall coral, lower spawn depth, urchin sizing.',
   'v0.4.0  Depth gauge — real-time dive indicator with zone name and visual fill. Deep waters darken the world.',
   'v0.3.5  Anglerfish lurking in the deep — glowing lures, aggressive hunting in dark waters, pulsing bioluminescence.',
   'v0.3.4  Seabed creatures now live: urchins spike on contact, crabs scuttle and deal damage, starfish are collectible with respawn.',
