@@ -420,7 +420,8 @@ for (let i = 0; i < 180; i++) {
   }
 
   const scale = 0.8 + Math.random() * 3.6;
-  group.scale.setScalar(scale);
+  const actualScale = i % 8 === 0 ? scale * (2.5 + Math.random() * 2.5) : scale;
+  group.scale.setScalar(actualScale);
   const r = 12 + Math.random() * 75;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -83, Math.sin(a) * r);
@@ -440,6 +441,37 @@ for (let i = 0; i < 60; i++) {
   shell.rotation.y = Math.random() * Math.PI;
   shells.push(shell);
   scene.add(shell);
+}
+
+const kelp = [];
+for (let i = 0; i < 40; i++) {
+  const h = 30 + Math.random() * 55;
+  const segments = Math.floor(h / 2.5);
+  const group = new THREE.Group();
+  for (let s = 0; s < segments; s++) {
+    const seg = new THREE.Mesh(
+      new THREE.BoxGeometry(0.18 + Math.random() * 0.1, 2.5, 0.18 + Math.random() * 0.1),
+      new THREE.MeshStandardMaterial({ color: s % 2 === 0 ? 0x2d7a3a : 0x3a9950, roughness: 0.8 })
+    );
+    seg.position.y = s * 2.5 + 1.25;
+    seg.rotation.z = (Math.random() - 0.5) * 0.35;
+    seg.rotation.x = (Math.random() - 0.5) * 0.2;
+    group.add(seg);
+    if (Math.random() > 0.6) {
+      const leaf = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8 + Math.random() * 0.6, 0.12, 0.5 + Math.random() * 0.4),
+        new THREE.MeshStandardMaterial({ color: 0x3aaa55, roughness: 0.75 })
+      );
+      leaf.position.set((Math.random() - 0.5) * 0.8, s * 2.5 + 1.5, (Math.random() - 0.5) * 0.5);
+      leaf.rotation.y = Math.random() * Math.PI;
+      group.add(leaf);
+    }
+  }
+  const r = 8 + Math.random() * 85;
+  const a = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a) * r, -83 + h / 2, Math.sin(a) * r);
+  kelp.push({ mesh: group, sway: Math.random() * Math.PI * 2, speed: 0.6 + Math.random() * 0.5 });
+  scene.add(group);
 }
 
 function resolveSolidCollision(pos, solidPos, radius) {
@@ -979,11 +1011,10 @@ function makeTuna() {
   tail.position.set(-3.4, 0, 0);
   tailBase.position.set(-3.0, 0, 0);
   group.add(body, belly, back, tail, tailBase, finTop, finSideL, finSideR);
-  const r = 15 + Math.random() * 80;
-  const a = Math.random() * Math.PI * 2;
+  group.rotation.y = -Math.PI / 2;
   group.position.set(Math.cos(a) * r, -55 + Math.random() * 35, Math.sin(a) * r);
   scene.add(group);
-  tunas.push({ mesh: group, speed: 1.8 + Math.random() * 0.8, hp: 1000, bob: Math.random() * Math.PI * 2, hitCooldown: 0, collisionRadius: 4.5 });
+  tunas.push({ mesh: group, speed: 1.8 + Math.random() * 0.8, hp: 1000, bob: Math.random() * Math.PI * 2, hitCooldown: 0, collisionRadius: 4.5, friendly: true });
 }
 
 function makeOctopus() {
@@ -2295,20 +2326,22 @@ function updateTunas(dt, now) {
           tunas.splice(i, 1);
           return;
         }
-        const ram = player.velocity.length() * config.ramPower() * 0.16;
-        const crit = player.sprinting && Math.random() < 0.5;
-        const dealt = crit ? ram * 1.5 : ram;
-        tuna.hp -= dealt;
-        if (tuna.hp <= 0) {
-          scene.remove(tuna.mesh);
-          tunas.splice(i, 1);
-          state.currency += 20;
-          addXp(35);
-          spawnDamageText(tuna.mesh.position, dealt, crit);
-          spawnRipple(tuna.mesh.position, 0x3a6f9f);
-          showNotice('🐟 Big tuna defeated! +35 XP');
+        if (tuna.friendly) {
+          const ram = player.velocity.length() * config.ramPower() * 0.16;
+          const crit = player.sprinting && Math.random() < 0.5;
+          const dealt = crit ? ram * 1.5 : ram;
+          tuna.hp -= dealt;
+          if (tuna.hp <= 0) {
+            scene.remove(tuna.mesh);
+            tunas.splice(i, 1);
+            state.currency += 20;
+            addXp(35);
+            spawnDamageText(tuna.mesh.position, dealt, crit);
+            spawnRipple(tuna.mesh.position, 0x3a6f9f);
+            showNotice('🐟 Big tuna defeated! +35 XP');
+          }
+          tuna.hitCooldown = now;
         }
-        tuna.hitCooldown = now;
       }
     }
   }
@@ -2589,16 +2622,17 @@ function updateBubbles(dt) {
 
 function updateKelp(dt) {
   const t = performance.now() * 0.001;
-  for (const blade of kelpBlades) {
-    blade.rotation.z = Math.sin(t * blade.userData.speed + blade.userData.phase) * 0.25;
-    blade.rotation.x = Math.sin(t * blade.userData.speed * 0.7 + blade.userData.phase) * 0.08;
-    const dx = blade.position.x - player.pos.x;
-    const dz = blade.position.z - player.pos.z;
+  for (const kp of kelp) {
+    kp.sway += dt * kp.speed;
+    kp.mesh.rotation.z = Math.sin(kp.sway) * 0.2;
+    kp.mesh.rotation.x = Math.sin(kp.sway * 0.7) * 0.08;
+    const dx = kp.mesh.position.x - player.pos.x;
+    const dz = kp.mesh.position.z - player.pos.z;
     if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
       const r = 6 + Math.random() * 92;
       const a = Math.random() * Math.PI * 2;
-      blade.position.x = player.pos.x + Math.cos(a) * r;
-      blade.position.z = player.pos.z + Math.sin(a) * r;
+      kp.mesh.position.x = player.pos.x + Math.cos(a) * r;
+      kp.mesh.position.z = player.pos.z + Math.sin(a) * r;
     }
   }
 }
