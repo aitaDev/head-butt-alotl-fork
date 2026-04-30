@@ -52,7 +52,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
 .value { color: #ffd27d; font-weight: 700; }
-.space-continue { margin-top: 10px; color: #ffe066; font-weight: 700; text-shadow: 1px 1px 0 #000; animation: space-continue-blink 0.7s steps(2) infinite alternate; }
+.space-continue { margin-top: 10px; color: #ffe066 !important; font-weight: 700; text-shadow: 1px 1px 0 #000; animation: space-continue-blink 0.7s steps(2) infinite alternate; }
 @keyframes space-continue-blink {
   0% { opacity: 1; }
   100% { opacity: 0.35; }
