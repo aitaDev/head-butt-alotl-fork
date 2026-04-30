@@ -665,7 +665,8 @@ function makeAlien() {
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -72 + Math.random() * 62, Math.sin(a) * r);
   scene.add(group);
-  aliens.push({ mesh: group, hp: (38 + state.level * 9) * scale * 1.8 * type.hp, speed: Math.max(0.35, type.speed - scale * 0.12) + Math.random() * 0.35, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale * type.damage, kind: type.name, collisionRadius: 1.2 * scale });
+  const sizeDamageMultiplier = scale >= 2 ? 4.5 : scale >= 1.5 ? 2.5 : 1;
+  aliens.push({ mesh: group, hp: (38 + state.level * 9) * scale * 1.8 * type.hp, speed: Math.max(0.35, type.speed - scale * 0.12) + Math.random() * 0.35, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale * type.damage * sizeDamageMultiplier, kind: type.name, collisionRadius: 1.2 * scale });
 }
 
 function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45 ? 'fish' : 'worm') {
