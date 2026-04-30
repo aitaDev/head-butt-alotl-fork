@@ -113,6 +113,14 @@ app.innerHTML = `
     </div>
   </div>
 
+  <div id="upgradeHintMenu" class="overlay hidden">
+    <div class="panel">
+      <h2>Character Upgrades</h2>
+      <p class="subtitle">You have 20 currency. Hit C to open Character Upgrades and spend it.</p>
+      <div class="small space-continue">Hit space to continue</div>
+    </div>
+  </div>
+
   <div id="storyMenu" class="overlay hidden">
     <div class="panel" style="max-width:520px;text-align:center">
       <p id="storyText" style="font-size:15px;line-height:1.75;color:#d7f1ff;margin-bottom:24px"></p>
@@ -1397,7 +1405,9 @@ function updateHUD() {
   el.aliensBonked.textContent = state.stats.aliensBonked;
   if (!upgradeHintShown && state.currency >= 20) {
     upgradeHintShown = true;
-    showNotice('You have 20 currency. Hit C to open Character Upgrades and spend it.');
+    paused = true;
+    document.exitPointerLock();
+    openOverlay('upgradeHintMenu');
   }
   if (player.pos.distanceTo(whale.position) < 115 && performance.now() > whaleChatCooldownUntil && !paused) {
     paused = true;
@@ -1473,7 +1483,7 @@ function setGraphics(delta) {
 }
 
 function openOverlay(id) {
-  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu', 'tutorialMenu', 'storyMenu']) el[key].classList.add('hidden');
+  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu', 'tutorialMenu', 'upgradeHintMenu', 'storyMenu']) el[key].classList.add('hidden');
   if (id) el[id].classList.remove('hidden');
 }
 
@@ -1521,6 +1531,15 @@ function continueWhaleDialog() {
 }
 
 function continueTutorial() {
+  unlockAudio();
+  audio.menu.currentTime = 0;
+  audio.menu.play().catch(() => {});
+  paused = false;
+  openOverlay(null);
+  renderer.domElement.requestPointerLock();
+}
+
+function continueUpgradeHint() {
   unlockAudio();
   audio.menu.currentTime = 0;
   audio.menu.play().catch(() => {});
@@ -1587,6 +1606,11 @@ document.addEventListener('keydown', e => {
     continueTutorial();
     return;
   }
+  if (!el.upgradeHintMenu.classList.contains('hidden') && (e.code === 'Space' || e.key === ' ' || e.key === 'Enter')) {
+    e.preventDefault();
+    continueUpgradeHint();
+    return;
+  }
   keys.add(e.code);
   if (e.code === data.options.keybinds.pause && gameStarted) {
     paused = !paused;
@@ -1614,6 +1638,10 @@ document.addEventListener('keyup', e => {
   }
   if (!el.tutorialMenu.classList.contains('hidden') && (e.code === 'Space' || e.key === ' ' || e.key === 'Enter')) {
     continueTutorial();
+    return;
+  }
+  if (!el.upgradeHintMenu.classList.contains('hidden') && (e.code === 'Space' || e.key === ' ' || e.key === 'Enter')) {
+    continueUpgradeHint();
   }
 });
 renderer.domElement.addEventListener('click', () => {
