@@ -1,0 +1,351 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 2352 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+12 TL
+(Head-Butt-Alotl Mob Guide) Tj
+T*
+() Tj
+T*
+(Note: This guide is based on the current game code. Some values are dynamic or randomized, so) Tj
+T*
+(ranges are shown where needed. Screenshots are not included here, but each entry includes a) Tj
+T*
+(short visual description.) Tj
+T*
+() Tj
+T*
+(ENEMIES / HOSTILES) Tj
+T*
+() Tj
+T*
+(1. Alien - grunt) Tj
+T*
+(- Health: scales from the alien base formula; lower than brute/spike, moderate overall) Tj
+T*
+(- Damage to player: base type damage 1, then scaled by size and current large-alien multiplier) Tj
+T*
+(- Rewards: same as all standard aliens, about 8 to 12 Silver and 12 XP on kill) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: green alien with horned head, blocky body, belly plate, legs, and eyes) Tj
+T*
+() Tj
+T*
+(2. Alien - brute) Tj
+T*
+(- Health: much higher than other standard aliens due to higher hp multiplier and larger scale) Tj
+T*
+(- Damage to player: very high, especially after the new large-alien damage multiplier) Tj
+T*
+(- Rewards: about 8 to 12 Silver and 12 XP on kill) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: big blue heavy alien, large body and head, thick silhouette, meant to feel like) Tj
+T*
+(a tank) Tj
+T*
+() Tj
+T*
+(3. Alien - spike) Tj
+T*
+(- Health: medium-high) Tj
+T*
+(- Damage to player: high) Tj
+T*
+(- Rewards: about 8 to 12 Silver and 12 XP on kill) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: pink/red alien with horned look and more dangerous silhouette) Tj
+T*
+() Tj
+T*
+(4. Alien - tiny) Tj
+T*
+(- Health: lowest of the alien types) Tj
+T*
+(- Damage to player: low, but still dangerous in groups) Tj
+T*
+(- Rewards: about 8 to 12 Silver and 12 XP on kill) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: small yellow alien, fast-looking and compact) Tj
+T*
+() Tj
+T*
+(5. Shark) Tj
+T*
+(- Health: about 85 to 130 HP) Tj
+T*
+(- Damage to player: about 18 to 30 damage per second while in contact) Tj
+T*
+(- Rewards: 18 Silver and 22 XP) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: gray shark with back, belly, dorsal fin, tail, jaw, eyes, and gills) Tj
+T*
+() Tj
+T*
+(6. Anglerfish) Tj
+T*
+(- Health: not shown in one constant line, but built as a heavier deep-water hostile with) Tj
+T*
+(significant durability) Tj
+T*
+(- Damage to player: about 14 to 22 damage per second while in contact) Tj
+ET
+endstream
+endobj
+3 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+4 0 obj
+<< /Length 2050 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+12 TL
+(- Rewards: 22 Silver and 28 XP) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: dark deep-sea fish with a lure, jaw, fins, and a bulky head-heavy silhouette) Tj
+T*
+() Tj
+T*
+(7. Leviathan) Tj
+T*
+(- Health: 900 HP) Tj
+T*
+(- Damage to player: 100 damage) Tj
+T*
+(- Rewards: none currently defined in gameplay loop) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: huge dark predator with long body, fin, tail, and jaw; more like a boss creature) Tj
+T*
+() Tj
+T*
+(8. Sea Urchin) Tj
+T*
+(- Health: about 18 to 30 HP) Tj
+T*
+(- Damage to player: about 4 damage per second on contact) Tj
+T*
+(- Rewards: none directly defined right now) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: small dark urchin body with colorful glowing spines) Tj
+T*
+() Tj
+T*
+(9. Crab) Tj
+T*
+(- Health: about 14 to 22 HP) Tj
+T*
+(- Damage to player: about 3 damage per second on contact) Tj
+T*
+(- Rewards: none directly defined right now) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: orange-red crab with shell, claws, legs, and raised eyes) Tj
+T*
+() Tj
+T*
+(FRIENDLY / NEUTRAL CREATURES) Tj
+T*
+() Tj
+T*
+(10. Whale) Tj
+T*
+(- Health: not applicable) Tj
+T*
+(- Damage to player: none) Tj
+T*
+(- Rewards: none directly; provides a wisdom/dialog popup) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: giant blue whale with body, fins, tail, and a friendly encounter role) Tj
+T*
+() Tj
+T*
+(11. Octopus) Tj
+T*
+(- Health: not a combat enemy in the current loop) Tj
+T*
+(- Damage to player: none directly defined) Tj
+T*
+(- Rewards: none) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: purple octopus with eight blocky arms and a cube-like head) Tj
+T*
+() Tj
+T*
+(12. Jellyfish) Tj
+T*
+(- Health: not currently handled as a standard hostile HP pool) Tj
+T*
+(- Damage to player: none directly defined in the main hostile loop) Tj
+T*
+(- Rewards: about 3 to 5 Silver and 8 XP when bonked) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: translucent colored jellyfish bell with hanging tentacles) Tj
+T*
+() Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 1858 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+12 TL
+(13. Seahorse) Tj
+T*
+(- Health: not a combat enemy) Tj
+T*
+(- Damage to player: none) Tj
+T*
+(- Rewards: 2 Silver and 5 XP when collected/bonked) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: colorful stylized seahorse with upright body, small head, snout, and curled tail) Tj
+T*
+() Tj
+T*
+(14. Starfish) Tj
+T*
+(- Health: not applicable) Tj
+T*
+(- Damage to player: none) Tj
+T*
+(- Rewards: 1 Silver and 3 XP) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: bright multi-armed starfish in several colors) Tj
+T*
+() Tj
+T*
+(15. Glow Orb) Tj
+T*
+(- Health: not applicable) Tj
+T*
+(- Damage to player: none) Tj
+T*
+(- Rewards: 5 Silver and 15 XP) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: glowing floating orb with a luminous halo around it) Tj
+T*
+() Tj
+T*
+(16. Pickups - Steak) Tj
+T*
+(- Health: not applicable) Tj
+T*
+(- Damage to player: none) Tj
+T*
+(- Rewards: 10 Silver and 20 XP) Tj
+T*
+(- HP given to player: +10 HP) Tj
+T*
+(- Description: chunky red steak pickup with fat strip and marbling) Tj
+T*
+() Tj
+T*
+(17. Pickups - Fish) Tj
+T*
+(- Health: not applicable) Tj
+T*
+(- Damage to player: none) Tj
+T*
+(- Rewards: 4 Silver and 10 XP) Tj
+T*
+(- HP given to player: +4 HP) Tj
+T*
+(- Description: small fish pickup used as a mid-value food reward) Tj
+T*
+() Tj
+T*
+(18. Pickups - Worm) Tj
+T*
+(- Health: not applicable) Tj
+T*
+(- Damage to player: none) Tj
+T*
+(- Rewards: 2 Silver and 6 XP) Tj
+T*
+(- HP given to player: none) Tj
+T*
+(- Description: basic food pickup, common and low value) Tj
+T*
+() Tj
+T*
+(REMOVED / CURRENTLY DISABLED) Tj
+T*
+() Tj
+T*
+(19. Narwhals) Tj
+T*
+(- Current status: removed from gameplay in the current fork version) Tj
+T*
+(- Historical role: fast trio buff creature that granted +50% damage for 1 minute when touched) Tj
+T*
+(- Description: pale whale-like creature with a horn/tusk) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+endobj
+9 0 obj
+<< /Type /Catalog /Pages 8 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000002482 00000 n 
+0000002608 00000 n 
+0000004709 00000 n 
+0000004835 00000 n 
+0000006744 00000 n 
+0000006870 00000 n 
+0000006939 00000 n 
+trailer
+<< /Size 10 /Root 9 0 R >>
+startxref
+6988
+%%EOF

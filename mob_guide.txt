@@ -1,0 +1,140 @@
+Head-Butt-Alotl Mob Guide
+
+Note: This guide is based on the current game code. Some values are dynamic or randomized, so ranges are shown where needed. Screenshots are not included here, but each entry includes a short visual description.
+
+ENEMIES / HOSTILES
+
+1. Alien - grunt
+- Health: scales from the alien base formula; lower than brute/spike, moderate overall
+- Damage to player: base type damage 1, then scaled by size and current large-alien multiplier
+- Rewards: same as all standard aliens, about 8 to 12 Silver and 12 XP on kill
+- HP given to player: none
+- Description: green alien with horned head, blocky body, belly plate, legs, and eyes
+
+2. Alien - brute
+- Health: much higher than other standard aliens due to higher hp multiplier and larger scale
+- Damage to player: very high, especially after the new large-alien damage multiplier
+- Rewards: about 8 to 12 Silver and 12 XP on kill
+- HP given to player: none
+- Description: big blue heavy alien, large body and head, thick silhouette, meant to feel like a tank
+
+3. Alien - spike
+- Health: medium-high
+- Damage to player: high
+- Rewards: about 8 to 12 Silver and 12 XP on kill
+- HP given to player: none
+- Description: pink/red alien with horned look and more dangerous silhouette
+
+4. Alien - tiny
+- Health: lowest of the alien types
+- Damage to player: low, but still dangerous in groups
+- Rewards: about 8 to 12 Silver and 12 XP on kill
+- HP given to player: none
+- Description: small yellow alien, fast-looking and compact
+
+5. Shark
+- Health: about 85 to 130 HP
+- Damage to player: about 18 to 30 damage per second while in contact
+- Rewards: 18 Silver and 22 XP
+- HP given to player: none
+- Description: gray shark with back, belly, dorsal fin, tail, jaw, eyes, and gills
+
+6. Anglerfish
+- Health: not shown in one constant line, but built as a heavier deep-water hostile with significant durability
+- Damage to player: about 14 to 22 damage per second while in contact
+- Rewards: 22 Silver and 28 XP
+- HP given to player: none
+- Description: dark deep-sea fish with a lure, jaw, fins, and a bulky head-heavy silhouette
+
+7. Leviathan
+- Health: 900 HP
+- Damage to player: 100 damage
+- Rewards: none currently defined in gameplay loop
+- HP given to player: none
+- Description: huge dark predator with long body, fin, tail, and jaw; more like a boss creature
+
+8. Sea Urchin
+- Health: about 18 to 30 HP
+- Damage to player: about 4 damage per second on contact
+- Rewards: none directly defined right now
+- HP given to player: none
+- Description: small dark urchin body with colorful glowing spines
+
+9. Crab
+- Health: about 14 to 22 HP
+- Damage to player: about 3 damage per second on contact
+- Rewards: none directly defined right now
+- HP given to player: none
+- Description: orange-red crab with shell, claws, legs, and raised eyes
+
+FRIENDLY / NEUTRAL CREATURES
+
+10. Whale
+- Health: not applicable
+- Damage to player: none
+- Rewards: none directly; provides a wisdom/dialog popup
+- HP given to player: none
+- Description: giant blue whale with body, fins, tail, and a friendly encounter role
+
+11. Octopus
+- Health: not a combat enemy in the current loop
+- Damage to player: none directly defined
+- Rewards: none
+- HP given to player: none
+- Description: purple octopus with eight blocky arms and a cube-like head
+
+12. Jellyfish
+- Health: not currently handled as a standard hostile HP pool
+- Damage to player: none directly defined in the main hostile loop
+- Rewards: about 3 to 5 Silver and 8 XP when bonked
+- HP given to player: none
+- Description: translucent colored jellyfish bell with hanging tentacles
+
+13. Seahorse
+- Health: not a combat enemy
+- Damage to player: none
+- Rewards: 2 Silver and 5 XP when collected/bonked
+- HP given to player: none
+- Description: colorful stylized seahorse with upright body, small head, snout, and curled tail
+
+14. Starfish
+- Health: not applicable
+- Damage to player: none
+- Rewards: 1 Silver and 3 XP
+- HP given to player: none
+- Description: bright multi-armed starfish in several colors
+
+15. Glow Orb
+- Health: not applicable
+- Damage to player: none
+- Rewards: 5 Silver and 15 XP
+- HP given to player: none
+- Description: glowing floating orb with a luminous halo around it
+
+16. Pickups - Steak
+- Health: not applicable
+- Damage to player: none
+- Rewards: 10 Silver and 20 XP
+- HP given to player: +10 HP
+- Description: chunky red steak pickup with fat strip and marbling
+
+17. Pickups - Fish
+- Health: not applicable
+- Damage to player: none
+- Rewards: 4 Silver and 10 XP
+- HP given to player: +4 HP
+- Description: small fish pickup used as a mid-value food reward
+
+18. Pickups - Worm
+- Health: not applicable
+- Damage to player: none
+- Rewards: 2 Silver and 6 XP
+- HP given to player: none
+- Description: basic food pickup, common and low value
+
+REMOVED / CURRENTLY DISABLED
+
+19. Narwhals
+- Current status: removed from gameplay in the current fork version
+- Historical role: fast trio buff creature that granted +50% damage for 1 minute when touched
+- Description: pale whale-like creature with a horn/tusk
