@@ -1008,20 +1008,37 @@ function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45
     stripe2.position.set(0.18, 0, 0);
     group.add(body, belly, tail, topFin, sideFinL, sideFinR, eyeL, eyeR, stripe1, stripe2);
   } else {
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.16, 0.16), new THREE.MeshStandardMaterial({ color: 0xc98a52, roughness: 0.95 }));
-    const band1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.18, 0.18), new THREE.MeshStandardMaterial({ color: 0x9c6436 }));
-    const band2 = band1.clone();
-    band1.position.set(-0.08, 0.03, 0.05);
-    band2.position.set(0.14, -0.03, -0.04);
-    band1.rotation.x = 1.2;
-    band2.rotation.x = 1.05;
-    group.add(body, band1, band2);
+    // Worm — segmented cylindrical body, pinkish, curvy
+    const wormGroup = new THREE.Group();
+    const segCount = 7;
+    for (let s = 0; s < segCount; s++) {
+      const t = s / (segCount - 1);
+      const segR = 0.18 - t * 0.06; // taper toward tail
+      const seg = new THREE.Mesh(
+        new THREE.SphereGeometry(segR, 7, 5),
+        new THREE.MeshStandardMaterial({ color: t === 0 ? 0xff88aa : 0xffaabb, roughness: 0.85 })
+      );
+      const curve = Math.sin(s * 0.9) * 0.15;
+      seg.position.set(s * 0.22 - 0.66, curve, 0);
+      wormGroup.add(seg);
+    }
+    // Head — slightly larger, darker
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 7, 5), new THREE.MeshStandardMaterial({ color: 0xee7799, roughness: 0.8 }));
+    head.position.set(0.7, 0.1, 0);
+    wormGroup.add(head);
+    // Tiny eyes
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 5, 4), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+    const eyeR = eyeL.clone();
+    eyeL.position.set(0.82, 0.2, 0.1);
+    eyeR.position.set(0.82, 0.2, -0.1);
+    wormGroup.add(eyeL, eyeR);
+    group.add(wormGroup);
   }
   const minR = kind === 'fish' ? 28 : 8;
   const maxR = kind === 'fish' ? 110 : 48;
   const r = minR + Math.random() * (maxR - minR);
   const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -76 + Math.random() * 68, Math.sin(a) * r);
+  group.position.set(Math.cos(a) * r, kind === 'worm' ? -82.5 : -76 + Math.random() * 68, Math.sin(a) * r);
   group.rotation.set(Math.random(), Math.random(), Math.random());
   scene.add(group);
   const collisionRadius = kind === 'steak' ? 1.1 : kind === 'fish' ? 0.95 : 0.7;
