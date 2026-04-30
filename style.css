@@ -52,6 +52,17 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
 .value { color: #ffd27d; font-weight: 700; }
+.coin-icon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f8fbff, #cfd6df 55%, #8d98a6 100%);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: 0 0 0 1px rgba(90,110,130,0.4), 0 0 8px rgba(220,230,255,0.25);
+  vertical-align: -1px;
+}
 .space-continue { margin-top: 10px; color: #ffe066 !important; font-weight: 700; text-shadow: 1px 1px 0 #000; animation: space-continue-blink 0.7s steps(2) infinite alternate; }
 @keyframes space-continue-blink {
   0% { opacity: 1; }
