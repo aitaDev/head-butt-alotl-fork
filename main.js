@@ -643,6 +643,7 @@ const aliens = [];
 const pickups = [];
 const sharks = [];
 const octopi = [];
+const tunas = [];
 const narwhals = [];
 const leviathans = [];
 const floatingTexts = [];
@@ -691,6 +692,8 @@ let pickupSpawnTimer = 0;
 let sharkSpawnTimer = 0;
 let anglerSpawnTimer = 0;
 let leviathanSpawnTimer = 0;
+let octopiSpawnTimer = 0;
+let tunaSpawnTimer = 0;
 let continueAllowed = !!data.save.hasSave;
 const worldRadius = 100;
 let isGameOver = false;
@@ -957,23 +960,61 @@ function makeShark() {
   sharks.push({ mesh: group, speed: 2 + Math.random() * 1.5, damage: 18 + Math.random() * 12, bob: Math.random() * Math.PI * 2, hp: (85 + Math.random() * 45) * 2, hitCooldown: 0, collisionRadius: 3.2 });
 }
 
+function makeTuna() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(6.5, 2.2, 1.8), new THREE.MeshStandardMaterial({ color: 0x3a6f9f, roughness: 0.65 }));
+  const belly = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.8, 1.4), new THREE.MeshStandardMaterial({ color: 0xc8dff0, roughness: 0.8 }));
+  const back = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.9, 1.3), new THREE.MeshStandardMaterial({ color: 0x2a5f8f, roughness: 0.7 }));
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, 1.8), new THREE.MeshStandardMaterial({ color: 0x3a6f9f, roughness: 0.65 }));
+  const finTop = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.2), new THREE.MeshStandardMaterial({ color: 0x2a5f8f, roughness: 0.7 }));
+  const finSideL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.9, 1.1), new THREE.MeshStandardMaterial({ color: 0x336699, roughness: 0.72 }));
+  const finSideR = finSideL.clone();
+  const tailBase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, 0.9), new THREE.MeshStandardMaterial({ color: 0x2a5f8f }));
+  tail.rotation.y = 0.28;
+  back.position.set(-0.5, 0.6, 0);
+  belly.position.set(-0.4, -0.5, 0);
+  finTop.position.set(0.5, 1.1, 0);
+  finSideL.position.set(0.8, -0.3, 0.7);
+  finSideR.position.set(0.8, -0.3, -0.7);
+  tail.position.set(-3.4, 0, 0);
+  tailBase.position.set(-3.0, 0, 0);
+  group.add(body, belly, back, tail, tailBase, finTop, finSideL, finSideR);
+  const r = 15 + Math.random() * 80;
+  const a = Math.random() * Math.PI * 2;
+  group.position.set(Math.cos(a) * r, -55 + Math.random() * 35, Math.sin(a) * r);
+  scene.add(group);
+  tunas.push({ mesh: group, speed: 1.8 + Math.random() * 0.8, hp: 1000, bob: Math.random() * Math.PI * 2, hitCooldown: 0, collisionRadius: 4.5 });
+}
+
 function makeOctopus() {
   const group = new THREE.Group();
-  const head = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.0, 2.4), new THREE.MeshStandardMaterial({ color: 0xa45bff, roughness: 0.8 }));
-  head.position.y = 0.35;
+  const body = new THREE.Mesh(new THREE.BoxGeometry(3.8, 2.2, 2.8), new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.75 }));
+  const bodyStripe = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.25, 2.7), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 }));
+  bodyStripe.position.set(0, 0.3, 0);
+  group.add(body, bodyStripe);
   for (let i = 0; i < 8; i++) {
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.8, 0.12), new THREE.MeshStandardMaterial({ color: 0x8b47dd, roughness: 0.85 }));
     const angle = (i / 8) * Math.PI * 2;
-    arm.position.set(Math.cos(angle) * 0.5, -1.15, Math.sin(angle) * 0.5);
-    arm.rotation.z = (Math.random() - 0.5) * 0.6;
-    group.add(arm);
+    const tentacle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.25, 3.5 + Math.random() * 1.5, 0.25),
+      new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.85 })
+    );
+    tentacle.position.set(Math.cos(angle) * 1.6, -1.8, Math.sin(angle) * 1.6);
+    tentacle.rotation.z = Math.cos(angle) * 0.4;
+    tentacle.rotation.x = Math.sin(angle) * 0.4;
+    group.add(tentacle);
   }
-  group.add(head);
-  const r = 10 + Math.random() * 70;
+  const eyeWhiteL = new THREE.Mesh(new THREE.SphereGeometry(0.38, 8, 6), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 }));
+  const eyeWhiteR = eyeWhiteL.clone();
+  const eyePupilL = new THREE.Mesh(new THREE.SphereGeometry(0.18, 6, 5), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+  const eyePupilR = eyePupilL.clone();
+  eyeWhiteL.position.set(1.7, 0.6, 0.9); eyePupilL.position.set(1.88, 0.6, 0.9);
+  eyeWhiteR.position.set(1.7, 0.6, -0.9); eyePupilR.position.set(1.88, 0.6, -0.9);
+  group.add(eyeWhiteL, eyeWhiteR, eyePupilL, eyePupilR);
+  const r = 12 + Math.random() * 80;
   const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -52 + Math.random() * 22, Math.sin(a) * r);
+  group.position.set(Math.cos(a) * r, -55 + Math.random() * 30, Math.sin(a) * r);
   scene.add(group);
-  octopi.push({ mesh: group, bob: Math.random() * Math.PI * 2 });
+  octopi.push({ mesh: group, speed: 1.2 + Math.random() * 0.7, hp: 220 + Math.random() * 80, bob: Math.random() * Math.PI * 2, hitCooldown: 0, collisionRadius: 3.5 });
 }
 
 function makeJellyfish() {
@@ -2009,6 +2050,8 @@ if (isFork) {
       else if (type === 'urchin') makeUrchin();
       else if (type === 'jellyfish') makeJellyfish();
       else if (type === 'pearl') makePearl();
+      else if (type === 'tuna') makeTuna();
+      else if (type === 'octopus') makeOctopus();
     };
   }
   if (debugCloseBtn) {
@@ -2128,6 +2171,10 @@ function updateLeviathans(dt, now) {
     leviathanSpawnTimer = 0;
     makeLeviathan();
   }
+  if (elapsed >= 45 && tunas.length < 1 && tunaSpawnTimer > 35) {
+    tunaSpawnTimer = 0;
+    makeTuna();
+  }
   let nearLeviathan = false;
   for (let i = leviathans.length - 1; i >= 0; i--) {
     const leviathan = leviathans[i];
@@ -2221,6 +2268,99 @@ function updateFloatingTexts(dt) {
   }
 }
 
+function updateTunas(dt, now) {
+  for (let i = tunas.length - 1; i >= 0; i--) {
+    const tuna = tunas[i];
+    tuna.bob += dt * 1.2;
+    tuna.mesh.position.y += Math.sin(tuna.bob) * 0.012;
+    if (tuna.mesh.position.x - player.pos.x > worldRadius) tuna.mesh.position.x -= worldRadius * 2;
+    if (tuna.mesh.position.x - player.pos.x < -worldRadius) tuna.mesh.position.x += worldRadius * 2;
+    if (tuna.mesh.position.z - player.pos.z > worldRadius) tuna.mesh.position.z -= worldRadius * 2;
+    if (tuna.mesh.position.z - player.pos.z < -worldRadius) tuna.mesh.position.z += worldRadius * 2;
+    const dx = tuna.mesh.position.x - player.pos.x;
+    const dz = tuna.mesh.position.z - player.pos.z;
+    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
+      tuna.mesh.position.x = player.pos.x + (Math.random() - 0.5) * worldRadius * 1.6;
+      tuna.mesh.position.z = player.pos.z + (Math.random() - 0.5) * worldRadius * 1.6;
+    }
+    const toPlayer = player.pos.clone().sub(tuna.mesh.position);
+    const dist = toPlayer.length();
+    if (dist > 0.001) tuna.mesh.position.addScaledVector(toPlayer.normalize(), tuna.speed * hostileSpeedMultiplier * dt);
+    tuna.mesh.lookAt(player.pos);
+    if (dist < (tuna.collisionRadius + player.radius)) {
+      resolveSolidCollision(player.pos, tuna.mesh.position, tuna.collisionRadius + player.radius);
+      if (!tuna.hitCooldown || now - tuna.hitCooldown > 200) {
+        if (debugGodMode) {
+          scene.remove(tuna.mesh);
+          tunas.splice(i, 1);
+          return;
+        }
+        const ram = player.velocity.length() * config.ramPower() * 0.16;
+        const crit = player.sprinting && Math.random() < 0.5;
+        const dealt = crit ? ram * 1.5 : ram;
+        tuna.hp -= dealt;
+        if (tuna.hp <= 0) {
+          scene.remove(tuna.mesh);
+          tunas.splice(i, 1);
+          state.currency += 20;
+          addXp(35);
+          spawnDamageText(tuna.mesh.position, dealt, crit);
+          spawnRipple(tuna.mesh.position, 0x3a6f9f);
+          showNotice('🐟 Big tuna defeated! +35 XP');
+        }
+        tuna.hitCooldown = now;
+      }
+    }
+  }
+}
+
+function updateOctopi(dt, now) {
+  octopiSpawnTimer += dt;
+  const elapsed = (performance.now() - roundStartedAt) / 1000;
+  if (elapsed >= 120 && octopi.length < 2 && octopiSpawnTimer > 25) {
+    octopiSpawnTimer = 0;
+    makeOctopus();
+  }
+  for (let i = octopi.length - 1; i >= 0; i--) {
+    const octo = octopi[i];
+    octo.bob += dt * 1.5;
+    octo.mesh.position.y += Math.sin(octo.bob) * 0.018;
+    if (octo.mesh.position.x - player.pos.x > worldRadius) octo.mesh.position.x -= worldRadius * 2;
+    if (octo.mesh.position.x - player.pos.x < -worldRadius) octo.mesh.position.x += worldRadius * 2;
+    if (octo.mesh.position.z - player.pos.z > worldRadius) octo.mesh.position.z -= worldRadius * 2;
+    if (octo.mesh.position.z - player.pos.z < -worldRadius) octo.mesh.position.z += worldRadius * 2;
+    const toPlayer = player.pos.clone().sub(octo.mesh.position);
+    const dist = toPlayer.length();
+    if (dist > 0.001) octo.mesh.position.addScaledVector(toPlayer.normalize(), octo.speed * hostileSpeedMultiplier * dt);
+    octo.mesh.lookAt(player.pos);
+    if (dist < (octo.collisionRadius + player.radius)) {
+      resolveSolidCollision(player.pos, octo.mesh.position, octo.collisionRadius + player.radius);
+      if (!octo.hitCooldown || now - octo.hitCooldown > 200) {
+        if (debugGodMode) {
+          scene.remove(octo.mesh);
+          octopi.splice(i, 1);
+          return;
+        }
+        const ram = player.velocity.length() * config.ramPower() * 0.14;
+        const crit = player.sprinting && Math.random() < 0.5;
+        const dealt = crit ? ram * 1.5 : ram;
+        octo.hp -= dealt;
+        if (octo.hp <= 0) {
+          scene.remove(octo.mesh);
+          octopi.splice(i, 1);
+          state.currency += 8;
+          addXp(15);
+          spawnDamageText(octo.mesh.position, dealt, crit);
+          spawnRipple(octo.mesh.position, 0x333333);
+          showNotice('🐙 Octopus defeated! +15 XP');
+        }
+        octo.hitCooldown = now;
+        takeDamage(12 * dt, 'a giant octopus');
+      }
+    }
+  }
+}
+
 function updateRipples(dt) {
   for (let i = ripples.length - 1; i >= 0; i--) {
     const r = ripples[i];
@@ -2301,6 +2441,8 @@ function animate(now) {
     updateLeviathans(dt, now);
     updateAnglerfish(dt, now);
     updateSharks(dt, now);
+    updateTunas(dt, now);
+    updateOctopi(dt, now);
     updatePickups(dt);
     for (const octo of octopi) {
       octo.bob += dt * 1.5;
