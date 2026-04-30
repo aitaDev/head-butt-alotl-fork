@@ -50,6 +50,7 @@ let paused = true;
 let pointerLocked = false;
 let rebinding = null;
 let lastDamageCause = 'your own bad decisions';
+let upgradeHintShown = false;
 
 const state = {
   xp: data.save.xp,
@@ -106,7 +107,7 @@ app.innerHTML = `
   <div id="tutorialMenu" class="overlay hidden">
     <div class="panel">
       <h2>How To Swim</h2>
-      <p class="subtitle">W move forward, S back, A left, D right, move mouse to aim, Shift sprint, U upgrades, Esc pause.</p>
+      <p class="subtitle">W move forward, S back, A left, D right, move mouse to aim, Shift sprint, C upgrades, Esc pause.</p>
       <div class="small space-continue">␣ Hit space to continue</div>
     </div>
   </div>
@@ -240,6 +241,7 @@ function persist() {
 }
 
 function resetState() {
+  upgradeHintShown = false;
   Object.assign(state, structuredClone(defaults.save));
   state.health = config.maxHealth();
   persist();
@@ -1385,6 +1387,10 @@ function updateHUD() {
   el.healthLabel.textContent = `Health ${Math.round(state.health)}/${config.maxHealth()}`;
   el.currency.textContent = state.currency;
   el.aliensBonked.textContent = state.stats.aliensBonked;
+  if (!upgradeHintShown && state.currency >= 20) {
+    upgradeHintShown = true;
+    showNotice('You have 20 currency. Hit C to open Character Upgrades and spend it.');
+  }
   if (player.pos.distanceTo(whale.position) < 115 && performance.now() > whaleChatCooldownUntil && !paused) {
     paused = true;
     whaleChatCooldownUntil = performance.now() + 120000;
@@ -1584,7 +1590,7 @@ document.addEventListener('keydown', e => {
       renderer.domElement.requestPointerLock();
     }
   }
-  if (e.code === data.options.keybinds.upgrades && gameStarted) {
+  if ((e.code === data.options.keybinds.upgrades || e.code === 'KeyC') && gameStarted) {
     paused = true;
     document.exitPointerLock();
     renderUpgradeMenu();
