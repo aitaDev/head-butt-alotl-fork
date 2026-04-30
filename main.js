@@ -858,7 +858,7 @@ function makeJellyfish() {
   const dome = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2),
     new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 }));
   dome.position.y = 0.05;
-  dome.rotation.x = Math.PI;
+  dome.rotation.x = 0;
   for (let i = 0; i < 6; i++) {
     const tentacle = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.4 + Math.random() * 1.2, 0.05),
       new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.5 }));
