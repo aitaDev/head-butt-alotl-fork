@@ -748,23 +748,39 @@ function spawnDamageText(position, amount, crit = false) {
   requestAnimationFrame(() => elText.classList.add('show'));
 }
 
-function makeNarwhal() {
+function makeNarwhal(index = narwhals.length) {
   const group = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.3, 1.3), new THREE.MeshStandardMaterial({ color: 0xd7f1ff, roughness: 0.7 }));
-  const head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: 0xeaf8ff, roughness: 0.6 }));
-  const horn = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.12, 0.12), new THREE.MeshStandardMaterial({ color: 0xf5f0d8, roughness: 0.5 }));
-  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: 0xb9dced }));
-  body.position.set(0, 0, 0);
-  head.position.set(2.7, 0.05, 0);
-  horn.position.set(3.7, 0.2, 0);
-  tail.position.set(-2.3, 0, 0);
-  tail.rotation.y = 0.25;
-  group.add(body, head, horn, tail);
-  const r = 18 + Math.random() * 65;
-  const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -55 + Math.random() * 35, Math.sin(a) * r);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4.8, 1.5, 1.5), new THREE.MeshStandardMaterial({ color: 0xd7f1ff, roughness: 0.7 }));
+  const head = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.1, 1.05), new THREE.MeshStandardMaterial({ color: 0xeaf8ff, roughness: 0.6 }));
+  const horn = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.12, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0xf5f0d8, roughness: 0.5 }));
+  const tailBase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, 0.9), new THREE.MeshStandardMaterial({ color: 0xb9dced }));
+  const tailFlukeTop = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.85, 0.42), new THREE.MeshStandardMaterial({ color: 0xb9dced }));
+  const tailFlukeBottom = tailFlukeTop.clone();
+  const finL = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.45), new THREE.MeshStandardMaterial({ color: 0xc8e7f5 }));
+  const finR = finL.clone();
+  const dorsal = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.22, 0.18), new THREE.MeshStandardMaterial({ color: 0xcdefff }));
+  const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: 0x101820 }));
+  const eyeR = eyeL.clone();
+  head.position.set(3.0, 0.08, 0);
+  horn.rotation.z = Math.PI / 2;
+  horn.position.set(4.25, 0.45, 0);
+  tailBase.position.set(-2.65, 0, 0);
+  tailFlukeTop.position.set(-3.0, 0.42, 0);
+  tailFlukeBottom.position.set(-3.0, -0.42, 0);
+  tailFlukeTop.rotation.z = 0.85;
+  tailFlukeBottom.rotation.z = -0.85;
+  finL.position.set(0.6, -0.45, 0.62);
+  finR.position.set(0.6, -0.45, -0.62);
+  finL.rotation.z = 0.35;
+  finR.rotation.z = -0.35;
+  dorsal.position.set(-0.4, 0.7, 0);
+  eyeL.position.set(3.65, 0.22, 0.34);
+  eyeR.position.set(3.65, 0.22, -0.34);
+  group.add(body, head, horn, tailBase, tailFlukeTop, tailFlukeBottom, finL, finR, dorsal, eyeL, eyeR);
+  const angle = (Math.PI * 2 * index) / 3;
+  group.position.set(Math.cos(angle) * 28, -42 + Math.sin(index) * 4, Math.sin(angle) * 28);
   scene.add(group);
-  narwhals.push({ mesh: group, activeUntil: 0, following: false, bob: Math.random() * Math.PI * 2, collisionRadius: 4.5 });
+  narwhals.push({ mesh: group, bob: Math.random() * Math.PI * 2, collisionRadius: 4.5, angle, orbitRadius: 28 + index * 2, orbitSpeed: 2.8 + index * 0.18, depthOffset: -42 + index * 1.2 });
 }
 
 function makeLeviathan() {
@@ -1167,7 +1183,7 @@ function updateAnglerfish(dt, now) {
 
     // Take damage when rammed by player
     if (dist < af.collisionRadius + player.radius && player.velocity.length() > 2.5) {
-      const dmgMult = narwhalBuffUntil > performance.now() ? 2 : 1;
+      const dmgMult = narwhalBuffUntil > performance.now() ? 1.5 : 1;
       const ram = player.velocity.length() * config.ramPower() * 0.16 * dmgMult;
       const sprintingCrit = player.sprinting && Math.random() < 0.5;
       const movingCrit = !player.sprinting && player.velocity.length() > 2.5 && Math.random() < 0.25;
@@ -1290,7 +1306,7 @@ for (let i = 0; i < 40; i++) {
 
 for (let i = 0; i < 18; i++) makePickup();
 for (let i = 0; i < 10; i++) makeOctopus();
-for (let i = 0; i < 2; i++) makeNarwhal();
+for (let i = 0; i < 3; i++) makeNarwhal(i);
 for (let i = 0; i < 7; i++) makeJellyfish();
 for (let i = 0; i < 5; i++) makeSeahorse();
 for (let i = 0; i < 12; i++) makeGlowOrb();
@@ -1394,7 +1410,7 @@ function updateHUD() {
     openOverlay('whaleChatMenu');
   }
   if (narwhalBuffUntil > performance.now()) {
-    showNotice('🦄 Narwhal ally active, double damage for 1 minute');
+    showNotice('🦄 Narwhal buff active, +50% damage for 1 minute');
   }
 }
 
@@ -1818,7 +1834,7 @@ function updateAliens(dt, now) {
     if (dist < (alien.collisionRadius + player.radius)) {
       let killed = false;
       if (!alien.hitCooldown || now - alien.hitCooldown > 120) {
-        const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
+        const damageMultiplier = narwhalBuffUntil > performance.now() ? 1.5 : 1;
         const ram = player.velocity.length() * config.ramPower() * 0.18 * damageMultiplier;
         const sprintingCrit = player.sprinting && Math.random() < 0.5;
         const movingCrit = !player.sprinting && player.velocity.length() > 0.8 && Math.random() < 0.25;
@@ -1891,25 +1907,25 @@ function updatePickups(dt) {
 }
 
 function updateNarwhals(dt) {
-  for (const narwhal of narwhals) {
-    narwhal.bob += dt * 1.8;
-    const target = narwhal.following && narwhal.activeUntil > performance.now() ? player.pos : narwhal.mesh.position;
-    if (narwhal.following && narwhal.activeUntil > performance.now()) {
-      const escortPos = player.pos.clone().add(new THREE.Vector3(Math.sin(performance.now() * 0.001) * 3, 0.8, Math.cos(performance.now() * 0.001) * 3));
-      const move = escortPos.sub(narwhal.mesh.position);
-      if (move.length() > 0.001) narwhal.mesh.position.addScaledVector(move.normalize(), dt * 6);
-      narwhal.mesh.lookAt(player.pos);
-    }
-    narwhal.mesh.position.y += Math.sin(narwhal.bob) * 0.02;
-    if (!narwhal.following && narwhal.mesh.position.distanceTo(player.pos) < narwhal.collisionRadius) {
-      narwhal.following = true;
-      narwhal.activeUntil = performance.now() + 60000;
-      narwhalBuffUntil = narwhal.activeUntil;
-      showNotice('A rare narwhal joins you and doubles your damage');
-    }
-    if (narwhal.following && narwhal.activeUntil <= performance.now()) {
-      narwhal.following = false;
-      showNotice('Your narwhal friend swims away');
+  for (let i = narwhals.length - 1; i >= 0; i--) {
+    const narwhal = narwhals[i];
+    narwhal.bob += dt * 6;
+    narwhal.angle += dt * narwhal.orbitSpeed;
+    narwhal.mesh.position.x = player.pos.x + Math.cos(narwhal.angle) * narwhal.orbitRadius;
+    narwhal.mesh.position.z = player.pos.z + Math.sin(narwhal.angle) * narwhal.orbitRadius;
+    narwhal.mesh.position.y = narwhal.depthOffset + Math.sin(narwhal.bob) * 1.2;
+    const ahead = new THREE.Vector3(
+      player.pos.x + Math.cos(narwhal.angle + 0.1) * narwhal.orbitRadius,
+      narwhal.depthOffset,
+      player.pos.z + Math.sin(narwhal.angle + 0.1) * narwhal.orbitRadius
+    );
+    narwhal.mesh.lookAt(ahead);
+    if (narwhal.mesh.position.distanceTo(player.pos) < narwhal.collisionRadius) {
+      narwhalBuffUntil = performance.now() + 60000;
+      showNotice('You caught the narwhals. +50% damage for 1 minute');
+      for (const pal of narwhals) scene.remove(pal.mesh);
+      narwhals.length = 0;
+      break;
     }
   }
 }
@@ -1955,7 +1971,7 @@ function updateSharks(dt, now) {
     if (dist < (shark.collisionRadius + player.radius)) {
       let killed = false;
       if (!shark.hitCooldown || now - shark.hitCooldown > 120) {
-        const damageMultiplier = narwhalBuffUntil > performance.now() ? 2 : 1;
+        const damageMultiplier = narwhalBuffUntil > performance.now() ? 1.5 : 1;
         const ram = player.velocity.length() * config.ramPower() * 0.16 * damageMultiplier;
         const sprintingCrit = player.sprinting && Math.random() < 0.5;
         const movingCrit = !player.sprinting && player.velocity.length() > 0.8 && Math.random() < 0.25;
