@@ -569,7 +569,7 @@ const bubbles = [];
 const kelpBlades = [];
 const urchins = [];
 const crabs = [];
-const starfish = [];
+// starfish removed
 const crystals = [];
 const tentacles = [];
 const depthZones = [];
@@ -1028,7 +1028,7 @@ function makeCrab() {
   eyeL.position.set(0.18, 0.28, 0.14); eyeR.position.set(0.18, 0.28, -0.14);
   group.add(eyeL, eyeR);
   const r = 8 + Math.random() * 90; const a2 = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a2) * r, -83.5, Math.sin(a2) * r);
+  group.position.set(Math.cos(a2) * r, -84.6 + Math.random() * 0.9, Math.sin(a2) * r);
   group.rotation.y = Math.random() * Math.PI * 2;
   scene.add(group);
   crabs.push({ mesh: group, hp: (14 + Math.random() * 8) * 2, speed: 0.8 + Math.random() * 1.2, bob: Math.random() * Math.PI * 2, wanderAngle: Math.random() * Math.PI * 2, hitCooldown: 0 });
@@ -1354,7 +1354,7 @@ for (let i = 0; i < 12; i++) makeGlowOrb();
 for (let i = 0; i < 14; i++) makeAnemone();
 for (let i = 0; i < 4; i++) makeLoreTablet();
 for (let i = 0; i < 7; i++) makeCrab();
-for (let i = 0; i < 9; i++) makeStarfish();
+// starfish removed
 for (let i = 0; i < 6; i++) makeCrystal();
 for (let i = 0; i < 4; i++) makeKraken();
 for (let i = 0; i < 10; i++) makePearl();
@@ -2367,27 +2367,4 @@ function updateSeabedCreatures(dt, now) {
     }
   }
 
-  // Starfish — collectible like seahorses, respawn after delay
-  for (let i = starfish.length - 1; i >= 0; i--) {
-    const sf = starfish[i];
-    sf.bob += dt * 0.9;
-    sf.mesh.position.y = -84.0 + Math.sin(sf.bob) * 0.06;
-    sf.mesh.rotation.z += dt * 0.2;
-    const dx = sf.mesh.position.x - player.pos.x;
-    const dz = sf.mesh.position.z - player.pos.z;
-    if (Math.abs(dx) > worldRadius || Math.abs(dz) > worldRadius) {
-      sf.mesh.position.x = player.pos.x + (Math.random() - 0.5) * worldRadius * 1.6;
-      sf.mesh.position.z = player.pos.z + (Math.random() - 0.5) * worldRadius * 1.6;
-    }
-    const dist = sf.mesh.position.distanceTo(player.pos);
-    if (dist < 1.6 && player.velocity.length() > 1.2) {
-      scene.remove(sf.mesh);
-      starfish.splice(i, 1);
-      state.currency += 1;
-      addXp(3);
-      spawnRipple(sf.mesh.position, sf.color || 0xffaa44);
-      showNotice('⭐ Starfish collected! +3 XP');
-      setTimeout(() => { if (gameStarted && starfish.length < 12) makeStarfish(); }, 4000);
-    }
-  }
 }
