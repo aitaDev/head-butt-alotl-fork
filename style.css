@@ -228,44 +228,40 @@ input[type="range"] { width: 180px; }
 /* ── Skin chooser ── */
 .skin-chooser {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 16px;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(140,210,255,0.2);
-  border-radius: 8px;
-  padding: 12px 24px;
-  width: 160px;
-  margin-left: auto;
-  margin-right: auto;
+  gap: 12px;
 }
-.skin-name-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+.skin-chooser-overlay {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(7, 26, 54, 0.45);
+  border: 1px solid rgba(170, 230, 255, 0.25);
+  backdrop-filter: blur(4px);
 }
 #skinName {
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
   color: #fff;
   letter-spacing: 1px;
-}
-.skin-swatch {
-  width: 48px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.35);
+  min-width: 132px;
+  text-align: center;
 }
 .skin-arrow {
-  background: none;
+  appearance: none;
   border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 4px 6px;
   font-size: 16px;
+  line-height: 1;
   color: #9fdcff;
   cursor: pointer;
-  padding: 4px 12px;
-  transition: color 0.15s;
+  min-width: auto;
 }
-.skin-arrow:hover { color: #fff; }
-.skin-arrow:active { color: #ff9ecf; }
+.skin-arrow:hover { color: #ffffff; filter: none; }
+.skin-arrow:active { color: #ff9ecf; transform: none; box-shadow: none; }

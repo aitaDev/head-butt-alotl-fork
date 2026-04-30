@@ -90,9 +90,7 @@ function applySkin(idx) {
   axTail.material.color.setHex(s.stripe);
   axTailTip.material.color.setHex(s.tail);
   const nameEl = document.getElementById('skinName');
-  const swatchEl = document.getElementById('skinSwatch');
   if (nameEl) nameEl.textContent = s.name;
-  if (swatchEl) swatchEl.style.background = '#' + s.body.toString(16).padStart(6,'0');
 }
 
 function nextSkin(delta) {
@@ -169,14 +167,6 @@ app.innerHTML = `
       <div class="main-menu-copy">
         <h1 class="title">Head-Butt-Alotl</h1>
         <p class="subtitle">Save the pond by headbutting alien invaders and gobbling worms for power.</p>
-        <div class="skin-chooser">
-          <button id="skinUpBtn" class="skin-arrow">▲</button>
-          <div class="skin-name-wrap">
-            <div id="skinName">Dazi Pink</div>
-            <div class="skin-swatch" id="skinSwatch"></div>
-          </div>
-          <button id="skinDownBtn" class="skin-arrow">▼</button>
-        </div>
         <div class="menu-buttons">
           <button id="newGameBtn">New Game</button>
           <button id="continueBtn">Continue</button>
@@ -186,6 +176,11 @@ app.innerHTML = `
         <div id="versionTag">${gameVersion} by Phishie</div>
       </div>
       <div class="main-menu-art" aria-hidden="true">
+        <div class="skin-chooser skin-chooser-overlay">
+          <button id="skinUpBtn" class="skin-arrow">◀</button>
+          <div id="skinName">Dazi Pink</div>
+          <button id="skinDownBtn" class="skin-arrow">▶</button>
+        </div>
         <div id="menuPreview"></div>
       </div>
     </div>
