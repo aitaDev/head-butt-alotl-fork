@@ -45,6 +45,7 @@ const defaults = {
 };
 
 let data = loadData();
+data.save.currency = 0;
 let gameStarted = false;
 let paused = true;
 let pointerLocked = false;
@@ -56,7 +57,7 @@ let roundStartedAt = performance.now();
 const state = {
   xp: data.save.xp,
   level: data.save.level,
-  currency: data.save.currency,
+  currency: 0,
   health: data.save.health,
   upgrades: { ...data.save.upgrades },
   stats: { ...data.save.stats }
