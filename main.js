@@ -375,6 +375,7 @@ whaleFinL.position.set(4, -9, 13.5);
 whaleFinR.position.set(4, -9, -13.5);
 whale.add(whaleBody, whaleHead, whaleTailL, whaleTailR, whaleFinL, whaleFinR);
 whale.position.set(180, -65, -100);
+whale.visible = false;
 scene.add(whale);
 let whaleSwimAngle = 0;
 
@@ -1317,7 +1318,6 @@ for (let i = 0; i < 5; i++) makeSeahorse();
 for (let i = 0; i < 12; i++) makeGlowOrb();
 for (let i = 0; i < 14; i++) makeAnemone();
 for (let i = 0; i < 4; i++) makeLoreTablet();
-for (let i = 0; i < 8; i++) makeUrchin();
 for (let i = 0; i < 7; i++) makeCrab();
 for (let i = 0; i < 9; i++) makeStarfish();
 for (let i = 0; i < 6; i++) makeCrystal();
@@ -1389,7 +1389,7 @@ function showNotice(text) {
 
 function updateHUD() {
   if (audioUnlocked) {
-    if (player.pos.distanceTo(whale.position) < 120) {
+    if (whale.visible && player.pos.distanceTo(whale.position) < 120) {
       if (audio.whale.paused) audio.whale.play().catch(() => {});
     } else {
       audio.whale.pause();
@@ -1409,7 +1409,7 @@ function updateHUD() {
     showUpgradeHintPopup();
     return;
   }
-  if (player.pos.distanceTo(whale.position) < 115 && performance.now() > whaleChatCooldownUntil && !paused) {
+  if (whale.visible && player.pos.distanceTo(whale.position) < 115 && performance.now() > whaleChatCooldownUntil && !paused) {
     paused = true;
     whaleChatCooldownUntil = performance.now() + 120000;
     openOverlay('whaleChatMenu');
