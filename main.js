@@ -1032,7 +1032,7 @@ function makeCrab() {
   eyeL.position.set(0.18, 0.28, 0.14); eyeR.position.set(0.18, 0.28, -0.14);
   group.add(eyeL, eyeR);
   const r = 8 + Math.random() * 90; const a2 = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a2) * r, -70.0, Math.sin(a2) * r);
+  group.position.set(Math.cos(a2) * r, -82.0, Math.sin(a2) * r);
   group.rotation.y = Math.random() * Math.PI * 2;
   scene.add(group);
   crabs.push({ mesh: group, hp: (14 + Math.random() * 8) * 2, speed: 0.8 + Math.random() * 1.2, bob: Math.random() * Math.PI * 2, wanderAngle: Math.random() * Math.PI * 2, hitCooldown: 0 });
@@ -2412,7 +2412,7 @@ function updateSeabedCreatures(dt, now) {
   // Crabs — scuttle around, deal contact damage and scatter when touched
   for (const crab of crabs) {
     crab.bob += dt * 1.6;
-    crab.mesh.position.y = -83.5 + Math.sin(crab.bob) * 0.04;
+    crab.mesh.position.y = -81.0 + Math.sin(crab.bob) * 0.04;
     crab.wanderAngle += dt * 0.5;
     crab.mesh.rotation.y = crab.wanderAngle;
     crab.mesh.position.x += Math.cos(crab.wanderAngle) * crab.speed * hostileSpeedMultiplier * dt * 0.6;
