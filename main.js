@@ -696,7 +696,7 @@ function makeAlien() {
   group.position.set(Math.cos(a) * r, -72 + Math.random() * 62, Math.sin(a) * r);
   scene.add(group);
   const sizeDamageMultiplier = scale >= 2 ? 4.5 : scale >= 1.5 ? 2.5 : 1;
-  aliens.push({ mesh: group, hp: (38 + state.level * 9) * scale * 1.8 * type.hp, speed: Math.max(0.35, type.speed - scale * 0.12) + Math.random() * 0.35, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale * type.damage * sizeDamageMultiplier, kind: type.name, collisionRadius: 1.2 * scale });
+  aliens.push({ mesh: group, hp: (38 + state.level * 9) * scale * 1.8 * type.hp * 2, speed: Math.max(0.35, type.speed - scale * 0.12) + Math.random() * 0.35, bob: Math.random() * Math.PI * 2, scale, damage: 6 * scale * type.damage * sizeDamageMultiplier, kind: type.name, collisionRadius: 1.2 * scale });
 }
 
 function makePickup(kind = Math.random() < 0.12 ? 'steak' : Math.random() < 0.45 ? 'fish' : 'worm') {
@@ -837,7 +837,7 @@ function makeLeviathan() {
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -45 + Math.random() * 18, Math.sin(a) * r);
   scene.add(group);
-  leviathans.push({ mesh: group, speed: 8 + Math.random() * 3, damage: 100, hp: 900, bob: Math.random() * Math.PI * 2 });
+  leviathans.push({ mesh: group, speed: 8 + Math.random() * 3, damage: 100, hp: 1800, bob: Math.random() * Math.PI * 2 });
 }
 
 function makeShark() {
@@ -867,7 +867,7 @@ function makeShark() {
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -60 + Math.random() * 40, Math.sin(a) * r);
   scene.add(group);
-  sharks.push({ mesh: group, speed: 2 + Math.random() * 1.5, damage: 18 + Math.random() * 12, bob: Math.random() * Math.PI * 2, hp: 85 + Math.random() * 45, hitCooldown: 0, collisionRadius: 3.2 });
+  sharks.push({ mesh: group, speed: 2 + Math.random() * 1.5, damage: 18 + Math.random() * 12, bob: Math.random() * Math.PI * 2, hp: (85 + Math.random() * 45) * 2, hitCooldown: 0, collisionRadius: 3.2 });
 }
 
 function makeOctopus() {
@@ -999,7 +999,7 @@ function makeUrchin() {
   const r = 10 + Math.random() * 88; const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -83.5, Math.sin(a) * r);
   scene.add(group);
-  urchins.push({ mesh: group, hp: 18 + Math.random() * 12, bob: Math.random() * Math.PI * 2, hitCooldown: 0 });
+  urchins.push({ mesh: group, hp: (18 + Math.random() * 12) * 2, bob: Math.random() * Math.PI * 2, hitCooldown: 0 });
 }
 
 function makeCrab() {
@@ -1031,7 +1031,7 @@ function makeCrab() {
   group.position.set(Math.cos(a2) * r, -83.5, Math.sin(a2) * r);
   group.rotation.y = Math.random() * Math.PI * 2;
   scene.add(group);
-  crabs.push({ mesh: group, hp: 14 + Math.random() * 8, speed: 0.8 + Math.random() * 1.2, bob: Math.random() * Math.PI * 2, wanderAngle: Math.random() * Math.PI * 2, hitCooldown: 0 });
+  crabs.push({ mesh: group, hp: (14 + Math.random() * 8) * 2, speed: 0.8 + Math.random() * 1.2, bob: Math.random() * Math.PI * 2, wanderAngle: Math.random() * Math.PI * 2, hitCooldown: 0 });
 }
 
 function makeStarfish() {
@@ -1155,7 +1155,7 @@ function makeAnglerfish() {
   scene.add(group);
   anglerfish.push({ mesh: group, lureMesh: lure, lureHalo, lureColor,
     speed: 2.5 + Math.random() * 1.8, damage: 14 + Math.random() * 8,
-    hp: 55 + Math.random() * 35, bob: Math.random() * Math.PI * 2,
+    hp: (55 + Math.random() * 35) * 2, bob: Math.random() * Math.PI * 2,
     hitCooldown: 0, collisionRadius: 3.0, huntTimer: 0, lurePhase: Math.random() * Math.PI * 2 });
 }
 
