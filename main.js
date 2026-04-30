@@ -968,7 +968,7 @@ function makeAnemone() {
   }
   const r = 8 + Math.random() * 90;
   const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -79.0, Math.sin(a) * r);
+  group.position.set(Math.cos(a) * r, -80.0, Math.sin(a) * r);
   scene.add(group);
   anemones.push({ mesh: group, bob: Math.random() * Math.PI * 2, tentacles: group.children.slice(1) });
 }
