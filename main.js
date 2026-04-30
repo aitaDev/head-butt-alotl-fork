@@ -183,11 +183,11 @@ app.innerHTML = `
   </div>
 
   <div id="upgradeMenu" class="overlay hidden">
-    <div class="panel">
+    <div class="panel" style="max-width:680px">
       <h2>Axolotl Evolution</h2>
       <p class="subtitle">Spend Salted Silver on upgrades.</p>
       <div class="row"><span>Level</span><span class="value" id="upLevel"></span></div>
-      <div class="row"><span><span class="coin-icon" aria-hidden="true"></span></span><span class="value" id="upCurrency"></span></div>
+      <div class="row"><span>Salted Silver</span><span class="value" id="upCurrency"></span></div>
       <div class="bar"><div id="upgradeXpFill" class="fill"></div><div class="barLabel" id="upgradeXpLabel"></div></div>
       <div style="height:12px"></div>
       <div id="upgradeList"></div>
@@ -198,7 +198,7 @@ app.innerHTML = `
   </div>
 
   <div class="topbar">
-    <div class="card" id="scoreCard"><span class="coin-icon" aria-hidden="true"></span> Salted Silver: <span id="currency">0</span></div>
+    <div class="card" id="scoreCard">Salted Silver: <span id="currency">0</span></div>
     <div class="card" id="statCard">Aliens bonked: <span id="aliensBonked">0</span></div>
   </div>
 
@@ -1430,7 +1430,7 @@ function renderUpgradeMenu() {
     const cost = meta.cost(lvl);
     const row = document.createElement('div');
     row.className = 'upgrade';
-    row.innerHTML = `<div><strong>${meta.name}</strong><div class="small">${meta.desc} (Level ${lvl}/5)</div></div><div class="value">${lvl >= 5 ? 'MAX' : `<span class="coin-icon" aria-hidden="true"></span> ${cost}`}</div>`;
+    row.innerHTML = `<div><strong>${meta.name}</strong><div class="small">${meta.desc} (Level ${lvl}/5)</div></div><div class="value">${lvl >= 5 ? 'MAX' : cost + ' Salted Silver'}</div>`;
     const btn = document.createElement('button');
     btn.textContent = lvl >= 5 ? 'Maxed' : 'Upgrade';
     btn.disabled = lvl >= 5 || state.currency < cost;
