@@ -1177,14 +1177,14 @@ function makeTuna(overridePos) {
   tailRightFluke.rotation.z = -0.2;
   tailGroup.add(tailStem, tailLeft, tailRight, tailLeftFluke, tailRightFluke);
   tailGroup.position.set(0, 0, -16.5);
-  tailGroup.rotation.z = 0.12;
+  tailGroup.rotation.z = 0.55;
   // Tall singular dorsal fin — iconic tuna shape
   const dorsal = new THREE.Mesh(new THREE.BoxGeometry(0.35, 9.0, 5.5), new THREE.MeshStandardMaterial({ color: 0x336688, roughness: 0.6 }));
   const dorsalFin = new THREE.Mesh(new THREE.BoxGeometry(0.3, 5.5, 3.0), new THREE.MeshStandardMaterial({ color: 0x4477aa, roughness: 0.58 }));
   dorsal.position.set(0, 4.5, 1.0);
-  dorsal.rotation.z = 0.1;
+  dorsal.rotation.z = 0.35;
   dorsalFin.position.set(0, 3.2, 3.5);
-  dorsalFin.rotation.z = 0.15;
+  dorsalFin.rotation.z = 0.45;
   // Swept pectoral fins — back and downward
   const pectL = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.8, 0.25), new THREE.MeshStandardMaterial({ color: 0x4477aa, roughness: 0.6 }));
   const pectR = pectL.clone();
@@ -2526,16 +2526,13 @@ function updateTunas(dt, now) {
   for (let i = tunas.length - 1; i >= 0; i--) {
     const tuna = tunas[i];
     tuna.bob += dt * 1.2;
-    // Passive swim: move in a wandering direction, bob gently
-    tuna.wanderAngle += dt * 0.4;
+    // Straight swim — fixed direction, slow curve drift
+    tuna.wanderAngle += dt * 0.05;
     tuna.mesh.position.x += Math.cos(tuna.wanderAngle) * tuna.speed * dt;
     tuna.mesh.position.z += Math.sin(tuna.wanderAngle) * tuna.speed * dt;
     tuna.mesh.position.y += Math.sin(tuna.bob) * 0.015;
-    // Face direction of travel (not at player)
-    const swimDir = new THREE.Vector3(Math.cos(tuna.wanderAngle), 0, Math.sin(tuna.wanderAngle));
-    // rotation.y=PI/2 → local Z→world+X, local -Z→world -X
-    // Forward is local +Z → world +X, so lookAt(-cos,0,-sin) aligns local -Z with (-cos,0,-sin)
-    // which makes local +Z point at (+cos,0,+sin) = swimDir
+    // rotation.y=PI/2: local Z→world+X, local -Z→world -X
+    // lookAt(-cos,0,-sin) points local -Z at (-cos,0,-sin) → local +Z points at (+cos,0,+sin) = swimDir
     tuna.mesh.lookAt(tuna.mesh.position.clone().add(new THREE.Vector3(-Math.cos(tuna.wanderAngle), 0, -Math.sin(tuna.wanderAngle))));
     if (tuna.mesh.position.x - player.pos.x > worldRadius) tuna.mesh.position.x -= worldRadius * 2;
     if (tuna.mesh.position.x - player.pos.x < -worldRadius) tuna.mesh.position.x += worldRadius * 2;
