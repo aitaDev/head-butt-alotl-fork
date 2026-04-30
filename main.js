@@ -183,11 +183,11 @@ app.innerHTML = `
   </div>
 
   <div id="upgradeMenu" class="overlay hidden">
-    <div class="panel" style="max-width:680px">
+    <div class="panel">
       <h2>Axolotl Evolution</h2>
       <p class="subtitle">Spend Salted Silver on upgrades.</p>
       <div class="row"><span>Level</span><span class="value" id="upLevel"></span></div>
-      <div class="row"><span>Salted Silver</span><span class="value" id="upCurrency"></span></div>
+      <div class="row"><span><span class="coin-icon" aria-hidden="true"></span></span><span class="value" id="upCurrency"></span></div>
       <div class="bar"><div id="upgradeXpFill" class="fill"></div><div class="barLabel" id="upgradeXpLabel"></div></div>
       <div style="height:12px"></div>
       <div id="upgradeList"></div>
