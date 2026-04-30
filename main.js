@@ -79,10 +79,10 @@ const config = {
 const hostileSpeedMultiplier = 10;
 
 const upgradesMeta = [
-  { key: 'fins', name: 'Better Fins', desc: 'Swim faster through the pond.', cost: lvl => 20 * Math.pow(5, lvl) },
-  { key: 'head', name: 'Bigger Stronger Head', desc: 'Bonk aliens harder for faster takedowns.', cost: lvl => 20 * Math.pow(5, lvl) },
-  { key: 'lungs', name: 'Pond Lungs', desc: 'More health and better survival.', cost: lvl => 20 * Math.pow(5, lvl) },
-  { key: 'bite', name: 'Power Chomp', desc: 'Grab worms and steak from farther away.', cost: lvl => 20 * Math.pow(5, lvl) }
+  { key: 'fins', name: 'Better Fins', desc: 'Swim faster through the pond.', cost: lvl => [20, 100, 300, 900, 2500][lvl] },
+  { key: 'head', name: 'Bigger Stronger Head', desc: 'Bonk aliens harder for faster takedowns.', cost: lvl => [60, 100, 300, 900, 2500][lvl] },
+  { key: 'lungs', name: 'Pond Lungs', desc: 'More health and better survival.', cost: lvl => [45, 100, 300, 900, 2500][lvl] },
+  { key: 'bite', name: 'Power Chomp', desc: 'Grab worms and steak from farther away.', cost: lvl => [45, 100, 300, 900, 2500][lvl] }
 ];
 
 app.innerHTML = `
