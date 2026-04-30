@@ -568,7 +568,7 @@ const jellyfish = [];
 const seahorses = [];
 const glowOrbs = [];
 const anemones = [];
-const loreTablets = [];
+// lore tablets removed
 const bubbles = [];
 const kelpBlades = [];
 const urchins = [];
@@ -968,7 +968,7 @@ function makeAnemone() {
   }
   const r = 8 + Math.random() * 90;
   const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -84.5, Math.sin(a) * r);
+  group.position.set(Math.cos(a) * r, -79.0, Math.sin(a) * r);
   scene.add(group);
   anemones.push({ mesh: group, bob: Math.random() * Math.PI * 2, tentacles: group.children.slice(1) });
 }
@@ -1357,7 +1357,7 @@ for (let i = 0; i < 7; i++) makeJellyfish();
 for (let i = 0; i < 5; i++) makeSeahorse();
 for (let i = 0; i < 12; i++) makeGlowOrb();
 for (let i = 0; i < 14; i++) makeAnemone();
-for (let i = 0; i < 4; i++) makeLoreTablet();
+// lore tablets removed
 for (let i = 0; i < 7; i++) makeCrab();
 // starfish removed
 for (let i = 0; i < 6; i++) makeCrystal();
@@ -2226,7 +2226,7 @@ function animate(now) {
     updateSeahorses(dt);
     updateGlowOrbs(dt, now);
     updateAnemones(dt);
-    updateLoreTablets(dt);
+    // updateLoreTablets(dt);
     updateBubbles(dt);
     updateKelp(dt);
     updateFloatingTexts(dt);
