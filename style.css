@@ -144,7 +144,7 @@ input[type="range"] { width: 180px; }
   color: #ffe066;
   font-size: 16px;
 }
-.upgrade { display: grid; grid-template-columns: 1fr auto auto; column-gap: 28px; row-gap: 10px; align-items: center; background: rgba(255,255,255,0.04); padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+.upgrade { display: grid; grid-template-columns: 1fr auto auto; column-gap: 40px; row-gap: 10px; align-items: center; background: rgba(255,255,255,0.04); padding: 12px; border-radius: 12px; margin-bottom: 10px; }
 .keybind { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin: 10px 0; }
 .keybtn.listening { outline: 2px solid #ffd166; }
 .depth-card {
