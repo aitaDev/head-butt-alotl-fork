@@ -1157,6 +1157,8 @@ function makeTuna(overridePos) {
   tail.position.set(-3.4, 0, 0);
   tailBase.position.set(-3.0, 0, 0);
   group.add(body, belly, back, tail, tailBase, finTop, finSideL, finSideR);
+  const r = 15 + Math.random() * 80;
+  const a = Math.random() * Math.PI * 2;
   group.rotation.y = -Math.PI / 2;
   group.position.set(overridePos ? overridePos.x : Math.cos(a) * r, overridePos ? overridePos.y : -55 + Math.random() * 35, overridePos ? overridePos.z : Math.sin(a) * r);
   scene.add(group);
