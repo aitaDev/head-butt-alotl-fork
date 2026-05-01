@@ -2072,8 +2072,6 @@ function continueWhaleDialog() {
 
 function continueTutorial() {
   unlockAudio();
-  audio.menu.currentTime = 0;
-  audio.menu.play().catch(() => {});
   paused = false;
   openOverlay(null);
   renderer.domElement.requestPointerLock();
@@ -2081,8 +2079,6 @@ function continueTutorial() {
 
 function continueUpgradeHint() {
   unlockAudio();
-  audio.menu.currentTime = 0;
-  audio.menu.play().catch(() => {});
   paused = false;
   openOverlay(null);
   renderer.domElement.requestPointerLock();
@@ -2208,18 +2204,18 @@ renderer.domElement.addEventListener('click', () => {
   if (gameStarted && !pointerLocked && !paused) renderer.domElement.requestPointerLock();
 });
 
-el.skinUpBtn.onclick = () => { unlockAudio(); audio.menu.play().catch(() => {}); nextSkin(1); };
-el.skinDownBtn.onclick = () => { unlockAudio(); audio.menu.play().catch(() => {}); nextSkin(-1); };
-el.newGameBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); prepareNewGame(); storyIndex = 0; el.storyText.textContent = storyParagraphs[0]; openOverlay('storyMenu'); };
-el.continueBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); continueAllowed && startGame(true); };
+el.skinUpBtn.onclick = () => { unlockAudio(); nextSkin(1); };
+el.skinDownBtn.onclick = () => { unlockAudio(); nextSkin(-1); };
+el.newGameBtn.onclick = () => { unlockAudio(); prepareNewGame(); storyIndex = 0; el.storyText.textContent = storyParagraphs[0]; openOverlay('storyMenu'); };
+el.continueBtn.onclick = () => { unlockAudio(); continueAllowed && startGame(true); };
 el.continueBtn.disabled = !continueAllowed;
-el.optionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
-el.pauseOptionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
-el.patchNotesBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderPatchNotes(); openOverlay('patchNotesMenu'); };
-el.creditsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay('creditsMenu'); };
-el.closePatchNotesBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay('mainMenu'); };
-el.closeCreditsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay('mainMenu'); };
-el.closeOptionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
+el.optionsBtn.onclick = () => { unlockAudio(); renderOptions(); openOverlay('optionsMenu'); };
+el.pauseOptionsBtn.onclick = () => { unlockAudio(); renderOptions(); openOverlay('optionsMenu'); };
+el.patchNotesBtn.onclick = () => { unlockAudio(); renderPatchNotes(); openOverlay('patchNotesMenu'); };
+el.creditsBtn.onclick = () => { unlockAudio(); openOverlay('creditsMenu'); };
+el.closePatchNotesBtn.onclick = () => { unlockAudio(); openOverlay('mainMenu'); };
+el.closeCreditsBtn.onclick = () => { unlockAudio(); openOverlay('mainMenu'); };
+el.closeOptionsBtn.onclick = () => { unlockAudio(); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
 el.resumeBtn.onclick = () => { unlockAudio(); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.charBtn.onclick = () => { renderUpgradeMenu(); openOverlay('upgradeMenu'); };
 el.closeUpgradeBtn.onclick = () => openOverlay('pauseMenu');
