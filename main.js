@@ -976,6 +976,11 @@ function playNextGameMusic() {
   currentGameMusic.play().catch(() => {});
 }
 
+function ensureGameMusicPlaying() {
+  if (!audioUnlocked || !gameStarted || paused || isGameOver) return;
+  if (!currentGameMusic || currentGameMusic.paused) playNextGameMusic();
+}
+
 function stopGameMusic() {
   for (const track of gameMusicPlaylist) {
     track.pause();
@@ -2074,6 +2079,7 @@ function continueTutorial() {
   unlockAudio();
   paused = false;
   openOverlay(null);
+  ensureGameMusicPlaying();
   renderer.domElement.requestPointerLock();
 }
 
@@ -2081,6 +2087,7 @@ function continueUpgradeHint() {
   unlockAudio();
   paused = false;
   openOverlay(null);
+  ensureGameMusicPlaying();
   renderer.domElement.requestPointerLock();
 }
 
@@ -2216,7 +2223,7 @@ el.creditsBtn.onclick = () => { unlockAudio(); openOverlay('creditsMenu'); };
 el.closePatchNotesBtn.onclick = () => { unlockAudio(); openOverlay('mainMenu'); };
 el.closeCreditsBtn.onclick = () => { unlockAudio(); openOverlay('mainMenu'); };
 el.closeOptionsBtn.onclick = () => { unlockAudio(); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
-el.resumeBtn.onclick = () => { unlockAudio(); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
+el.resumeBtn.onclick = () => { unlockAudio(); paused = false; openOverlay(null); ensureGameMusicPlaying(); renderer.domElement.requestPointerLock(); };
 el.charBtn.onclick = () => { renderUpgradeMenu(); openOverlay('upgradeMenu'); };
 el.closeUpgradeBtn.onclick = () => openOverlay('pauseMenu');
 el.quitBtn.onclick = quitToTitle;
