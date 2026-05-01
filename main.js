@@ -332,11 +332,13 @@ camera.position.set(0, 2, 6);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, data.options.graphics === 'low' ? 1 : data.options.graphics === 'medium' ? 1.5 : 2));
+renderer.shadowMap.enabled = false;
 app.prepend(renderer.domElement);
 
 scene.add(new THREE.AmbientLight(0x89c9ff, 1.2));
 const sun = new THREE.DirectionalLight(0xffffff, 1.7);
 sun.position.set(20, 30, 10);
+sun.castShadow = false;
 scene.add(sun);
 
 // Water cylinder removed — water visual handled by fog and background color
@@ -352,6 +354,7 @@ const floor = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0xd1b276, roughness: 0.95 })
 );
 floor.position.y = -86;
+floor.receiveShadow = false;
 scene.add(floor);
 
 const reeds = [];
@@ -467,6 +470,7 @@ for (let i = 0; i < 180; i++) {
   const r = 12 + Math.random() * 75;
   const a = Math.random() * Math.PI * 2;
   group.position.set(Math.cos(a) * r, -83, Math.sin(a) * r);
+  group.userData.graphicsIndex = i;
   coral.push(group);
   scene.add(group);
 }
@@ -1786,6 +1790,7 @@ for (let i = 0; i < 10; i++) makePearl();
 for (let i = 0; i < 8; i++) makePlanktonPatch();
 makeDepthZones();
 makeMotes();
+applyGraphicsSettings();
 
 function addXp(amount) {
   state.xp += amount;
@@ -1937,11 +1942,39 @@ function renderOptions() {
   }
 }
 
+function applyGraphicsSettings() {
+  const g = data.options.graphics;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, g === 'low' ? 1 : g === 'medium' ? 1.5 : 2));
+
+  lightRays.visible = g !== 'low';
+  moteGroup.visible = g !== 'low';
+
+  for (let i = bubbles.length - 1; i >= 0; i--) {
+    if (g !== 'high') {
+      scene.remove(bubbles[i].mesh);
+      bubbles.splice(i, 1);
+    }
+  }
+
+  for (const c of coral) {
+    const idx = c.userData.graphicsIndex || 0;
+    c.visible = g === 'high' ? true : g === 'medium' ? idx % 2 === 0 : idx % 4 === 0;
+  }
+
+  for (let i = 0; i < planktonPatches.length; i++) {
+    planktonPatches[i].mesh.visible = g === 'high' ? true : g === 'medium' ? i % 2 === 0 : false;
+  }
+
+  renderer.shadowMap.enabled = g === 'high';
+  sun.castShadow = g === 'high';
+  floor.receiveShadow = g === 'high';
+}
+
 function setGraphics(delta) {
   const order = ['low', 'medium', 'high'];
   const index = Math.max(0, Math.min(2, order.indexOf(data.options.graphics) + delta));
   data.options.graphics = order[index];
-  renderer.setPixelRatio(Math.min(devicePixelRatio, data.options.graphics === 'low' ? 1 : data.options.graphics === 'medium' ? 1.5 : 2));
+  applyGraphicsSettings();
   persist();
   renderOptions();
 }
@@ -2893,7 +2926,7 @@ function updateLoreTablets(dt) {
 
 function updateBubbles(dt) {
   // Spawn bubbles from axolotl
-  if (Math.random() < 0.18) {
+  if (data.options.graphics === 'high' && Math.random() < 0.18) {
     const b = new THREE.Mesh(
       new THREE.SphereGeometry(0.05 + Math.random() * 0.08, 6, 6),
       new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.55 })
