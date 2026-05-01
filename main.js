@@ -2161,6 +2161,8 @@ function prepareNewGame(mode = 'survival') {
   if (isPeacefulMode()) {
     for (const p of pickups) scene.remove(p.mesh);
     pickups.length = 0;
+    for (const orb of glowOrbs) scene.remove(orb.mesh);
+    glowOrbs.length = 0;
     initPeacefulMode();
     clearHostileMobs();
   } else {
@@ -3067,6 +3069,7 @@ function updateSeahorses(dt) {
 }
 
 function updateGlowOrbs(dt, now) {
+  if (isPeacefulMode()) return;
   for (const orb of glowOrbs) {
     orb.bob += dt * 2.2;
     orb.phase += dt * 0.8;
