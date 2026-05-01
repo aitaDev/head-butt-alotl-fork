@@ -926,14 +926,12 @@ const worldRadius = 100;
 let isGameOver = false;
 let narwhalBuffUntil = 0;
 let whaleChatCooldownUntil = 0;
-let lastScubaAt = 0;
 let audioUnlocked = false;
 
 const audio = {
   underwater: new Audio('./assets/audio/underwater-loop.mp3'),
   gameMusic2: new Audio('./assets/audio/game-music-2.mp3'),
   gameMusic3: new Audio('./assets/audio/game-music-3.mp3'),
-  scuba: new Audio('./assets/audio/scuba.mp3'),
   whoosh: new Audio('./assets/audio/whoosh.mp3'),
   whale: new Audio('./assets/audio/whale.mp3'),
   menu: new Audio('./assets/audio/menu.mp3'),
@@ -945,7 +943,6 @@ const audioBaseVolumes = {
   underwater: 0.175,
   gameMusic2: 0.35,
   gameMusic3: 0.35,
-  scuba: 0.25,
   whoosh: 0.35,
   whale: 0.55,
   menu: 0.45,
@@ -1011,7 +1008,6 @@ function applyAudioSettings() {
   audio.gameMusic2.volume = audioBaseVolumes.gameMusic2 * musicScale;
   audio.gameMusic3.volume = audioBaseVolumes.gameMusic3 * musicScale;
   audio.menu.volume = audioBaseVolumes.menu * musicScale;
-  audio.scuba.volume = audioBaseVolumes.scuba * soundScale;
   audio.whoosh.volume = audioBaseVolumes.whoosh * soundScale;
   audio.whale.volume = audioBaseVolumes.whale * soundScale;
   audio.eat.volume = audioBaseVolumes.eat * soundScale;
@@ -2325,11 +2321,6 @@ function updatePlayer(dt) {
     } else {
       audio.whoosh.pause();
       audio.whoosh.currentTime = 0;
-    }
-    if (performance.now() - lastScubaAt > 20000) {
-      lastScubaAt = performance.now();
-      audio.scuba.currentTime = 0;
-      audio.scuba.play().catch(() => {});
     }
   }
   if (sprintPressed && desiredVelocity.lengthSq() > 0) {
