@@ -94,10 +94,72 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   border: 1px solid rgba(255,220,130,0.5);
   box-shadow: 0 0 60px rgba(255,215,120,0.25), 0 20px 80px rgba(0,0,0,0.55);
 }
-.relic-complete-icon {
-  font-size: 72px;
-  margin-bottom: 14px;
-  filter: drop-shadow(0 0 18px rgba(255,220,120,0.55));
+.temple-head-assembly {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 18px;
+}
+.temple-piece {
+  position: absolute;
+  background: linear-gradient(180deg, #7f848c, #575d66);
+  border: 3px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 0 18px rgba(255,255,255,0.08), 0 10px 24px rgba(0,0,0,0.35);
+  animation-duration: 0.9s;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(.2,.8,.2,1);
+}
+.temple-top {
+  width: 116px; height: 54px; left: 32px; top: 14px; border-radius: 16px 16px 10px 10px;
+  animation-name: templeTopIn;
+}
+.temple-left-eye {
+  width: 54px; height: 64px; left: 22px; top: 72px; border-radius: 10px;
+  animation-name: templeLeftIn;
+}
+.temple-right-eye {
+  width: 54px; height: 64px; right: 22px; top: 72px; border-radius: 10px;
+  animation-name: templeRightIn;
+}
+.temple-jaw {
+  width: 96px; height: 42px; left: 42px; bottom: 16px; border-radius: 10px 10px 16px 16px;
+  animation-name: templeJawIn;
+}
+.temple-left-eye::after, .temple-right-eye::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: rgba(16,20,24,0.9);
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+}
+.temple-glow {
+  position: absolute;
+  inset: 12px;
+  border-radius: 22px;
+  background: radial-gradient(circle, rgba(255,220,120,0.52), rgba(255,220,120,0.12) 45%, transparent 72%);
+  opacity: 0;
+  animation: templeGlowOn 1.1s ease-out 1.0s forwards;
+  filter: blur(6px);
+}
+@keyframes templeTopIn {
+  from { transform: translateY(-42px) scale(0.85); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes templeLeftIn {
+  from { transform: translateX(-40px) rotate(-8deg); opacity: 0; }
+  to { transform: translateX(0) rotate(0); opacity: 1; }
+}
+@keyframes templeRightIn {
+  from { transform: translateX(40px) rotate(8deg); opacity: 0; }
+  to { transform: translateX(0) rotate(0); opacity: 1; }
+}
+@keyframes templeJawIn {
+  from { transform: translateY(42px) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes templeGlowOn {
+  0% { opacity: 0; filter: blur(10px); }
+  100% { opacity: 1; filter: blur(4px); }
 }
 .relic-complete-note {
   font-size: 11px;

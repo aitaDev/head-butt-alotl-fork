@@ -48,7 +48,7 @@ const defaults = {
     health: 100,
     gameMode: 'survival',
     upgrades: { fins: 0, head: 0, lungs: 0, bite: 0 },
-    stats: { aliensBonked: 0, wormsEaten: 0, steakEaten: 0, relicsFound: 0 }
+    stats: { aliensBonked: 0, wormsEaten: 0, steakEaten: 0, relicsFound: 0, firstRelicQuestDone: false }
   }
 };
 
@@ -200,10 +200,16 @@ app.innerHTML = `
 
   <div id="relicCompleteMenu" class="overlay hidden">
     <div class="panel relic-complete-panel" style="max-width:640px;text-align:center">
-      <div class="relic-complete-icon">🗝️</div>
-      <h2>Relic Restored!</h2>
-      <p class="subtitle">You recovered the full relic set and brought a lost treasure of the pond back into the light.</p>
-      <div class="patch-note relic-complete-note">Ancient metal, sea-worn gold, and hidden memory all click back into place. This should feel huge, because it is.</div>
+      <div class="temple-head-assembly" aria-hidden="true">
+        <div class="temple-piece temple-top"></div>
+        <div class="temple-piece temple-left-eye"></div>
+        <div class="temple-piece temple-right-eye"></div>
+        <div class="temple-piece temple-jaw"></div>
+        <div class="temple-glow"></div>
+      </div>
+      <h2>Temple Head Restored!</h2>
+      <p class="subtitle">The relic pieces lock together into an ancient stone guardian, then ignite with a deep golden light.</p>
+      <div class="patch-note relic-complete-note">Quest complete: The First Relic. The pond remembers what was lost, and now so do you.</div>
       <div class="stack" style="margin-top:20px">
         <button id="closeRelicCompleteBtn">Continue</button>
       </div>
@@ -373,7 +379,7 @@ function resetPeacefulRelics() {
   for (const relic of relics) scene.remove(relic.mesh);
   relics.length = 0;
   state.stats.relicsFound = 0;
-  if (isPeacefulMode()) {
+  if (isPeacefulMode() && !state.stats.firstRelicQuestDone) {
     for (let i = 0; i < peacefulRelicTarget; i++) makeRelic();
   }
 }
@@ -2023,7 +2029,7 @@ function updateHUD() {
   el.healthFill.classList.toggle('sprint-flash', !!player.sprinting);
   el.healthLabel.textContent = `Health ${Math.round(state.health)}/${config.maxHealth()}`;
   el.currency.textContent = state.currency;
-  el.relicCard.classList.toggle('hidden', !isPeacefulMode());
+  el.relicCard.classList.toggle('hidden', !isPeacefulMode() || !!state.stats.firstRelicQuestDone);
   el.relicsFound.textContent = state.stats.relicsFound;
   el.relicsTotal.textContent = peacefulRelicTarget;
   if (!isPeacefulMode() && !upgradeHintShown && state.currency >= 20) {
@@ -2306,6 +2312,8 @@ document.addEventListener('keydown', e => {
   }
   if (!el.relicCompleteMenu.classList.contains('hidden') && (e.code === 'Space' || e.key === ' ' || e.key === 'Enter')) {
     e.preventDefault();
+    state.stats.firstRelicQuestDone = true;
+    state.stats.relicsFound = 0;
     paused = false;
     openOverlay(null);
     ensureGameplayAudioPlaying();
@@ -2363,7 +2371,7 @@ el.patchNotesBtn.onclick = () => { playMenuClick(); renderPatchNotes(); openOver
 el.creditsBtn.onclick = () => { playMenuClick(); openOverlay('creditsMenu'); };
 el.closePatchNotesBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu'); };
 el.closeCreditsBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu'); };
-el.closeRelicCompleteBtn.onclick = () => { playMenuClick(); paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
+el.closeRelicCompleteBtn.onclick = () => { playMenuClick(); state.stats.firstRelicQuestDone = true; state.stats.relicsFound = 0; paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
 el.closeOptionsBtn.onclick = () => { playMenuClick(); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
 el.resumeBtn.onclick = () => { playMenuClick(); paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
 el.charBtn.onclick = () => { if (isPeacefulMode()) return; playMenuClick(); renderUpgradeMenu(); openOverlay('upgradeMenu'); };
