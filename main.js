@@ -1634,6 +1634,20 @@ function makeCrystal() {
   crystals.push({ mesh: group, color, bob: Math.random() * Math.PI * 2, phase: Math.random() * Math.PI * 2 });
 }
 
+function isRelicSpawnClear(pos) {
+  const blockers = [
+    ...coral,
+    ...reeds,
+    ...anemones.map(a => a.mesh),
+    ...urchins.map(u => u.mesh),
+    ...crystals.map(c => c.mesh)
+  ];
+  for (const blocker of blockers) {
+    if (blocker.position.distanceTo(pos) < 7) return false;
+  }
+  return pos.length() > 12;
+}
+
 function makeRelic() {
   const group = new THREE.Group();
   const base = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.28, 0.7), new THREE.MeshStandardMaterial({ color: 0xc89a2b, emissive: 0x8a5c12, emissiveIntensity: 0.7, roughness: 0.45, metalness: 0.65 }));
@@ -1644,9 +1658,17 @@ function makeRelic() {
   gem.position.y = 0.42;
   halo.position.y = 0.42;
   group.add(base, lid, gem, halo);
-  const r = 14 + Math.random() * 78;
-  const a = Math.random() * Math.PI * 2;
-  group.position.set(Math.cos(a) * r, -80.5, Math.sin(a) * r);
+  let placed = false;
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const r = 14 + Math.random() * 78;
+    const a = Math.random() * Math.PI * 2;
+    const pos = new THREE.Vector3(Math.cos(a) * r, -80.5, Math.sin(a) * r);
+    if (!isRelicSpawnClear(pos)) continue;
+    group.position.copy(pos);
+    placed = true;
+    break;
+  }
+  if (!placed) group.position.set(0, -80.5, 18);
   scene.add(group);
   relics.push({ mesh: group, halo, bob: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 1.2, pulse: Math.random() * Math.PI * 2 });
 }
