@@ -1373,7 +1373,7 @@ function makeOctopus(overridePos) {
   group.add(eyeWhiteL, eyeWhiteR, eyePupilL, eyePupilR);
   const r = 12 + Math.random() * 80;
   const a = Math.random() * Math.PI * 2;
-  group.position.set(overridePos ? overridePos.x : Math.cos(a) * r, overridePos ? overridePos.y : -55 + Math.random() * 30, overridePos ? overridePos.z : Math.sin(a) * r);
+  group.position.set(overridePos ? overridePos.x : Math.cos(a) * r, overridePos ? overridePos.y : -45 + Math.random() * 30, overridePos ? overridePos.z : Math.sin(a) * r);
   scene.add(group);
   octopi.push({ mesh: group, speed: 1.2 + Math.random() * 0.7, hp: 220 + Math.random() * 80, bob: Math.random() * Math.PI * 2, hitCooldown: 0, collisionRadius: 3.5 });
 }
