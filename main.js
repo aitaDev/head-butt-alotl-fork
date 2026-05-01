@@ -389,22 +389,12 @@ for (let i = 0; i < 180; i++) {
       group.add(disc);
     }
   } else if (type === 2) {
-    // Brain coral — large round bumpy sphere
+    // Brain coral — large round main body only
     const body = new THREE.Mesh(
       new THREE.SphereGeometry(1.4 + Math.random() * 1.0, 10, 8),
       new THREE.MeshStandardMaterial({ color, roughness: 0.88 })
     );
     group.add(body);
-    for (let b = 0; b < 8; b++) {
-      const bump = new THREE.Mesh(
-        new THREE.SphereGeometry(0.25 + Math.random() * 0.2, 6, 5),
-        new THREE.MeshStandardMaterial({ color: color + 0x111111, roughness: 0.9 })
-      );
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-      bump.position.set(Math.sin(phi) * Math.cos(theta) * 1.4, Math.cos(phi) * 1.4, Math.sin(phi) * Math.sin(theta) * 1.4);
-      group.add(bump);
-    }
   } else if (type === 3) {
     // Tube coral — cluster of tall thin tubes
     const tubeCount = 3 + Math.floor(Math.random() * 4);
@@ -445,13 +435,6 @@ for (let i = 0; i < 180; i++) {
       antler.rotation.z = Math.cos(angle) * 0.4;
       antler.rotation.x = Math.sin(angle) * 0.4;
       group.add(antler);
-      // Rounded tip
-      const tip = new THREE.Mesh(
-        new THREE.SphereGeometry(0.2 + Math.random() * 0.12, 6, 5),
-        new THREE.MeshStandardMaterial({ color: color + 0x222222, roughness: 0.65 })
-      );
-      tip.position.set(Math.cos(angle) * 1.0, h + 0.1, Math.sin(angle) * 1.0);
-      group.add(tip);
     }
   }
 
