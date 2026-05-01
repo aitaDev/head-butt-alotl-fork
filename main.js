@@ -940,7 +940,7 @@ const audio = {
   gameMusic5: new Audio('./assets/audio/game-music-5.mp3'),
   whoosh: new Audio('./assets/audio/whoosh.mp3'),
   whale: new Audio('./assets/audio/whale.mp3'),
-  menu: new Audio('./assets/audio/menu.mp3'),
+  menu: new Audio('./assets/audio/ui-click.mp3'),
   eat: new Audio('./assets/audio/eat.mp3'),
   gameOver: new Audio('./assets/audio/game_over.mp3'),
   bigShark: new Audio('./assets/audio/big-shark.mp3')
@@ -1040,6 +1040,12 @@ function unlockAudio() {
       sound.currentTime = 0;
     }).catch(() => {});
   }
+}
+
+function playMenuClick() {
+  unlockAudio();
+  audio.menu.currentTime = 0;
+  audio.menu.play().catch(() => {});
 }
 
 function makeAlien(overridePos = null) {
@@ -1906,6 +1912,7 @@ function buyUpgrade(key) {
   if (level >= 5) return;
   const cost = meta.cost(level);
   if (state.currency < cost) return showNotice('Not enough Silver');
+  playMenuClick();
   state.currency -= cost;
   state.upgrades[key] += 1;
   if (key === 'lungs') state.health = Math.min(config.maxHealth(), state.health + 20);
@@ -2000,7 +2007,7 @@ function renderOptions() {
     btn.className = 'secondary keybtn';
     btn.textContent = code.replace('Key', '').replace('Digit', '');
     if (rebinding === key) btn.classList.add('listening');
-    btn.onclick = () => { rebinding = key; renderOptions(); };
+    btn.onclick = () => { playMenuClick(); rebinding = key; renderOptions(); };
     row.innerHTML = `<span>${labels[key]}</span>`;
     row.appendChild(btn);
     el.keybindList.appendChild(row);
@@ -2044,6 +2051,7 @@ function setGraphics(delta) {
   const order = ['low', 'medium', 'high'];
   const index = Math.max(0, Math.min(2, order.indexOf(data.options.graphics) + delta));
   data.options.graphics = order[index];
+  playMenuClick();
   applyGraphicsSettings();
   persist();
   renderOptions();
@@ -2239,24 +2247,24 @@ renderer.domElement.addEventListener('click', () => {
   if (gameStarted && !pointerLocked && !paused) renderer.domElement.requestPointerLock();
 });
 
-el.skinUpBtn.onclick = () => { unlockAudio(); nextSkin(1); };
-el.skinDownBtn.onclick = () => { unlockAudio(); nextSkin(-1); };
-el.newGameBtn.onclick = () => { unlockAudio(); prepareNewGame(); storyIndex = 0; el.storyText.textContent = storyParagraphs[0]; openOverlay('storyMenu'); };
-el.continueBtn.onclick = () => { unlockAudio(); continueAllowed && startGame(true); };
+el.skinUpBtn.onclick = () => { playMenuClick(); nextSkin(1); };
+el.skinDownBtn.onclick = () => { playMenuClick(); nextSkin(-1); };
+el.newGameBtn.onclick = () => { playMenuClick(); prepareNewGame(); storyIndex = 0; el.storyText.textContent = storyParagraphs[0]; openOverlay('storyMenu'); };
+el.continueBtn.onclick = () => { playMenuClick(); continueAllowed && startGame(true); };
 el.continueBtn.disabled = !continueAllowed;
-el.optionsBtn.onclick = () => { unlockAudio(); renderOptions(); openOverlay('optionsMenu'); };
-el.pauseOptionsBtn.onclick = () => { unlockAudio(); renderOptions(); openOverlay('optionsMenu'); };
-el.patchNotesBtn.onclick = () => { unlockAudio(); renderPatchNotes(); openOverlay('patchNotesMenu'); };
-el.creditsBtn.onclick = () => { unlockAudio(); openOverlay('creditsMenu'); };
-el.closePatchNotesBtn.onclick = () => { unlockAudio(); openOverlay('mainMenu'); };
-el.closeCreditsBtn.onclick = () => { unlockAudio(); openOverlay('mainMenu'); };
-el.closeOptionsBtn.onclick = () => { unlockAudio(); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
-el.resumeBtn.onclick = () => { unlockAudio(); paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
-el.charBtn.onclick = () => { renderUpgradeMenu(); openOverlay('upgradeMenu'); };
-el.closeUpgradeBtn.onclick = () => openOverlay('pauseMenu');
-el.quitBtn.onclick = quitToTitle;
-el.retryBtn.onclick = () => { unlockAudio(); startGame(false); };
-el.gameOverTitleBtn.onclick = quitToTitle;
+el.optionsBtn.onclick = () => { playMenuClick(); renderOptions(); openOverlay('optionsMenu'); };
+el.pauseOptionsBtn.onclick = () => { playMenuClick(); renderOptions(); openOverlay('optionsMenu'); };
+el.patchNotesBtn.onclick = () => { playMenuClick(); renderPatchNotes(); openOverlay('patchNotesMenu'); };
+el.creditsBtn.onclick = () => { playMenuClick(); openOverlay('creditsMenu'); };
+el.closePatchNotesBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu'); };
+el.closeCreditsBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu'); };
+el.closeOptionsBtn.onclick = () => { playMenuClick(); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
+el.resumeBtn.onclick = () => { playMenuClick(); paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
+el.charBtn.onclick = () => { playMenuClick(); renderUpgradeMenu(); openOverlay('upgradeMenu'); };
+el.closeUpgradeBtn.onclick = () => { playMenuClick(); openOverlay('pauseMenu'); };
+el.quitBtn.onclick = () => { playMenuClick(); quitToTitle(); };
+el.retryBtn.onclick = () => { playMenuClick(); startGame(false); };
+el.gameOverTitleBtn.onclick = () => { playMenuClick(); quitToTitle(); };
 el.graphicsDown.onclick = () => setGraphics(-1);
 el.graphicsUp.onclick = () => setGraphics(1);
 el.soundSlider.oninput = e => { data.options.sound = Number(e.target.value); applyAudioSettings(); persist(); renderOptions(); };
