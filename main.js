@@ -2,8 +2,8 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.5.1';
-const isFork = false;
+const gameVersion = 'v0.5.1-debug';
+const isFork = true;
 let debugGodMode = false;
 let debugHideFloor = false;
 let debugShowCoords = false;
