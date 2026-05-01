@@ -2596,10 +2596,7 @@ function updateNarwhals(dt) {
 function updateLeviathans(dt, now) {
   leviathanSpawnTimer += dt;
   const elapsed = (performance.now() - roundStartedAt) / 1000;
-  if (state.level >= 7 && elapsed >= 210 && leviathans.length < 1 && leviathanSpawnTimer > 45) {
-    leviathanSpawnTimer = 0;
-    makeLeviathan();
-  }
+  // Leviathans temporarily disabled
   if (elapsed >= 45 && tunas.length < 1 && tunaSpawnTimer > 35) {
     tunaSpawnTimer = 0;
     makeTuna();
