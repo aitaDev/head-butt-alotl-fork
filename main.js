@@ -942,7 +942,7 @@ const audio = {
   bigShark: new Audio('./assets/audio/big-shark.mp3')
 };
 const audioBaseVolumes = {
-  underwater: 0.35,
+  underwater: 0.175,
   gameMusic2: 0.35,
   gameMusic3: 0.35,
   scuba: 0.25,
@@ -953,10 +953,11 @@ const audioBaseVolumes = {
   gameOver: 0.65,
   bigShark: 0.5
 };
-const gameMusicPlaylist = [audio.underwater, audio.gameMusic2, audio.gameMusic3];
+const gameMusicPlaylist = [audio.gameMusic2, audio.gameMusic3];
 let gameMusicQueue = [];
 let currentGameMusic = null;
 
+audio.underwater.loop = true;
 audio.whoosh.loop = true;
 audio.bigShark.loop = true;
 
@@ -978,6 +979,7 @@ function playNextGameMusic() {
 
 function ensureGameMusicPlaying() {
   if (!audioUnlocked || !gameStarted || paused || isGameOver) return;
+  if (audio.underwater.paused) audio.underwater.play().catch(() => {});
   if (!currentGameMusic || currentGameMusic.paused) playNextGameMusic();
 }
 
@@ -999,7 +1001,7 @@ for (const track of gameMusicPlaylist) {
 function applyAudioSettings() {
   const soundScale = data.options.sound / 100;
   const musicScale = data.options.music / 100;
-  audio.underwater.volume = audioBaseVolumes.underwater * musicScale;
+  audio.underwater.volume = audioBaseVolumes.underwater * soundScale;
   audio.gameMusic2.volume = audioBaseVolumes.gameMusic2 * musicScale;
   audio.gameMusic3.volume = audioBaseVolumes.gameMusic3 * musicScale;
   audio.menu.volume = audioBaseVolumes.menu * musicScale;
@@ -2043,7 +2045,10 @@ function startGame(continueGame = false) {
   openOverlay(null);
   unlockAudio();
   audio.menu.pause();
-  if (audioUnlocked) playNextGameMusic();
+  if (audioUnlocked) {
+    audio.underwater.play().catch(() => {});
+    playNextGameMusic();
+  }
   renderer.domElement.requestPointerLock();
   persist();
   refreshAxolotlVisuals();
