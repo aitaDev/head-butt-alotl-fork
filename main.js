@@ -952,6 +952,7 @@ const audioBaseVolumes = {
   bigShark: 0.5
 };
 const gameMusicPlaylist = [audio.gameMusic2, audio.gameMusic3];
+const bossBattlesPlaylist = [new Audio('./assets/audio/boss-battle-1.mp3')];
 let gameMusicQueue = [];
 let currentGameMusic = null;
 let gameMusicSilenceTimer = null;
@@ -1000,6 +1001,10 @@ for (const track of gameMusicPlaylist) {
       if (!paused && gameStarted && !isGameOver) playNextGameMusic();
     }, 30000);
   });
+}
+for (const track of bossBattlesPlaylist) {
+  track.loop = false;
+  track.volume = 0;
 }
 
 function applyAudioSettings() {
