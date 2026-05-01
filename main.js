@@ -1652,7 +1652,7 @@ function makeAnglerfish(overridePos) {
   scene.add(group);
   anglerfish.push({ mesh: group, lureMesh: lure, lureHalo, lureColor,
     speed: 2.5 + Math.random() * 1.8, damage: 14 + Math.random() * 8,
-    hp: (55 + Math.random() * 35) * 2, bob: Math.random() * Math.PI * 2,
+    hp: (55 + Math.random() * 35) * 6, bob: Math.random() * Math.PI * 2,
     hitCooldown: 0, collisionRadius: 3.0, huntTimer: 0, lurePhase: Math.random() * Math.PI * 2 });
 }
 
