@@ -2,12 +2,13 @@ import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
 
 const app = document.getElementById('app');
 const saveKey = 'axolotl-alien-fighter-save';
-const gameVersion = 'v0.5.1-debug';
-const isFork = true;
+const gameVersion = 'v0.5.2';
+const isFork = false;
 let debugGodMode = false;
 let debugHideFloor = false;
 let debugShowCoords = false;
 const patchNotes = [
+  'v0.5.2  Added Survival and Peaceful modes, expanded shuffled game-music playlists, restored ambient underwater loop as gameplay sound, added credits popup, menu click SFX, hostile spawn tuning, and multiple creature/audio fixes.',
   'v0.5.1  Main menu skin chooser added to the 3D preview box, with Bluey, Dazi Pink, and Shrek skins plus streamlined left/right selector controls.',
   'v0.5.0  New tuna (sleek torpedo, crescent tail, 3000HP, straight swim), redesigned worms (segmented curvy, pink head), kelp forest, pirate ship wrecks with coin loot, 6 coral types, doubled coral density, rare tall coral, lower spawn depth, urchin sizing.',
   'v0.4.0  Depth gauge — real-time dive indicator with zone name and visual fill. Deep waters darken the world.',
