@@ -2028,6 +2028,11 @@ function applyGraphicsSettings() {
     planktonPatches[i].mesh.visible = g === 'high' ? true : g === 'medium' ? i % 2 === 0 : false;
   }
 
+  // Graphics settings should never hide gameplay mobs or pickups, only visual detail.
+  for (const list of [aliens, sharks, anglerfish, leviathans, narwhals, tunas, octopi, jellyfish, seahorses, crabs, urchins, pearls, glowOrbs]) {
+    for (const item of list) if (item?.mesh) item.mesh.visible = true;
+  }
+
   renderer.shadowMap.enabled = g === 'high';
   sun.castShadow = g === 'high';
   floor.receiveShadow = g === 'high';
