@@ -1989,6 +1989,7 @@ function showNotice(text) {
 }
 
 function updateHUD() {
+  el.charBtn.classList.toggle('hidden', isPeacefulMode());
   if (audioUnlocked) {
     if (whale.visible && player.pos.distanceTo(whale.position) < 120) {
       if (audio.whale.paused) audio.whale.play().catch(() => {});
@@ -2008,7 +2009,7 @@ function updateHUD() {
   el.relicCard.classList.toggle('hidden', !isPeacefulMode());
   el.relicsFound.textContent = state.stats.relicsFound;
   el.relicsTotal.textContent = peacefulRelicTarget;
-  if (!upgradeHintShown && state.currency >= 20) {
+  if (!isPeacefulMode() && !upgradeHintShown && state.currency >= 20) {
     showUpgradeHintPopup();
     return;
   }
@@ -2158,6 +2159,8 @@ function prepareNewGame(mode = 'survival') {
   resetState();
   state.gameMode = mode;
   if (isPeacefulMode()) {
+    for (const p of pickups) scene.remove(p.mesh);
+    pickups.length = 0;
     initPeacefulMode();
     clearHostileMobs();
   } else {
@@ -2293,7 +2296,7 @@ document.addEventListener('keydown', e => {
       renderer.domElement.requestPointerLock();
     }
   }
-  if ((e.code === data.options.keybinds.upgrades || e.code === 'KeyC') && gameStarted) {
+  if ((e.code === data.options.keybinds.upgrades || e.code === 'KeyC') && gameStarted && !isPeacefulMode()) {
     paused = true;
     document.exitPointerLock();
     renderUpgradeMenu();
@@ -2335,7 +2338,7 @@ el.closePatchNotesBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu')
 el.closeCreditsBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu'); };
 el.closeOptionsBtn.onclick = () => { playMenuClick(); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
 el.resumeBtn.onclick = () => { playMenuClick(); paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
-el.charBtn.onclick = () => { playMenuClick(); renderUpgradeMenu(); openOverlay('upgradeMenu'); };
+el.charBtn.onclick = () => { if (isPeacefulMode()) return; playMenuClick(); renderUpgradeMenu(); openOverlay('upgradeMenu'); };
 el.closeUpgradeBtn.onclick = () => { playMenuClick(); openOverlay('pauseMenu'); };
 el.quitBtn.onclick = () => { playMenuClick(); quitToTitle(); };
 el.retryBtn.onclick = () => { playMenuClick(); startGame(false); };
@@ -2619,6 +2622,7 @@ function updateAliens(dt, now) {
 }
 
 function updatePickups(dt) {
+  if (isPeacefulMode()) return;
   pickupSpawnTimer += dt;
   if (pickupSpawnTimer > 2.4 && pickups.length < 24) { pickupSpawnTimer = 0; makePickup(); }
   for (let i = pickups.length - 1; i >= 0; i--) {
