@@ -81,12 +81,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   color: #ffd27d;
   text-shadow: 2px 2px 0 #000;
 }
-#creditsTag {
-  margin-top: 10px;
-  font-size: 10px;
-  color: #d7f1ff;
-  text-shadow: 1px 1px 0 #000;
-  line-height: 1.5;
+#creditsMenu a {
+  color: #9fdcff;
+}
+#creditsMenu a:hover {
+  color: #ffffff;
+}
+.credits-list {
+  line-height: 1.8;
 }
 #menuPreview {
   position: relative;

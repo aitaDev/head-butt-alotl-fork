@@ -173,9 +173,9 @@ app.innerHTML = `
           <button id="continueBtn">Continue</button>
           <button id="optionsBtn" class="secondary">Options</button>
           <button id="patchNotesBtn" class="secondary">Patch Notes</button>
+          <button id="creditsBtn" class="secondary">Credits</button>
         </div>
         <div id="versionTag">${gameVersion} by Phishie</div>
-        <div id="creditsTag">Developed by Phishie (Dan A)</div>
       </div>
       <div class="main-menu-art" aria-hidden="true">
         <div class="skin-chooser skin-chooser-overlay">
@@ -194,6 +194,20 @@ app.innerHTML = `
       <div id="patchNotesList" class="stack"></div>
       <div class="stack" style="margin-top:16px">
         <button id="closePatchNotesBtn">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="creditsMenu" class="overlay hidden">
+    <div class="panel">
+      <h2>Credits</h2>
+      <div id="creditsList" class="stack credits-list">
+        <div class="patch-note">Developed by Phishie (Dan A)</div>
+        <div class="patch-note">Music by <a href="https://pixabay.com/users/leberch-42823964/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=509552" target="_blank" rel="noopener noreferrer">Nikita Kondrashev</a> from <a href="https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=509552" target="_blank" rel="noopener noreferrer">Pixabay</a></div>
+        <div class="patch-note">Music by <a href="https://pixabay.com/users/musicword-39191707/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=165884" target="_blank" rel="noopener noreferrer">Music Word</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=165884" target="_blank" rel="noopener noreferrer">Pixabay</a></div>
+      </div>
+      <div class="stack" style="margin-top:16px">
+        <button id="closeCreditsBtn">Back</button>
       </div>
     </div>
   </div>
@@ -1925,7 +1939,7 @@ function setGraphics(delta) {
 }
 
 function openOverlay(id) {
-  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu', 'tutorialMenu', 'upgradeHintMenu', 'storyMenu', 'debugMenu']) el[key].classList.add('hidden');
+  for (const key of ['mainMenu', 'pauseMenu', 'optionsMenu', 'upgradeMenu', 'gameOverMenu', 'whaleChatMenu', 'patchNotesMenu', 'creditsMenu', 'tutorialMenu', 'upgradeHintMenu', 'storyMenu', 'debugMenu']) el[key].classList.add('hidden');
   if (id) el[id].classList.remove('hidden');
   if (renderer?.domElement) renderer.domElement.style.opacity = (id === 'mainMenu' || id === 'storyMenu' || id === 'tutorialMenu') ? '0' : '1';
   if (id === 'mainMenu') applySkin(currentSkinIndex);
@@ -2119,7 +2133,9 @@ el.continueBtn.disabled = !continueAllowed;
 el.optionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
 el.pauseOptionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderOptions(); openOverlay('optionsMenu'); };
 el.patchNotesBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); renderPatchNotes(); openOverlay('patchNotesMenu'); };
+el.creditsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay('creditsMenu'); };
 el.closePatchNotesBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay('mainMenu'); };
+el.closeCreditsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay('mainMenu'); };
 el.closeOptionsBtn.onclick = () => { unlockAudio(); audio.menu.currentTime = 0; audio.menu.play().catch(() => {}); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
 el.resumeBtn.onclick = () => { unlockAudio(); paused = false; openOverlay(null); renderer.domElement.requestPointerLock(); };
 el.charBtn.onclick = () => { renderUpgradeMenu(); openOverlay('upgradeMenu'); };
