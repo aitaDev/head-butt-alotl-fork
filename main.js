@@ -244,7 +244,6 @@ app.innerHTML = `
 
   <div class="topbar">
     <div class="card" id="scoreCard">Silver: <span id="currency">0</span></div>
-    <div class="card" id="statCard">Aliens bonked: <span id="aliensBonked">0</span></div>
   </div>
 
   <div id="notice"></div>
@@ -1844,7 +1843,6 @@ function updateHUD() {
   el.healthFill.classList.toggle('sprint-flash', !!player.sprinting);
   el.healthLabel.textContent = `Health ${Math.round(state.health)}/${config.maxHealth()}`;
   el.currency.textContent = state.currency;
-  el.aliensBonked.textContent = state.stats.aliensBonked;
   if (!upgradeHintShown && state.currency >= 20) {
     showUpgradeHintPopup();
     return;
