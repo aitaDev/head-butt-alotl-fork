@@ -1052,7 +1052,7 @@ function makeAlien(overridePos = null) {
   const group = new THREE.Group();
   const types = [
     { name: 'grunt', body: 0x88d66f, head: 0x8cf07d, belly: 0xb8f29a, horn: true, arms: true, scaleMin: 0.6, scaleMax: 1.4, hp: 1, speed: 1.1, damage: 1 },
-    { name: 'brute', body: 0x5678ff, head: 0x7a92ff, belly: 0xb7c2ff, horn: false, arms: true, scaleMin: 1.8, scaleMax: 3.4, hp: 2.8, speed: 0.7, damage: 2.7 },
+    ...(state.level >= 5 ? [{ name: 'brute', body: 0x5678ff, head: 0x7a92ff, belly: 0xb7c2ff, horn: false, arms: true, scaleMin: 1.8, scaleMax: 3.4, hp: 2.8, speed: 0.7, damage: 2.7 }] : []),
     { name: 'spike', body: 0xd66f88, head: 0xf08ca8, belly: 0xf2b8c9, horn: true, arms: false, scaleMin: 0.9, scaleMax: 2.1, hp: 1.6, speed: 1.0, damage: 1.8 },
     { name: 'tiny', body: 0xe0d45a, head: 0xf7ed8e, belly: 0xfff6b8, horn: false, arms: true, scaleMin: 0.35, scaleMax: 0.7, hp: 0.55, speed: 1.6, damage: 0.55 }
   ];
