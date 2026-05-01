@@ -1766,6 +1766,10 @@ makeMotes();
 
 function addXp(amount) {
   state.xp += amount;
+  if (audioUnlocked) {
+    audio.eat.currentTime = 0;
+    audio.eat.play().catch(() => {});
+  }
   el.xpBurst.classList.remove('hidden');
   clearTimeout(addXp.burstTimer);
   addXp.burstTimer = setTimeout(() => el.xpBurst.classList.add('hidden'), 550);
