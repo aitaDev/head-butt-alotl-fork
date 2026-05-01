@@ -2002,6 +2002,7 @@ function updateHUD() {
   el.xpFill.style.width = `${(state.xp / xpNeed) * 100}%`;
   el.xpFill.classList.toggle('xp-bursting', !el.xpBurst.classList.contains('hidden'));
   el.xpLabel.textContent = `XP ${state.xp}/${xpNeed}  •  Level ${state.level}`;
+  el.healthHud.classList.toggle('hidden', isPeacefulMode());
   el.healthFill.style.width = `${(state.health / config.maxHealth()) * 100}%`;
   el.healthFill.classList.toggle('sprint-flash', !!player.sprinting);
   el.healthLabel.textContent = `Health ${Math.round(state.health)}/${config.maxHealth()}`;
