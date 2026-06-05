@@ -146,30 +146,30 @@ app.innerHTML = `
     <div class="panel">
       <h2>Whale Wisdom</h2>
       <p class="subtitle" id="whaleDialogText">Please help protect the ocean. Trash, oil, plastic, and poison spread everywhere. Clean water means life for all of us.</p>
-      <div class="small space-continue">Hit space to continue</div>
+      <div class="small space-continue">Tap to continue</div>
     </div>
   </div>
 
   <div id="tutorialMenu" class="overlay hidden">
     <div class="panel">
       <h2>How To Swim</h2>
-      <p class="subtitle">W move forward, S back, A left, D right, move mouse to aim, Shift sprint, C upgrades, Esc pause.</p>
-      <div class="small space-continue">Hit space to continue</div>
+      <p class="subtitle">Use the left stick to swim. Drag the right side to look and change swim height. Hold BOOST to sprint, tap UP for upgrades, and tap II to pause.</p>
+      <div class="small space-continue">Tap to continue</div>
     </div>
   </div>
 
   <div id="upgradeHintMenu" class="overlay hidden">
     <div class="panel">
       <h2>Character Upgrades</h2>
-      <p class="subtitle">You have 20 Silver. Hit C to open Character Upgrades and spend it.</p>
-      <div class="small space-continue">Hit space to continue</div>
+      <p class="subtitle">You have 20 Silver. Tap UP to open Character Upgrades and spend it.</p>
+      <div class="small space-continue">Tap to continue</div>
     </div>
   </div>
 
   <div id="storyMenu" class="overlay hidden">
     <div class="panel" style="max-width:520px;text-align:center">
       <p id="storyText" style="font-size:15px;line-height:1.75;color:#d7f1ff;margin-bottom:24px"></p>
-      <div class="small space-continue" id="storyHint" style="margin-top:10px">Hit space to continue</div>
+      <div class="small space-continue" id="storyHint" style="margin-top:10px">Tap to continue</div>
     </div>
   </div>
   <div id="mainMenu" class="overlay">
@@ -283,9 +283,9 @@ app.innerHTML = `
       <input id="soundSlider" type="range" min="0" max="100" />
       <div class="row"><span>Music</span><span class="value" id="musicValue"></span></div>
       <input id="musicSlider" type="range" min="0" max="100" />
-      <h3>Keybinds</h3>
+      <h3>Controls</h3>
       <div id="keybindList"></div>
-      <p class="small">Click a keybind, then press a new key.</p>
+      <p class="small" id="controlsHelp">Touch controls: left stick to swim, right side to look, BOOST to sprint, UP for upgrades, II to pause.</p>
       <div class="stack" style="margin-top:16px">
         <button id="closeOptionsBtn">Done</button>
       </div>
@@ -334,7 +334,7 @@ app.innerHTML = `
     </div>
     <div id="touchLookPad" class="touch-look-pad"></div>
     <button id="touchPauseBtn" class="touch-button touch-pause" type="button">II</button>
-    <button id="touchUpgradeBtn" class="touch-button touch-upgrade" type="button">C</button>
+    <button id="touchUpgradeBtn" class="touch-button touch-upgrade" type="button">UP</button>
     <button id="touchBoostBtn" class="touch-button touch-boost" type="button">BOOST</button>
   </div>
 </div>`;
@@ -2158,17 +2158,19 @@ function renderOptions() {
   el.soundSlider.value = data.options.sound;
   el.musicSlider.value = data.options.music;
   el.keybindList.innerHTML = '';
-  const labels = { forward: 'Forward', backward: 'Backward', left: 'Left', right: 'Right', jump: 'Surface Jump', sprint: 'Sprint', upgrades: 'Upgrades', pause: 'Pause' };
-  for (const [key, code] of Object.entries(data.options.keybinds)) {
+  el.controlsHelp.textContent = 'Touch controls: left stick to swim, right side to look, BOOST to sprint, UP for upgrades, II to pause.';
+  const actions = [
+    ['Move', 'Left stick'],
+    ['Look and swim height', 'Drag right side'],
+    ['Sprint', 'Hold BOOST'],
+    ['Character Upgrades', 'Tap UP'],
+    ['Pause', 'Tap II'],
+    ['Continue prompts', 'Tap the screen']
+  ];
+  for (const [label, action] of actions) {
     const row = document.createElement('div');
     row.className = 'keybind';
-    const btn = document.createElement('button');
-    btn.className = 'secondary keybtn';
-    btn.textContent = code.replace('Key', '').replace('Digit', '');
-    if (rebinding === key) btn.classList.add('listening');
-    btn.onclick = () => { playMenuClick(); rebinding = key; renderOptions(); };
-    row.innerHTML = `<span>${labels[key]}</span>`;
-    row.appendChild(btn);
+    row.innerHTML = `<span>${label}</span><span class="value">${action}</span>`;
     el.keybindList.appendChild(row);
   }
 }
@@ -2552,13 +2554,13 @@ window.addEventListener('resize', () => {
 });
 
 function updatePlayer(dt) {
-  const keyboardMoveInput = new THREE.Vector2(
+  const desktopMoveInput = new THREE.Vector2(
     (keys.has(data.options.keybinds.right) ? 1 : 0) - (keys.has(data.options.keybinds.left) ? 1 : 0),
     (keys.has(data.options.keybinds.forward) ? 1 : 0) - (keys.has(data.options.keybinds.backward) ? 1 : 0)
   );
   const moveInput = new THREE.Vector2(
-    THREE.MathUtils.clamp(keyboardMoveInput.x + touchMove.x, -1, 1),
-    THREE.MathUtils.clamp(keyboardMoveInput.y + touchMove.y, -1, 1)
+    THREE.MathUtils.clamp(desktopMoveInput.x + touchMove.x, -1, 1),
+    THREE.MathUtils.clamp(desktopMoveInput.y + touchMove.y, -1, 1)
   );
   const jumpPressed = keys.has(data.options.keybinds.jump);
   const sprintPressed = !isPeacefulMode() && (keys.has(data.options.keybinds.sprint) || touchBoost);

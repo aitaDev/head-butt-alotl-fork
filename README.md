@@ -18,22 +18,14 @@ $env:PORT=3003; npm start
 
 Then open <http://localhost:3003>.
 
-## Controls
-
-Default controls are configurable in the Options menu.
-- Move: WASD
-- Aim up/down with mouse to change swim height while moving
-- Sprint: Left mouse
-- Upgrade menu: U
-- Pause/menu: Escape
-
-## Mobile Controls
+## Touch Controls
 
 - Move: left thumbstick
-- Look/swim height: drag on the right side of the screen
-- Boost: hold BOOST
-- Pause: II
-- Upgrades: C
+- Look and swim height: drag on the right side of the screen
+- Sprint: hold BOOST
+- Character upgrades: tap UP
+- Pause/menu: tap II
+- Continue prompts: tap the screen
 
 ## Features
 
@@ -43,4 +35,4 @@ Default controls are configurable in the Options menu.
 - XP and currency progression
 - Character upgrade menu
 - Persistent save via localStorage
-- Options for keybinds, sound, graphics
+- Touch-control guide, sound, music, and graphics options
