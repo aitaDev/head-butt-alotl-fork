@@ -10,6 +10,14 @@ npm start
 
 Then open <http://localhost:3002>.
 
+To run this mobile fork next to the desktop version:
+
+```bash
+$env:PORT=3003; npm start
+```
+
+Then open <http://localhost:3003>.
+
 ## Controls
 
 Default controls are configurable in the Options menu.
@@ -18,6 +26,14 @@ Default controls are configurable in the Options menu.
 - Sprint: Left mouse
 - Upgrade menu: U
 - Pause/menu: Escape
+
+## Mobile Controls
+
+- Move: left thumbstick
+- Look/swim height: drag on the right side of the screen
+- Boost: hold BOOST
+- Pause: II
+- Upgrades: C
 
 ## Features
 

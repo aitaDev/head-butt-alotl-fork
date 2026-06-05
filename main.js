@@ -328,9 +328,42 @@ app.innerHTML = `
   </div>
   <div id="xpBurst" class="hidden">✦ XP GAIN ✦</div>
   <div id="levelUpFlash" class="hidden">✦ LEVEL UP ✦</div>
+  <div id="touchControls" class="touch-controls hidden" aria-hidden="true">
+    <div id="touchStick" class="touch-stick">
+      <div id="touchStickKnob" class="touch-stick-knob"></div>
+    </div>
+    <div id="touchLookPad" class="touch-look-pad"></div>
+    <button id="touchPauseBtn" class="touch-button touch-pause" type="button">II</button>
+    <button id="touchUpgradeBtn" class="touch-button touch-upgrade" type="button">C</button>
+    <button id="touchBoostBtn" class="touch-button touch-boost" type="button">BOOST</button>
+  </div>
 </div>`;
 
 const el = Object.fromEntries([...document.querySelectorAll('[id]')].map(node => [node.id, node]));
+const isMobileControls = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+const touchMove = new THREE.Vector2();
+let touchBoost = false;
+
+document.body.classList.toggle('touch-mode', isMobileControls);
+el.touchControls?.classList.toggle('hidden', !isMobileControls);
+
+function requestPointerIfDesktop() {
+  if (!isMobileControls) renderer.domElement.requestPointerLock();
+}
+
+function pauseForMenu(menuId = 'pauseMenu') {
+  paused = true;
+  if (!isMobileControls) document.exitPointerLock();
+  openOverlay(menuId);
+}
+
+function resumeFromMenu() {
+  paused = false;
+  openOverlay(null);
+  ensureGameplayAudioPlaying();
+  requestPointerIfDesktop();
+}
+
 const storyParagraphs = [
   'Axo was just a weird little pond creature with a thick skull and no plans beyond snacks and floating around.',
   'Then the newcomers showed up. Not fish, not frogs, definitely not friendly. They oozed in from the dark and started warping the water.',
@@ -2022,7 +2055,7 @@ function takeDamage(amount, cause = null) {
     el.gameOverCaption.textContent = captions[Math.floor(Math.random() * captions.length)];
     audio.gameOver.currentTime = 0;
     audio.gameOver.play().catch(() => {});
-    document.exitPointerLock();
+    if (!isMobileControls) document.exitPointerLock();
     openOverlay('gameOverMenu');
   }
 }
@@ -2209,7 +2242,7 @@ function startGame(continueGame = false) {
     audio.underwater.play().catch(() => {});
     playNextGameMusic();
   }
-  renderer.domElement.requestPointerLock();
+  requestPointerIfDesktop();
   persist();
   refreshAxolotlVisuals();
   updateHUD();
@@ -2247,32 +2280,22 @@ function prepareNewGame(mode = 'survival') {
 }
 
 function continueWhaleDialog() {
-  paused = false;
-  openOverlay(null);
-  renderer.domElement.requestPointerLock();
+  resumeFromMenu();
 }
 
 function continueTutorial() {
   unlockAudio();
-  paused = false;
-  openOverlay(null);
-  ensureGameplayAudioPlaying();
-  renderer.domElement.requestPointerLock();
+  resumeFromMenu();
 }
 
 function continueUpgradeHint() {
   unlockAudio();
-  paused = false;
-  openOverlay(null);
-  ensureGameplayAudioPlaying();
-  renderer.domElement.requestPointerLock();
+  resumeFromMenu();
 }
 
 function showUpgradeHintPopup() {
   upgradeHintShown = true;
-  paused = true;
-  document.exitPointerLock();
-  openOverlay('upgradeHintMenu');
+  pauseForMenu('upgradeHintMenu');
 }
 
 function advanceStory() {
@@ -2292,16 +2315,15 @@ function quitToTitle() {
     sound.pause();
     sound.currentTime = 0;
   }
-  document.exitPointerLock();
+  if (!isMobileControls) document.exitPointerLock();
   openOverlay('mainMenu');
   persist();
 }
 
 document.addEventListener('pointerlockchange', () => {
   pointerLocked = document.pointerLockElement === renderer.domElement;
-  if (!pointerLocked && gameStarted && !paused) {
-    paused = true;
-    openOverlay('pauseMenu');
+  if (!isMobileControls && !pointerLocked && gameStarted && !paused) {
+    pauseForMenu('pauseMenu');
   }
 });
 
@@ -2316,13 +2338,9 @@ function toggleDebugMenu() {
   const panel = document.getElementById('debugMenu');
   if (!panel) return;
   if (panel.classList.contains('hidden')) {
-    paused = true;
-    document.exitPointerLock();
-    openOverlay('debugMenu');
+    pauseForMenu('debugMenu');
   } else {
-    paused = false;
-    openOverlay(null);
-    if (gameStarted) renderer.domElement.requestPointerLock();
+    resumeFromMenu();
   }
 }
 
@@ -2358,28 +2376,21 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     state.stats.firstRelicQuestDone = true;
     state.stats.relicsFound = 0;
-    paused = false;
-    openOverlay(null);
-    ensureGameplayAudioPlaying();
-    renderer.domElement.requestPointerLock();
+    resumeFromMenu();
     return;
   }
   keys.add(e.code);
   if (e.code === data.options.keybinds.pause && gameStarted) {
     paused = !paused;
     if (paused) {
-      document.exitPointerLock();
-      openOverlay('pauseMenu');
+      pauseForMenu('pauseMenu');
     } else {
-      openOverlay(null);
-      renderer.domElement.requestPointerLock();
+      resumeFromMenu();
     }
   }
   if ((e.code === data.options.keybinds.upgrades || e.code === 'KeyC') && gameStarted && !isPeacefulMode()) {
-    paused = true;
-    document.exitPointerLock();
     renderUpgradeMenu();
-    openOverlay('upgradeMenu');
+    pauseForMenu('upgradeMenu');
   }
 });
 
@@ -2399,7 +2410,7 @@ document.addEventListener('keyup', e => {
 });
 renderer.domElement.addEventListener('click', () => {
   unlockAudio();
-  if (gameStarted && !pointerLocked && !paused) renderer.domElement.requestPointerLock();
+  if (gameStarted && !pointerLocked && !paused) requestPointerIfDesktop();
 });
 
 el.skinUpBtn.onclick = () => { playMenuClick(); nextSkin(1); };
@@ -2415,10 +2426,10 @@ el.patchNotesBtn.onclick = () => { playMenuClick(); renderPatchNotes(); openOver
 el.creditsBtn.onclick = () => { playMenuClick(); openOverlay('creditsMenu'); };
 el.closePatchNotesBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu'); };
 el.closeCreditsBtn.onclick = () => { playMenuClick(); openOverlay('mainMenu'); };
-el.closeRelicCompleteBtn.onclick = () => { playMenuClick(); state.stats.firstRelicQuestDone = true; state.stats.relicsFound = 0; paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
+el.closeRelicCompleteBtn.onclick = () => { playMenuClick(); state.stats.firstRelicQuestDone = true; state.stats.relicsFound = 0; resumeFromMenu(); };
 el.closeOptionsBtn.onclick = () => { playMenuClick(); openOverlay(gameStarted && paused && !isGameOver ? 'pauseMenu' : 'mainMenu'); };
-el.resumeBtn.onclick = () => { playMenuClick(); paused = false; openOverlay(null); ensureGameplayAudioPlaying(); renderer.domElement.requestPointerLock(); };
-el.charBtn.onclick = () => { if (isPeacefulMode()) return; playMenuClick(); renderUpgradeMenu(); openOverlay('upgradeMenu'); };
+el.resumeBtn.onclick = () => { playMenuClick(); resumeFromMenu(); };
+el.charBtn.onclick = () => { if (isPeacefulMode()) return; playMenuClick(); renderUpgradeMenu(); pauseForMenu('upgradeMenu'); };
 el.closeUpgradeBtn.onclick = () => { playMenuClick(); openOverlay('pauseMenu'); };
 el.quitBtn.onclick = () => { playMenuClick(); quitToTitle(); };
 el.retryBtn.onclick = () => { playMenuClick(); startGame(false); };
@@ -2428,6 +2439,112 @@ el.graphicsUp.onclick = () => setGraphics(1);
 el.soundSlider.oninput = e => { data.options.sound = Number(e.target.value); applyAudioSettings(); persist(); renderOptions(); };
 el.musicSlider.oninput = e => { data.options.music = Number(e.target.value); applyAudioSettings(); persist(); renderOptions(); };
 
+function setupTouchControls() {
+  if (!isMobileControls || !el.touchControls) return;
+
+  const stickRadius = 58;
+  let stickPointer = null;
+  let stickOrigin = { x: 0, y: 0 };
+  let lookPointer = null;
+  let lastLook = { x: 0, y: 0 };
+
+  const resetStick = () => {
+    stickPointer = null;
+    touchMove.set(0, 0);
+    el.touchStickKnob.style.transform = 'translate(-50%, -50%)';
+  };
+
+  el.touchStick.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    unlockAudio();
+    stickPointer = e.pointerId;
+    const rect = el.touchStick.getBoundingClientRect();
+    stickOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    el.touchStick.setPointerCapture(e.pointerId);
+  });
+
+  el.touchStick.addEventListener('pointermove', e => {
+    if (e.pointerId !== stickPointer) return;
+    e.preventDefault();
+    const dx = e.clientX - stickOrigin.x;
+    const dy = e.clientY - stickOrigin.y;
+    const distance = Math.min(stickRadius, Math.hypot(dx, dy));
+    const angle = Math.atan2(dy, dx);
+    const knobX = Math.cos(angle) * distance;
+    const knobY = Math.sin(angle) * distance;
+    const strength = distance / stickRadius;
+    touchMove.set(Math.cos(angle) * strength, -Math.sin(angle) * strength);
+    if (strength < 0.12) touchMove.set(0, 0);
+    el.touchStickKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+  });
+
+  el.touchStick.addEventListener('pointerup', resetStick);
+  el.touchStick.addEventListener('pointercancel', resetStick);
+  el.touchStick.addEventListener('lostpointercapture', resetStick);
+
+  el.touchLookPad.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    unlockAudio();
+    lookPointer = e.pointerId;
+    lastLook = { x: e.clientX, y: e.clientY };
+    el.touchLookPad.setPointerCapture(e.pointerId);
+  });
+
+  el.touchLookPad.addEventListener('pointermove', e => {
+    if (e.pointerId !== lookPointer || paused) return;
+    e.preventDefault();
+    const dx = e.clientX - lastLook.x;
+    const dy = e.clientY - lastLook.y;
+    lastLook = { x: e.clientX, y: e.clientY };
+    player.yaw -= dx * 0.006;
+    player.pitch -= dy * 0.007;
+    player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch));
+  });
+
+  const clearLook = e => {
+    if (e.pointerId === lookPointer) lookPointer = null;
+  };
+  el.touchLookPad.addEventListener('pointerup', clearLook);
+  el.touchLookPad.addEventListener('pointercancel', clearLook);
+
+  const setBoost = value => e => {
+    e.preventDefault();
+    unlockAudio();
+    touchBoost = value;
+  };
+  el.touchBoostBtn.addEventListener('pointerdown', setBoost(true));
+  el.touchBoostBtn.addEventListener('pointerup', setBoost(false));
+  el.touchBoostBtn.addEventListener('pointercancel', setBoost(false));
+
+  el.touchPauseBtn.onclick = () => {
+    playMenuClick();
+    if (!gameStarted || isGameOver) return;
+    if (paused) resumeFromMenu();
+    else pauseForMenu('pauseMenu');
+  };
+
+  el.touchUpgradeBtn.onclick = () => {
+    if (!gameStarted || paused || isPeacefulMode()) return;
+    playMenuClick();
+    renderUpgradeMenu();
+    pauseForMenu('upgradeMenu');
+  };
+
+  document.addEventListener('pointerup', e => {
+    if (!isMobileControls || e.target.closest('button, input, select, a, #touchControls')) return;
+    if (!el.storyMenu.classList.contains('hidden')) advanceStory();
+    else if (!el.tutorialMenu.classList.contains('hidden')) continueTutorial();
+    else if (!el.upgradeHintMenu.classList.contains('hidden')) continueUpgradeHint();
+    else if (!el.relicCompleteMenu.classList.contains('hidden')) {
+      state.stats.firstRelicQuestDone = true;
+      state.stats.relicsFound = 0;
+      resumeFromMenu();
+    }
+  });
+}
+
+setupTouchControls();
+
 window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
@@ -2435,12 +2552,16 @@ window.addEventListener('resize', () => {
 });
 
 function updatePlayer(dt) {
-  const moveInput = new THREE.Vector2(
+  const keyboardMoveInput = new THREE.Vector2(
     (keys.has(data.options.keybinds.right) ? 1 : 0) - (keys.has(data.options.keybinds.left) ? 1 : 0),
     (keys.has(data.options.keybinds.forward) ? 1 : 0) - (keys.has(data.options.keybinds.backward) ? 1 : 0)
   );
+  const moveInput = new THREE.Vector2(
+    THREE.MathUtils.clamp(keyboardMoveInput.x + touchMove.x, -1, 1),
+    THREE.MathUtils.clamp(keyboardMoveInput.y + touchMove.y, -1, 1)
+  );
   const jumpPressed = keys.has(data.options.keybinds.jump);
-  const sprintPressed = !isPeacefulMode() && keys.has(data.options.keybinds.sprint);
+  const sprintPressed = !isPeacefulMode() && (keys.has(data.options.keybinds.sprint) || touchBoost);
 
   const flatForward = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
   const right = new THREE.Vector3(-flatForward.z, 0, flatForward.x);
@@ -3045,7 +3166,7 @@ function updateRelics(dt) {
       if (state.stats.relicsFound >= peacefulRelicTarget && !relicCompletionShown) {
         relicCompletionShown = true;
         paused = true;
-        document.exitPointerLock();
+        if (!isMobileControls) document.exitPointerLock();
         openOverlay('relicCompleteMenu');
       }
     }

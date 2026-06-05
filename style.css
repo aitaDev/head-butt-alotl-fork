@@ -2,6 +2,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; font-family: 'Press Start 2P', monospace; background: #02131f; color: #fff; }
 canvas { display: block; transition: opacity 0.25s ease; }
+body.touch-mode, body.touch-mode canvas { touch-action: none; user-select: none; -webkit-user-select: none; }
 .hidden { display: none !important; }
 #app, #ui { position: fixed; inset: 0; }
 #ui { pointer-events: none; }
@@ -321,6 +322,77 @@ input[type="range"] { width: 100%; display: block; }
 }
 
 /* ── Skin chooser ── */
+.touch-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+}
+.touch-stick {
+  position: fixed;
+  left: max(18px, env(safe-area-inset-left));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 2px solid rgba(170,230,255,0.34);
+  background: radial-gradient(circle at 50% 50%, rgba(95,190,255,0.18), rgba(4,14,28,0.52));
+  box-shadow: inset 0 0 24px rgba(160,230,255,0.16), 0 12px 28px rgba(0,0,0,0.32);
+  pointer-events: auto;
+}
+.touch-stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.46);
+  background: linear-gradient(180deg, rgba(85,205,255,0.92), rgba(20,84,160,0.92));
+  box-shadow: 0 8px 18px rgba(0,0,0,0.34);
+  transform: translate(-50%, -50%);
+}
+.touch-look-pad {
+  position: fixed;
+  right: 0;
+  top: 80px;
+  bottom: 132px;
+  width: 52vw;
+  pointer-events: auto;
+}
+.touch-button {
+  position: fixed;
+  min-width: 0;
+  border-radius: 50%;
+  padding: 0;
+  pointer-events: auto;
+  touch-action: none;
+  text-align: center;
+  box-shadow: 0 6px 0 rgba(10,38,86,0.9), 0 12px 26px rgba(0,0,0,0.28);
+}
+.touch-pause {
+  right: max(14px, env(safe-area-inset-right));
+  top: max(14px, env(safe-area-inset-top));
+  width: 48px;
+  height: 48px;
+  font-size: 12px;
+}
+.touch-upgrade {
+  right: max(76px, calc(env(safe-area-inset-right) + 76px));
+  top: max(14px, env(safe-area-inset-top));
+  width: 48px;
+  height: 48px;
+  font-size: 13px;
+}
+.touch-boost {
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  font-size: 10px;
+}
+
 .skin-chooser {
   display: flex;
   align-items: center;
@@ -360,3 +432,31 @@ input[type="range"] { width: 100%; display: block; }
 }
 .skin-arrow:hover { color: #ffffff; filter: none; }
 .skin-arrow:active { color: #ff9ecf; transform: none; box-shadow: none; }
+
+@media (pointer: coarse), (max-width: 760px) {
+  #hud {
+    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 132px);
+    width: min(460px, 74vw);
+  }
+  #healthHud {
+    width: min(420px, 58vw);
+  }
+  .topbar {
+    top: 72px;
+  }
+  .depth-card {
+    right: max(18px, env(safe-area-inset-right));
+    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 112px);
+  }
+  .panel {
+    width: min(94vw, 560px);
+    max-height: 86vh;
+    padding: 22px;
+  }
+  .title {
+    font-size: 28px;
+  }
+  button {
+    min-height: 48px;
+  }
+}
